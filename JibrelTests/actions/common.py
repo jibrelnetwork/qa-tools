@@ -45,9 +45,14 @@ class TestService(object):
     def get_account_balance(self, addresses):
         uri = "/v1/accounts/balances"
         body = {}
-        uri_params = {}
         query_params = {"addresses": addresses}
-        return self.client.get(uri, body, uri_params, query_params)
+        return self.client.get(uri, body, query_params)
+
+    def get_transaction(self, transactions):
+        uri = f"/v1/{transactions}/balances"
+        body = {}
+        query_params = {}
+        return self.client.get(uri, body, query_params)
 
     # Full example
     # def test_handle(self, test_uri, test_body_1, test_body_2, query_str):
@@ -65,15 +70,13 @@ class TestService(object):
     #     return self.client.get(uri, body, uri_params, query_params)
 
 
-
 class ClientApi(object):
 
     def __init__(self, base_url): #maybe need add arg - additional headers
         self.service_link = base_url
         self.headers = {'Content-Type': 'application/json'}
 
-    def _format_uri(self, uri, uri_params, query_params):
-        uri = uri.format(**uri_params)
+    def _get_target_uri(self, uri, query_params):
         if query_params:
             query_params = filter_dict_from_none(query_params)
             query_uri = "&".join(["%s=%s" % (k, v) for k, v in query_params.items()])
@@ -118,31 +121,31 @@ class ClientApi(object):
         except ValueError:
             self._message("[CANT SERIALIZE] response:\n", resp.text, '\n')
             res = self._format_res(resp, resp.text)
-        #action for insert message in report file, looks like type_request + ' request ' + self.messages
+        # TODO: add action for insert message in report, looks like: type_request + ' request ' + self.messages
         del self.messages[:]
         return res
 
-    def post(self, uri, body, uri_params, query_params, headers):
-        uri = self._format_uri(uri, uri_params, query_params)
+    def post(self, uri, body=None, query_params=None):
+        uri = self._get_target_uri(uri, query_params)
         data = self._format_body(body)
-        return self._request(Methods.POST, uri, data, headers)
+        return self._request(Methods.POST, uri, data)
 
-    def get(self, uri, body, uri_params, query_params):
-        uri = self._format_uri(uri, uri_params, query_params)
+    def get(self, uri, body=None, query_params=None):
+        uri = self._get_target_uri(uri, query_params)
         return self._request(Methods.GET, uri, "")
 
-    def put(self, uri, body, uri_params, query_params, headers):
-        uri = self._format_uri(uri, uri_params, query_params)
+    def put(self, uri, body=None, query_params=None):
+        uri = self._get_target_uri(uri, query_params)
         data = self._format_body(body)
-        return self._request(Methods.PUT, uri, data, headers)
+        return self._request(Methods.PUT, uri, data)
 
-    def patch(self, uri, body, uri_params, query_params):
-        uri = self._format_uri(uri, uri_params, query_params)
+    def patch(self, uri, body=None, query_params=None):
+        uri = self._get_target_uri(uri, query_params)
         data = self._format_body(body)
         return self._request(Methods.PATCH, uri, data)
 
-    def delete(self, uri, body, uri_params, query_params):
-        uri = self._format_uri(uri, uri_params, query_params)
+    def delete(self, uri, body=None, query_params=None):
+        uri = self._get_target_uri(uri, query_params)
         data = self._format_body(body)
         return self._request(Methods.DELETE, uri, data)
 
