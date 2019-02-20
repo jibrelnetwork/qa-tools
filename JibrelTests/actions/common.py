@@ -98,10 +98,8 @@ class ClientApi(object):
     def _message(self, *messages):
         message = ' '.join([str(message) for message in messages])
         print(message)
-        self.messages.append(message)
 
     def _request(self, type_request, uri, data, auth=None, verify=False):
-        self.messages = []
         headers = {k: v for k, v in self.headers.items() if v is not None}
         self._message("%s to the service: %s" % (type_request.upper(), uri))
         self._message("Step: %s to the service: %s" % (type_request.upper(), uri))
@@ -123,7 +121,6 @@ class ClientApi(object):
             self._message("[CANT SERIALIZE] response:\n", resp.text, '\n')
             res = self._format_res(resp, resp.text)
         # TODO: add action for insert message in report, looks like: type_request + ' request ' + self.messages
-        del self.messages[:]
         return res
 
     def post(self, uri, body=None, query_params=None):
