@@ -28,6 +28,10 @@ how we can validate data by external framework
 4) https://richardtier.com/2014/03/24/json-schema-validation-with-django-rest-framework/
 """
 
+TIMEOUT_CONNECTION = 10
+TIMEOUT_READ = 60 * 5
+REQUESTS_TIMEOUT = (TIMEOUT_CONNECTION, TIMEOUT_READ)
+
 
 def filter_dict_from_none(dict_to_filter):
     return {key: value for key, value in dict_to_filter.items() if value is not None}
@@ -69,14 +73,28 @@ class ClientApi(object):
         self.headers = {'Content-Type': 'application/json'}
 
     def _format_uri(self, uri, uri_params, query_params):
-        return 'full_url_with_uri_params'
+        uri = uri.format(**uri_params)
+        if query_params:
+            query_params = filter_dict_from_none(query_params)
+            query_uri = "&".join(["%s=%s" % (k, v) for k, v in query_params.items()])
+            return self.service_link + uri + "?" + query_uri
+        return self.service_link + uri
 
     def _format_body(self, body):
-        return {}
+        if isinstance(body, dict):
+            data = filter_dict_from_none(body)
+        else:
+            data = body
+        data = json.dumps(data, indent=4)
+        return data
 
-    def _format_res(self, resp, json): pass
+    def _format_res(self, resp, resp_text):
+        return resp.status_code, resp_text
 
-    def _message(self, *messages): pass # print in console + collect log for report
+    def _message(self, *messages):
+        message = ' '.join([str(message) for message in messages])
+        print(message)
+        self.messages.append(message)
 
     def _request(self, type_request, uri, data, auth=None, verify=False):
         self.messages = []
@@ -87,9 +105,9 @@ class ClientApi(object):
         self._message("body of request:", data)
         method_request = getattr(requests, type_request.lower())
         if type_request in (Methods.POST, Methods.PUT, Methods.DELETE, Methods.PATCH):
-            resp = method_request(uri, data=data, headers=headers, verify=verify, auth=auth)
+            resp = method_request(uri, data=data, headers=headers, verify=verify, auth=auth, timeout=REQUESTS_TIMEOUT)
         elif type_request == Methods.GET:
-            resp = method_request(uri, headers=headers, verify=verify, auth=auth)
+            resp = method_request(uri, headers=headers, verify=verify, auth=auth, timeout=REQUESTS_TIMEOUT)
         else:
             raise Exception("Unknown type_request %s" % type_request)
         self._message("Service code: %s" % resp.status_code)
@@ -127,4 +145,9 @@ class ClientApi(object):
         uri = self._format_uri(uri, uri_params, query_params)
         data = self._format_body(body)
         return self._request(Methods.DELETE, uri, data)
+
+
+if __name__ == "__main__":
+    test = TestService(ClientApi("http://34.254.184.120:8000"))
+    test.get_account_balance('0x123weqads123123wqeq')
 
