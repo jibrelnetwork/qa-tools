@@ -1,6 +1,10 @@
 import json
 import requests
 
+TIMEOUT_CONNECTION = 10
+TIMEOUT_READ = 60 * 5
+REQUESTS_TIMEOUT = (TIMEOUT_CONNECTION, TIMEOUT_READ)
+
 
 class ServiceCodes(object):
     OK = 200
@@ -19,7 +23,6 @@ class Methods(object):
     PUT = "PUT"
 
 
-
 """
 how we can validate data by external framework
 1) https://pypi.org/project/flask-expects-json/
@@ -28,46 +31,9 @@ how we can validate data by external framework
 4) https://richardtier.com/2014/03/24/json-schema-validation-with-django-rest-framework/
 """
 
-TIMEOUT_CONNECTION = 10
-TIMEOUT_READ = 60 * 5
-REQUESTS_TIMEOUT = (TIMEOUT_CONNECTION, TIMEOUT_READ)
-
 
 def filter_dict_from_none(dict_to_filter):
     return {key: value for key, value in dict_to_filter.items() if value is not None}
-
-
-class TestService(object):
-
-    def __init__(self, client_api):
-        self.client = client_api
-
-    def get_account_balance(self, addresses):
-        uri = "/v1/accounts/balances"
-        body = {}
-        query_params = {"addresses": addresses}
-        return self.client.get(uri, body, query_params)
-
-    def get_transaction(self, transactions):
-        uri = f"/v1/{transactions}/balances"
-        body = {}
-        query_params = {}
-        return self.client.get(uri, body, query_params)
-
-    # Full example
-    # def test_handle(self, test_uri, test_body_1, test_body_2, query_str):
-    #     uri = "/v1/transactions"
-    #     body = {
-    #         'test_body_1': test_body_1,
-    #         'test_body_2': test_body_2,
-    #     }
-    #     uri_params = {
-    #         "test_uri": test_uri,
-    #     }
-    #     query_params = {
-    #         'query_str': query_str
-    #     }
-    #     return self.client.get(uri, body, uri_params, query_params)
 
 
 class ClientApi(object):
@@ -149,6 +115,39 @@ class ClientApi(object):
 
 
 if __name__ == "__main__":
+    class TestService(object):
+
+        def __init__(self, client_api):
+            self.client = client_api
+
+        def get_account_balance(self, addresses):
+            uri = f"/v1/accounts/balances"
+            body = {}
+            query_params = {"addresses": addresses}
+            return self.client.get(uri, body, query_params)
+
+        def get_transaction(self, transactions):
+            uri = f"/v1/{transactions}/balances"
+            body = {}
+            query_params = {}
+            return self.client.get(uri, body, query_params)
+
+        # Full example
+        # def test_handle(self, test_uri, test_body_1, test_body_2, query_str):
+        #     uri = "/v1/transactions"
+        #     body = {
+        #         'test_body_1': test_body_1,
+        #         'test_body_2': test_body_2,
+        #     }
+        #     uri_params = {
+        #         "test_uri": test_uri,
+        #     }
+        #     query_params = {
+        #         'query_str': query_str
+        #     }
+        #     return self.client.get(uri, body, uri_params, query_params)
+
+
     test = TestService(ClientApi("http://34.254.184.120:8000"))
     test.get_account_balance('0x123weqads123123wqeq')
 
