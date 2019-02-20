@@ -84,6 +84,7 @@ class ClientApi(object):
         return self.service_link + uri
 
     def _format_body(self, body):
+        body = body or {}
         if isinstance(body, dict):
             data = filter_dict_from_none(body)
         else:
