@@ -66,11 +66,7 @@ class ClientApi(object):
         print(message)
 
     def _request(self, type_request, uri, data, auth=None, verify=False):
-        headers = {k: v for k, v in self.headers.items() if v is not None}
-        self._message("%s to the service: %s" % (type_request.upper(), uri))
-        self._message("Step: %s to the service: %s" % (type_request.upper(), uri))
-        self._message("headers of request:", headers)
-        self._message("body of request:", data)
+        headers = filter_dict_from_none(self.headers)
         method_request = getattr(requests, type_request.lower())
         if type_request in (Methods.POST, Methods.PUT, Methods.DELETE, Methods.PATCH):
             resp = method_request(uri, data=data, headers=headers, verify=verify, auth=auth, timeout=REQUESTS_TIMEOUT)
@@ -78,6 +74,10 @@ class ClientApi(object):
             resp = method_request(uri, headers=headers, verify=verify, auth=auth, timeout=REQUESTS_TIMEOUT)
         else:
             raise Exception("Unknown type_request %s" % type_request)
+        self._message("%s to the service: %s" % (type_request, uri))
+        self._message("Step: %s to the service: %s" % (type_request, uri))
+        self._message("headers of request:", headers)
+        self._message("body of request:", data)
         self._message("Service code: %s" % resp.status_code)
         try:
             json_resp = resp.json()
