@@ -40,7 +40,11 @@ class ClientApi(object):
 
     def __init__(self, base_url): #maybe need add arg - additional headers
         self.service_link = base_url
+        self.service_name = ''
         self.headers = {'Content-Type': 'application/json'}
+
+    def set_service_name(self):
+        self
 
     def _get_target_uri(self, uri, query_params):
         if query_params:
