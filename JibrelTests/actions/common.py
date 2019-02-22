@@ -1,5 +1,6 @@
 import json
 import requests
+import logging
 
 TIMEOUT_CONNECTION = 10
 TIMEOUT_READ = 60 * 5
@@ -38,9 +39,12 @@ def filter_dict_from_none(dict_to_filter):
 
 class ClientApi(object):
 
-    def __init__(self, base_url): #maybe need add arg - additional headers
+    def __init__(self, base_url, service_name=None): #maybe need add arg - additional headers
         self.service_link = base_url
+        self.service_name = service_name or base_url
         self.headers = {'Content-Type': 'application/json'}
+        self._message = []  # TODO: full implement after decide on report tool
+        self.api_logger = logging.getLogger(self.service_name)
 
     def _get_target_uri(self, uri, query_params):
         if query_params:
@@ -61,9 +65,9 @@ class ClientApi(object):
     def _format_res(self, resp, resp_text):
         return resp.status_code, resp_text
 
-    def _message(self, *messages):
+    def _report_msg(self, *messages):
         message = ' '.join([str(message) for message in messages])
-        print(message)
+        self.api_logger.info(message)
 
     def _request(self, type_request, uri, data, auth=None, verify=False):
         headers = filter_dict_from_none(self.headers)
@@ -74,17 +78,16 @@ class ClientApi(object):
             resp = method_request(uri, headers=headers, verify=verify, auth=auth, timeout=REQUESTS_TIMEOUT)
         else:
             raise Exception("Unknown type_request %s" % type_request)
-        self._message("%s to the service: %s" % (type_request, uri))
-        self._message("Step: %s to the service: %s" % (type_request, uri))
-        self._message("headers of request:", headers)
-        self._message("body of request:", data)
-        self._message("Service code: %s" % resp.status_code)
+        self._report_msg("Step: %s to the service: %s" % (type_request, uri))
+        self._report_msg("headers of request:", headers)
+        self._report_msg("body of request:", data)
+        self._report_msg("Service code: %s" % resp.status_code)
         try:
             json_resp = resp.json()
-            self._message("response:\n", json.dumps(json_resp, indent=4), '\n')
+            self._report_msg("response:\n", json.dumps(json_resp, indent=4), '\n')
             res = self._format_res(resp, json_resp)
         except ValueError:
-            self._message("[CANT SERIALIZE] response:\n", resp.text, '\n')
+            self._report_msg("[CANT SERIALIZE] response:\n", resp.text, '\n')
             res = self._format_res(resp, resp.text)
         # TODO: add action for insert message in report, looks like: type_request + ' request ' + self.messages
         return res
