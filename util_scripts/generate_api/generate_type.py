@@ -69,5 +69,5 @@ def generate_types(swagger_data):
 
 if __name__ == "__main__":
     # pass
-    from util_scripts.generate_service_interface.generate_common import get_swagger_data
+    from util_scripts.generate_api.generate_common import get_swagger_data
     print(generate_types(get_swagger_data('test')))

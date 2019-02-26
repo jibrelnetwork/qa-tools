@@ -1,6 +1,5 @@
 import re
-from util_scripts.generate_service_interface.generate_common import get_swagger_data
-from util_scripts.generate_service_interface.generate_type import generate_type_schema, JsonFields, JsonTypes, get_def_name_from_ref
+from util_scripts.generate_api.generate_type import generate_type_schema, JsonFields, JsonTypes, get_def_name_from_ref
 
 
 REQUIRED_SUFFIX_TYPES = ['Required', 'Optional']
@@ -110,6 +109,7 @@ def generate_interface(swagger_data, interface_name):
 
 
 if __name__ == "__main__":
+    from util_scripts.generate_api.generate_common import get_swagger_data
     print(generate_interface(get_swagger_data('test'), 'lol'))
     print(generate_type_schema({'type': 'object', 'properties': {'status': {'$ref': '#/definitions/Status'}, 'data': {'$ref': '#/definitions/Uncle'}}}))
     # print(generate_interface('qwe'))

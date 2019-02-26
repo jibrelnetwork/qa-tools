@@ -1,7 +1,7 @@
 import json
 import os
 import string
-from util_scripts.generate_service_interface.generate_type import generate_types
+from util_scripts.generate_api.generate_type import generate_types
 
 from JibrelTests.consts.project_paths import apiDir
 
