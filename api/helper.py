@@ -1,3 +1,4 @@
+import jsonschema
 from functools import wraps
 from JibrelTests.actions.common import ServiceCodes
 
@@ -14,7 +15,7 @@ test_schema = {
     "properties": {
         'qwe1': {"type": "string"},
         'qwe2': {"type": "string"},
-        'lst1': {"type": "array", "items": {"type": "integer"}},
+        'lst1': {"type": "array", "items": {"type": "object"}},
         'map1': internal_data
     },
 }
@@ -24,12 +25,12 @@ class Status:
     pass
 
 
+
 DEFAULT_ERROR = {
     ServiceCodes.BAD_REQUEST: Status
 
 }
 
-import jsonschema
 
 def validate_type_wrap(combined_type_or_map):
     def fn_wrapper(fn):

@@ -1,84 +1,73 @@
-from JibrelTests.utils.utils import classproperty
+import re
+from copy import deepcopy
 
 
 class JsonFields(object):
     TYPE = "type"
     ITEMS = "items"
     REF = "$ref"
+    PROPERTIES = "properties"
 
 
 class JsonTypes(object):
     ARRAY = "array"
+    STRING = "string"
     OBJECT = "object"
 
 
-class_type_template = """
-class {type_name}(object):
+CLASS_TYPE_TEMPLATE = """
+class {def_name}(object):
     @classproperty
     def schema(cls):
         return {type_schema}
 """
 
-def get_ref_class_name(ref_name):
-    return ref_name.split('/')[-1]
+
+def get_def_name_from_ref(ref):
+    return ref.split('/')[-1]
 
 
-def generate_class(class_name, class_info):
-    if class_info[JsonFields.TYPE] == JsonTypes.ARRAY:
-        if JsonFields.REF in class_info[JsonFields.ITEMS]:
-            ref = class_info[JsonFields.ITEMS][JsonFields.REF]
-            class_info[JsonFields.ITEMS] = get_ref_class_name(ref) + '.schema'
+def get_array_format_info(array_obj):
+    if JsonFields.TYPE not in array_obj[JsonFields.ITEMS]:
+        array_obj[JsonFields.ITEMS] = field_formatter(deepcopy(array_obj[JsonFields.ITEMS]))
+    return array_obj
 
 
+def field_formatter(field_info):
+    if JsonFields.REF in field_info:
+        return get_def_name_from_ref(field_info[JsonFields.REF]) + '.schema'
+    if not field_info:  # TODO: REMOVE THIS AFTER fill Contract.abi.items field
+        field_info[JsonFields.TYPE] = 'string'
+    if field_info[JsonFields.TYPE] == JsonTypes.ARRAY:
+        return get_array_format_info(field_info)
+    return field_info
 
 
-def get_swagger_data(swagger_url):
-    import json
-    with open('test.json') as file_:
-        return json.load(file_)
+def generate_type_schema(props):
+    result = {JsonFields.TYPE: JsonTypes.OBJECT, JsonFields.PROPERTIES: {}}
+    def_info = props.get(JsonFields.PROPERTIES, {})
+    for field_name, field_info in def_info.items():
+        result[JsonFields.PROPERTIES][field_name] = field_formatter(field_info)
+    if not def_info:
+        result = field_formatter(props)
+    return format_schema_class(str(result))
+
+
+def format_schema_class(str_class):
+    test = re.compile(r"\'([\w]+\.schema)\'")
+    return test.sub(r"\1", str_class)
 
 
 def generate_types(swagger_data):
-    pass
+    generated_definitions = []
+    all_definitions = swagger_data['definitions']
+    for def_name, props in all_definitions.items():
+        schema = generate_type_schema(props)
+        generated_definitions.append(CLASS_TYPE_TEMPLATE.format(def_name=def_name, type_schema=schema))
+    return "\n".join(generated_definitions)
 
-
-qwe = {
-    "Error": {
-        "type": "object",
-        "properties": {
-            "field": {
-                "type": "string",
-                "example": "NON_FIELD_ERROR"
-            },
-            "code": {
-                "type": "string",
-                "example": "ERR_CODE"
-            },
-            "message": {
-                "type": "string",
-                "example": "some err text"
-            }
-        }
-    },
-    "Errors": {
-        "type": "array",
-        "items": {
-            "$ref": "#/definitions/Error"
-        },
-        "example": []
-    },
-    "Status": {
-        "properties": {
-            "success": {
-                "type": "boolean"
-            },
-            "errors": {
-                "$ref": "#/definitions/Errors"
-            }
-        }
-    },
-}
 
 if __name__ == "__main__":
-    for k, v in qwe.items():
-        print(generate_class(k, v))
+    # pass
+    from util_scripts.generate_service_interface.generate_common import get_swagger_data
+    print(generate_types(get_swagger_data('test')))
