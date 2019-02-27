@@ -7,7 +7,7 @@ TIMEOUT_READ = 60 * 5
 REQUESTS_TIMEOUT = (TIMEOUT_CONNECTION, TIMEOUT_READ)
 
 
-class ServiceCodes(object):
+class StatusCodes(object):
     OK = 200
     CREATED = 201
     NO_CONTENT = 204
