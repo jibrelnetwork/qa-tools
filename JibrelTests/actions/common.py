@@ -61,7 +61,7 @@ class ClientApi(object):
         self.api_logger.info(message)
 
     def _request(self, type_request, uri, data, auth=None, verify=False):
-        if type_request.lower() not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
+        if type_request not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
             raise Exception("Unknown request type: %s" % type_request)
         headers = filter_dict_from_none(self.headers)
         request_params = {
