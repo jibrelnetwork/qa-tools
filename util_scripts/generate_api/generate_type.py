@@ -43,19 +43,20 @@ def field_formatter(field_info):
     return field_info
 
 
-def generate_type_schema(props):
+def generate_type_schema(props, type_prefix=None):
     result = {JsonFields.TYPE: JsonTypes.OBJECT, JsonFields.PROPERTIES: {}}
     def_info = props.get(JsonFields.PROPERTIES, {})
     for field_name, field_info in def_info.items():
         result[JsonFields.PROPERTIES][field_name] = field_formatter(field_info)
     if not def_info:
         result = field_formatter(props)
-    return format_schema_class(str(result))
+    return format_schema_class(str(result), type_prefix)
 
 
-def format_schema_class(str_class):
-    test = re.compile(r"\'([\w]+\.schema)\'")
-    return test.sub(r"\1", str_class)
+def format_schema_class(str_class, type_prefix):
+    repl = type_prefix + '.' + r"\1" if type_prefix else r"\1"
+    data = re.compile(r"\'([\w]+\.schema)\'").sub(repl, str_class)
+    return data
 
 
 def generate_types(swagger_data):

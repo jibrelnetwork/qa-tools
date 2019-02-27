@@ -1,7 +1,7 @@
 import re
 from util_scripts.generate_api.generate_type import generate_type_schema, JsonFields, JsonTypes, get_def_name_from_ref
 
-
+AS_TYPE_IMPORT = 'types'
 REQUIRED_SUFFIX_TYPES = ['Required', 'Optional']
 
 
@@ -28,13 +28,18 @@ def _get_query_params_and_body(params):
     for param in params:
         if JsonFields.REF in param:
             query.append(get_def_name_from_ref(param[JsonFields.REF]))
-        elif param.get(JsonFields.TYPE) != JsonTypes.OBJECT:
+        elif param.get(JsonFields.TYPE, JsonTypes.OBJECT) != JsonTypes.OBJECT:
             query.append(param['name'])
         elif 'schema' in param:
-            if param['schema']['type'] == JsonTypes[JsonTypes.ARRAY]:
+            if param['schema']['type'] == JsonTypes.ARRAY:
                 if not isinstance(body, dict):
                     raise Exception("Can't detect body payload for method")
-                body = get_def_name_from_ref(param['schema']['items'][JsonFields.REF])
+                items = param['schema']['items']
+                if JsonFields.REF in items:
+                    body = get_def_name_from_ref(items[JsonFields.REF]) + 's'
+                elif JsonFields.TYPE in items:
+                    body = items[JsonFields.TYPE] + '_array'
+                body = body.lower()
                 continue
             body['obj_field_name'] = 'obj_field_name'  # TODO: need implement when will add in swagger
     query = [delete_required_type(i) for i in query]
@@ -52,7 +57,7 @@ def get_name_by_summary(summary_info):  # TODO: remove after Aleksey Selikhov fi
 
 
 def get_method_name(method_info):
-    return method_info.get('operationId', get_name_by_summary(method_info))
+    return method_info.get('operationId', get_name_by_summary(method_info)).replace('.', '')
 
 
 def get_validate_definition(method_info):
@@ -60,7 +65,7 @@ def get_validate_definition(method_info):
     for service_code, code_info in responses.items():
         if not service_code.startswith('2'):
             continue
-        return generate_type_schema(code_info.get('schema', code_info))
+        return generate_type_schema(code_info.get('schema', code_info), 'types')
     else:
         raise Exception("Can't detect 2XX service code")
 
@@ -82,10 +87,19 @@ def get_stingify_params(params):
         return "{}"
 
 
+def get_stringify_payload(params):
+    if isinstance(params, str):
+        result = params
+    elif isinstance(params, dict):
+        result = get_stingify_params(params)
+    return result
+
+
 def get_result_formatter_code(uri_params, query_params, body_payload):
-    signature = uri_params + query_params + [i for i in body_payload]
+    body_signature = [body_payload] if isinstance(body_payload, str) else [i for i in body_payload]
+    signature = uri_params + query_params + body_signature
     query_params = get_stingify_params(query_params)
-    body_payload = get_stingify_params(body_payload)
+    body_payload = get_stringify_payload(body_payload)
     return ', '.join(signature), query_params, body_payload
 
 
@@ -100,7 +114,6 @@ def get_method_code(uri_path, request_method, method_info):
 
 def generate_interface(swagger_data, interface_name):
     result = [CLASS_TEMPLATE.format(interface_name=interface_name)]
-    swagger_data = get_swagger_data(swagger_data)
     all_paths = swagger_data['paths']
     for uri_path, methods in all_paths.items():
         for request_method, method_info in methods.items():
