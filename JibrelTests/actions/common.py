@@ -24,15 +24,6 @@ class Methods(object):
     PUT = "PUT"
 
 
-"""
-how we can validate data by external framework
-1) https://pypi.org/project/flask-expects-json/
-2) https://python-jsonschema.readthedocs.io/en/latest/validate/
-3) https://marshmallow.readthedocs.io/en/latest/
-4) https://richardtier.com/2014/03/24/json-schema-validation-with-django-rest-framework/
-"""
-
-
 def filter_dict_from_none(dict_to_filter):
     return {key: value for key, value in dict_to_filter.items() if value is not None}
 
@@ -70,14 +61,19 @@ class ClientApi(object):
         self.api_logger.info(message)
 
     def _request(self, type_request, uri, data, auth=None, verify=False):
+        if type_request not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
+            raise Exception("Unknown request type: %s" % type_request)
         headers = filter_dict_from_none(self.headers)
+        request_params = {
+            'headers': headers,
+            'verify': verify,
+            'auth': auth,
+            'timeout': REQUESTS_TIMEOUT,
+        }
+        if type_request != Methods.GET:
+            request_params.update({'data': data})
         method_request = getattr(requests, type_request.lower())
-        if type_request in (Methods.POST, Methods.PUT, Methods.DELETE, Methods.PATCH):
-            resp = method_request(uri, data=data, headers=headers, verify=verify, auth=auth, timeout=REQUESTS_TIMEOUT)
-        elif type_request == Methods.GET:
-            resp = method_request(uri, headers=headers, verify=verify, auth=auth, timeout=REQUESTS_TIMEOUT)
-        else:
-            raise Exception("Unknown type_request %s" % type_request)
+        resp = method_request(uri, **request_params)
         self._report_msg("Step: %s to the service: %s" % (type_request, uri))
         self._report_msg("headers of request:", headers)
         self._report_msg("body of request:", data)
