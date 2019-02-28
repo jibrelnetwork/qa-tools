@@ -1,6 +1,8 @@
-import json
 import os
+import json
 import string
+import requests
+from JibrelTests.actions.common import StatusCodes
 from util_scripts.generate_api.generate_type import generate_types
 from util_scripts.generate_api.generate_interface import generate_interface
 
@@ -27,8 +29,13 @@ def get_api_filepaths(service_name):
 
 
 def get_swagger_data(swagger_url):
-    with open('test.json') as file_:
-        return json.load(file_)
+    resp = requests.get(swagger_url)
+    assert resp.status_code == StatusCodes.OK
+    try:
+        data = json.loads(resp.text)
+    except Exception as e:
+        data = resp.text
+    return data
 
 
 def save_data_with_imports(path_, data, imports):
@@ -62,4 +69,4 @@ def generate_api(swagger_url, service_name=None):
 
 
 if __name__ == "__main__":
-    generate_api('test')
+    generate_api('http://34.254.184.120:8000/api/doc/swagger.json')
