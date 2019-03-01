@@ -1,3 +1,5 @@
+import string
+import random
 
 
 class ClassPropertyDescriptor(object):
@@ -30,3 +32,18 @@ def classproperty(func):
 
     return ClassPropertyDescriptor(func)
 
+
+def generate_value(size=10, chars=string.ascii_letters + string.digits):  # TODO: add string.punctuation?
+    random_string = ''.join(random.choice(chars) for _ in range(size))
+    return random_string
+
+
+def generate_hex(size=10, with_prefix=True):
+    data = generate_value(size, string.hexdigits)
+    if with_prefix:
+        data = '0x' + data
+    return data
+
+
+def generate_address():
+    return generate_hex(40)
