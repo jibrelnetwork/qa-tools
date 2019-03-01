@@ -2,29 +2,29 @@ import os
 import json
 import string
 import requests
-from JibrelTests.actions.common import StatusCodes
-from util_scripts.generate_api.generate_type import generate_types
-from util_scripts.generate_api.generate_interface import generate_interface
 
-from JibrelTests.consts.project_paths import apiDir, REPO_NAME
+from .generate_type import generate_types
+from .generate_interface import generate_interface
+from qa_tool.utils.common import StatusCodes
+from qa_tool.consts import project_paths, REPO_NAME
 
-unusable_symbols = string.punctuation + string.whitespace
 
-API_IMPORTS = ["from api.helper import validate_type_wrap"]
-TYPE_IMPORTS = ["from JibrelTests.utils.utils import classproperty"]
+UNUSABLE_SYMBOLS = string.punctuation + string.whitespace
+TYPE_IMPORTS = ["from qa_tool.utils.utils import classproperty"]
+API_IMPORTS = ["from qa_tool.utils.api_helper import validate_type_wrap"]
 
 
 def format_to_python_name(data):
     for sym in data:
-        if sym in unusable_symbols:
+        if sym in UNUSABLE_SYMBOLS:
             data = data.replace(sym, '')
     return data
 
 
 def get_api_filepaths(service_name):
     service_name = service_name.lower()
-    interface_filename = os.path.join(apiDir, service_name + ".py")
-    types_filename = os.path.join(apiDir, 'types', service_name + "_types.py")
+    interface_filename = os.path.join(project_paths.apiDir, service_name + ".py")
+    types_filename = os.path.join(project_paths.apiDir, 'types', service_name + "_types.py")
     return interface_filename, types_filename
 
 

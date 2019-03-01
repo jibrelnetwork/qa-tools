@@ -1,7 +1,7 @@
 import jsonschema
 from functools import wraps
-from JibrelTests.utils.utils import classproperty
-from JibrelTests.actions.common import StatusCodes
+from .common import StatusCodes
+from .utils import classproperty
 
 
 class Error(object):
