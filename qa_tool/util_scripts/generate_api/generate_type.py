@@ -61,7 +61,7 @@ def format_schema_class(str_class, type_prefix):
 
 def generate_types(swagger_data):
     generated_definitions = []
-    all_definitions = swagger_data['definitions']
+    all_definitions = swagger_data.get('definitions', {})
     for def_name, props in all_definitions.items():
         schema = generate_type_schema(props)
         generated_definitions.append(CLASS_TYPE_TEMPLATE.format(def_name=def_name, type_schema=schema))

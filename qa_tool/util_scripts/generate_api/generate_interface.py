@@ -51,13 +51,14 @@ def _get_uri_params(uri_path):
 
 
 def get_name_by_summary(summary_info):  # TODO: remove after Aleksey Selikhov fixes
-    summary = summary_info['summary'].split(' ')
+    summary = summary_info.get('summary', '').split(' ')
     summary = [i.capitalize() for i in summary]
     return ''.join(summary)
 
 
 def get_method_name(method_info):
-    return method_info.get('operationId', get_name_by_summary(method_info)).replace('.', '')
+    name = method_info.get('operationId', get_name_by_summary(method_info))
+    return name.replace('.', '')
 
 
 def get_validate_definition(method_info):

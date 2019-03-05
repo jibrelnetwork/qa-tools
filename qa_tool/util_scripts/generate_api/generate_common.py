@@ -23,8 +23,8 @@ def format_to_python_name(data):
 
 def get_api_filepaths(service_name):
     service_name = service_name.lower()
-    interface_filename = os.path.join(project_paths.apiDir, service_name + ".py")
-    types_filename = os.path.join(project_paths.apiDir, 'types', service_name + "_types.py")
+    interface_filename = os.path.join(os.getcwd(), service_name + ".py")
+    types_filename = os.path.join(os.getcwd(), 'types', service_name + "_types.py")
     return interface_filename, types_filename
 
 
@@ -39,6 +39,8 @@ def get_swagger_data(swagger_url):
 
 
 def save_data_with_imports(path_, data, imports):
+    print(path_)
+    os.makedirs(path_[:path_.rfind(os.sep)], exist_ok=True)
     with open(path_, "w") as file_:
         data = '\n'.join(imports) + '\n'*2 + data
         file_.write(data)
@@ -46,7 +48,7 @@ def save_data_with_imports(path_, data, imports):
 
 def format_to_import(path_, as_statement):
     path_ = path_[:-3].split(os.sep)
-    path_ = path_[path_.index(REPO_NAME)+1:]
+    path_ = path_[path_.index('jticker-testing')+1:]
     return 'import ' + '.'.join(path_) + f' as {as_statement}'
 
 
