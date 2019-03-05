@@ -2,3 +2,4 @@ pytest
 allure-pytest
 requests==2.21.0
 jsonschema==2.6.0
+psycopg2-binary
