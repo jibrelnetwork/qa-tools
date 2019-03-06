@@ -16,11 +16,6 @@ positive = {
         'maximum': 'latest',
         'inside_range': 0.44,
     },
-    # 'order': {
-    #     'not_set': None,
-    #     'ASC': 'asc',
-    #     'DESC': 'desc',
-    # }
 }
 
 

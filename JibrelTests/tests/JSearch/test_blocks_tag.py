@@ -27,6 +27,3 @@ def test_block(setup, case):
     assert status_code == StatusCodes.OK
     assert response['status'] == {"success": True, "errors": []}
     assert validate.block(response['data'], expected)
-
-    # number = response['data']['number']
-    # check_block(response['data'], number)
