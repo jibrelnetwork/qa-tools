@@ -50,7 +50,7 @@ def test_blocks(setup, limit, offset):
 
     if offset == 'latest':
         offset = latest_before
-    elif type(offset) == float:
+    elif isinstance(offset, float):
         offset = int(latest_before * offset)
 
     status_code, response = jsearch.blocks(limit, offset)
