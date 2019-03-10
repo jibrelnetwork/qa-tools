@@ -28,6 +28,13 @@ def filter_dict_from_none(dict_to_filter):
     return {key: value for key, value in dict_to_filter.items() if value is not None}
 
 
+def get_params_argv(params):
+    return {
+        'argvalues': list(params.values()),
+        'ids': list(params.keys())
+    }
+
+
 class ClientApi(object):
 
     def __init__(self, base_url, service_name=None): #maybe need add arg - additional headers
@@ -37,10 +44,13 @@ class ClientApi(object):
         self._message = []  # TODO: full implement after decide on report tool
         self.api_logger = logging.getLogger(self.service_name)
 
+    def _format_uri_value_fn(self, data):
+        return ','.join(str(i) for i in data) if isinstance(data, (list, set)) else data
+
     def _get_target_uri(self, uri, query_params):
         if query_params:
             query_params = filter_dict_from_none(query_params)
-            query_uri = "&".join(["%s=%s" % (k, v) for k, v in query_params.items()])
+            query_uri = "&".join(["%s=%s" % (k, self._format_uri_value_fn(v)) for k, v in query_params.items()])
             return self.service_link + uri + "?" + query_uri
         return self.service_link + uri
 

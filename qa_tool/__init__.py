@@ -8,7 +8,7 @@ def run_test(file_name, capture_stdout=True):
         file_name, "-vvv"
     ]
 
-    if not capture_stdout:
+    if capture_stdout:
         cmd.append("-s")
 
     test_name = os.path.splitext(os.path.basename(file_name))[0]
