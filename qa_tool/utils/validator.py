@@ -10,7 +10,7 @@ def check_status(status_data, expected_error):
 
 
 def get_interest_data(data, expected_error=None):
-    if getter('status.success', data) and 'data' in data:
+    if isinstance(data, dict) and 'status' in data and 'data' in data:
         check_status(data['status'], expected_error)
         data = data['data']
     return data
@@ -32,10 +32,19 @@ def validate(data, expected_data, ignore_ordering=True, strict_mode=False, expec
     data = get_interest_data(data, expected_error)
 
     if isinstance(data, dict):
-        diff_keys = set(expected_data) - set(data)
+        diff_keys = set(expected_data.keys()) - set(data.keys())
         assert not diff_keys, "Expected data has more key, then actual data: %s" % str(diff_keys)
-        for k, v in expected_data.items():
-            _fn_validate(data[k], v)
+        for field_name, value in expected_data.items():
+            try:
+                _fn_validate(data[field_name], value)
+            except AssertionError as err_msg:
+                msg = '\n'.join([
+                    str(err_msg),
+                    "Problem with key %s:" % field_name,
+                    "    Actual result: %s" % data.get(field_name),
+                    "    Expected result: %s" % value
+                ])
+                raise AssertionError(msg)
 
     elif isinstance(data, (list, tuple)):
         assert isinstance(expected_data, (list, tuple))
@@ -45,7 +54,7 @@ def validate(data, expected_data, ignore_ordering=True, strict_mode=False, expec
             _fn_validate(data[i], expected_data[i])
 
     elif data is None or isinstance(data, bool):
-        assert expected_data in [None, True, False]
+        assert any([expected_data is i for i in  [None, True, False]])
 
     else:
         assert type(data) == type(expected_data)
@@ -53,14 +62,16 @@ def validate(data, expected_data, ignore_ordering=True, strict_mode=False, expec
 
 
 if __name__ == "__main__":
-    data = {
-        'test1': 1,
-        'test_not_check': 123,
-        'array1': [2,1,3]
-    }
+    # data = {
+    #     'test1': 1,
+    #     'test_not_check': 123,
+    #     'array1': [2,1,3]
+    # }
+    #
+    # expected_data = {
+    #     'test1': 1,
+    #     'array1': [1,2,3,4],
+    # }
+    # validate(data, expected_data)
 
-    expected_data = {
-        'test1': 1,
-        'array1': [1,2,3,4],
-    }
-    validate(data, expected_data)
+    validate(True, 1)
