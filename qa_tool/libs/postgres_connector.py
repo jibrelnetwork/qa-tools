@@ -9,7 +9,7 @@ class PostgresConnector(object):
     def __init__(self, host, user, password, database=None):  # Do we need support async there?
         port = None
         if ':' in host:
-            host, port = host.split(':', 1)
+            host, port = host.rsplit(':', 1)
         self._connection_dict = {
             "host": host,
             "port": int(port) if port else port,
@@ -52,4 +52,4 @@ class PostgresConnector(object):
 
 
 if __name__ == "__main__":
-    print(PostgresConnector('127.0.0.1:5432', 'jticker', 'jticker', 'postgres').get_table_names())
+    print(PostgresConnector('127.0.0.1:5432', 'jticker', 'postgres', 'jticker').get_table_names())

@@ -17,7 +17,7 @@ class Reporter(object):
         return allure.step(step_text)
 
     def attach(self, title, body, type_=TEXT):
-        return allure.attach(title, body, type_)
+        return allure.attach(body, title, type_)
 
     def parametrize(self, *args, **kwargs):
         return pytest.mark.parametrize(*args, **kwargs)
