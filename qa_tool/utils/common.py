@@ -2,6 +2,8 @@ import json
 import requests
 import logging
 
+from qa_tool.libs.reporter import reporter
+
 TIMEOUT_CONNECTION = 10
 TIMEOUT_READ = 60 * 5
 REQUESTS_TIMEOUT = (TIMEOUT_CONNECTION, TIMEOUT_READ)
@@ -84,19 +86,20 @@ class ClientApi(object):
             request_params.update({'data': data})
         method_request = getattr(requests, type_request.lower())
         resp = method_request(uri, **request_params)
-        self._report_msg("Step: %s to the service: %s" % (type_request, uri))
-        self._report_msg("headers of request:", headers)
-        self._report_msg("body of request:", data)
-        self._report_msg("Service code: %s" % resp.status_code)
-        try:
-            json_resp = resp.json()
-            self._report_msg("response:\n", json.dumps(json_resp, indent=4), '\n')
-            res = self._format_res(resp, json_resp)
-        except ValueError:
-            self._report_msg("[CANT SERIALIZE] response:\n", resp.text, '\n')
-            res = self._format_res(resp, resp.text)
-        # TODO: add action for insert message in report, looks like: type_request + ' request ' + self.messages
-        return res
+        with reporter.step(f"Step: {type_request} to the service: {uri}"):
+            self._report_msg("Step: %s to the service: %s" % (type_request, uri))
+            self._report_msg("headers of request:", headers)
+            self._report_msg("body of request:", data)
+            self._report_msg("Service code: %s" % resp.status_code)
+            try:
+                json_resp = resp.json()
+                self._report_msg("response:\n", json.dumps(json_resp, indent=4), '\n')
+                res = self._format_res(resp, json_resp)
+            except ValueError:
+                self._report_msg("[CANT SERIALIZE] response:\n", resp.text, '\n')
+                res = self._format_res(resp, resp.text)
+            # TODO: add action for insert message in report, looks like: type_request + ' request ' + self.messages
+            return res
 
     def post(self, uri, body=None, query_params=None):
         uri = self._get_target_uri(uri, query_params)

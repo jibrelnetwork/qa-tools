@@ -34,6 +34,36 @@ def classproperty(func):
     return ClassPropertyDescriptor(func)
 
 
+def getter(path, data, default=None):
+    """
+    Simple getting values from data structure
+    example:
+        uber = {'type': 5, 'data': [12, ['1', '2', {'asd': 'zxc'}], 14]}
+        getter('data.1.2', uber)
+    returns
+        {'asd': 'zxc'}
+    If path not found - returns None
+    """
+    # print 'data', path, data
+    if path is None:
+        return data
+    try:
+        if '.' in path:
+            lpath, rpath = path.split('.', 1)
+        else:
+            lpath = path
+            rpath = None
+
+        if isinstance(data, (list, tuple, set)) and lpath.isdigit():
+            return getter(rpath, data[int(lpath)], default)
+        elif isinstance(data, dict):
+            return getter(rpath, data[lpath], default)
+        else:
+            return getter(rpath, getattr(data, lpath), default)
+    except Exception:
+        return default
+
+
 def generate_value(size=10, chars=string.ascii_uppercase + string.digits):  # TODO: add string.punctuation?
     random_string = ''.join(random.choice(chars) for _ in range(size))
     return random_string

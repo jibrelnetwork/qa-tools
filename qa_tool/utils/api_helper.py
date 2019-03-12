@@ -1,7 +1,9 @@
 import jsonschema
 from functools import wraps
+
 from .common import StatusCodes
 from .utils import classproperty
+from qa_tool.libs.reporter import reporter
 
 
 class Error(object):
@@ -33,7 +35,11 @@ def validate_type_wrap(combined_type_or_map):
         def wrap(*args, **kwargs):
             code, data = fn(*args, **kwargs)
             schema = DEFAULT_ERROR.get(code, combined_type_or_map)
-            jsonschema.validate(instance=data, schema=schema)
+            try:
+                jsonschema.validate(instance=data, schema=schema)
+            except Exception as e:
+                reporter.attach('EXCEPTION!!!', str(e))
+                raise AssertionError('Validation error! Body not same with schema for %s' % fn.__name__)
             return code, data
         return wrap
     return fn_wrapper
