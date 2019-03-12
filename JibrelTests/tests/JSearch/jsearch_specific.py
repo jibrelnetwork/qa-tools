@@ -39,20 +39,14 @@ class Validator:
 
     @staticmethod
     def difference(one: dict, two: dict):
-        only_in_one = set()
-        only_in_two = set()
+        only_in_one = set(one.keys()) - set(two.keys())
+        only_in_two = set(two.keys()) - set(one.keys())
+        both = set(one.keys()) & set(two.keys())
+
         diff = set()
-
-        for key in one:
-            if key in two:
-                if one[key] != two[key]:
-                    diff.add(key)
-            else:
-                only_in_one.add(key)
-
-        for key in two:
-            if key not in one:
-                only_in_two.add(key)
+        for key in both:
+            if one[key] != two[key]:
+                diff.add(key)
 
         return diff, only_in_one, only_in_two
 
@@ -62,7 +56,7 @@ class Validator:
 
         diff, act, exp = self.difference(actual, expected)
 
-        if diff != set():
+        if diff:
             for item in diff:
                 log.error('actual %s: %s' % (item, actual[item]))
                 log.error('expected %s: %s' % (item, expected[item]))
@@ -129,12 +123,12 @@ class Eth:
         return response['result']
 
     def getBlock(self, tag, full_transactions=False):
-        if type(tag) == str and tag not in ('latest',):
+        if isinstance(tag, str) and tag not in ('latest',):
             body = {'method': 'eth_getBlockByHash'}
         else:
             body = {'method': 'eth_getBlockByNumber'}
 
-        if type(tag) == int:
+        if isinstance(tag, int):
             body['params'] = [hex(tag), full_transactions]
         else:
             body['params'] = [tag, full_transactions]
@@ -142,12 +136,12 @@ class Eth:
         return self._result(body)
 
     def getUncle(self, tag, index):
-        if type(tag) == str and tag not in ('latest',):
+        if isinstance(tag, str) and tag not in ('latest',):
             body = {'method': 'eth_getUncleByBlockHashAndIndex'}
         else:
             body = {'method': 'eth_getUncleByBlockNumberAndIndex'}
 
-        if type(tag) == int:
+        if isinstance(tag, int):
             body['params'] = [hex(tag), hex(index)]
         else:
             body['params'] = [tag, hex(index)]
