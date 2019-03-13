@@ -33,14 +33,19 @@ def validate_type_wrap(combined_type_or_map):
     def fn_wrapper(fn):
         @wraps(fn)
         def wrap(*args, **kwargs):
-            code, data = fn(*args, **kwargs)
-            schema = DEFAULT_ERROR.get(code, combined_type_or_map)
             try:
-                jsonschema.validate(instance=data, schema=schema)
-            except Exception as e:
-                reporter.attach('EXCEPTION!!!', str(e))
-                raise AssertionError('Validation error! Body not same with schema for %s' % fn.__name__)
-            return code, data
+                service_name = args[0].__class__.__name__
+            except:
+                service_name = 'UNDEFINED SERVICE NAME'
+            with reporter.step("Step: request %s to %s service:" % (fn.__name__, service_name)):
+                code, data = fn(*args, **kwargs)
+                schema = DEFAULT_ERROR.get(code, combined_type_or_map)
+                try:
+                    jsonschema.validate(instance=data, schema=schema)
+                except Exception as e:
+                    reporter.attach('Schema validation exception!', str(e))
+                    raise AssertionError('Validation error! Body not same with schema for %s' % fn.__name__)
+                return code, data
         return wrap
     return fn_wrapper
 
