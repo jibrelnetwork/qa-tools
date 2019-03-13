@@ -84,9 +84,9 @@ class ClientApi(object):
         }
         if type_request != Methods.GET:
             request_params.update({'data': data})
-        method_request = getattr(requests, type_request.lower())
-        resp = method_request(uri, **request_params)
         with reporter.step(f"Step: {type_request} to the service: {uri}"):
+            method_request = getattr(requests, type_request.lower())
+            resp = method_request(uri, **request_params)
             self._report_msg("Step: %s to the service: %s" % (type_request, uri))
             self._report_msg("headers of request:", headers)
             self._report_msg("body of request:", data)
