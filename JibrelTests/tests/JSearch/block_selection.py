@@ -42,8 +42,7 @@ def find_overlay_in_etherscan(jsearch_numbers, get_numbers, size):
 
     overlay = []
 
-    # for _ in range(1, page_max + 1):
-    for _ in range(1, 10):
+    for _ in range(1, page_max + 1):
 
         if e_scan.min <= jsearch.max <= e_scan.max:
             overlay.extend(e_scan.numbers_list)

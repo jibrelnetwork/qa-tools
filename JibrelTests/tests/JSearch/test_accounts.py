@@ -17,7 +17,7 @@ import logging
 import pytest
 from web3 import Web3
 from JibrelTests.actions.common import StatusCodes
-from JibrelTests.tests.JSearch.checklist_helper import names_and_samples_cascade
+from JibrelTests.tests.JSearch.checklist_helper import names_and_samples_cascade, names_and_samples
 
 
 log = logging.getLogger(__name__)
@@ -56,9 +56,9 @@ positive = {
         'contract': '0x8E870D67F660D95d5be530380D0eC0bd388289E1',
     },
     'tag': {
-        'latest',
-        '7212000',
-        '0x88a6bc42f4f65a0daab3a810444c2202d301db04d05203a86342b35333ac1413',
+        'latest': 'latest',
+        'number': '7212000',
+        'hash': '0x88a6bc42f4f65a0daab3a810444c2202d301db04d05203a86342b35333ac1413',
     }
 }
 
@@ -90,6 +90,6 @@ def test_accounts_balances_positive(address, tag, setup):
 
 
 @pytest.mark.parametrize("address, tag",
-                         **names_and_samples_cascade(negative))
+                         **names_and_samples(negative))
 def test_accounts_balances_negative(address, tag, setup):
     pass
