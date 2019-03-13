@@ -70,9 +70,12 @@ class ClientApi(object):
 
     def _report_msg(self, *messages):
         message = ' '.join([str(message) for message in messages])
+        print(message)
+        self.__messages.append(message)
         self.api_logger.info(message)
 
     def _request(self, type_request, uri, data, auth=None, verify=False):
+        self.__messages = []
         if type_request not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
             raise Exception("Unknown request type: %s" % type_request)
         headers = filter_dict_from_none(self.headers)
@@ -98,7 +101,8 @@ class ClientApi(object):
             except ValueError:
                 self._report_msg("[CANT SERIALIZE] response:\n", resp.text, '\n')
                 res = self._format_res(resp, resp.text)
-            # TODO: add action for insert message in report, looks like: type_request + ' request ' + self.messages
+            reporter.attach('Request info', '\n'.join(self.__messages))
+            del self.__messages[:]
             return res
 
     def post(self, uri, body=None, query_params=None):
