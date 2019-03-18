@@ -3,9 +3,14 @@ import sys
 import pytest
 
 
+pytest.register_assert_rewrite('qa_tool.utils.common')
+pytest.register_assert_rewrite('qa_tool.utils.api_helper')
+pytest.register_assert_rewrite('qa_tool.libs.reporter')
+
+
 def run_test(file_name, capture_stdout=True):
     cmd = [
-        file_name, "-vvv"
+        file_name, "-vvv",
     ]
 
     if capture_stdout:
