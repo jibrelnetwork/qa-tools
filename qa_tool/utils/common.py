@@ -53,7 +53,9 @@ class ClientApi(object):
         if query_params:
             query_params = filter_dict_from_none(query_params)
             query_uri = "&".join(["%s=%s" % (k, self._format_uri_value_fn(v)) for k, v in query_params.items()])
-            return self.service_link + uri + "?" + query_uri
+            if query_uri:
+                query_uri = "?" + query_uri
+            return self.service_link + uri + query_uri
         return self.service_link + uri
 
     def _format_body(self, body):
