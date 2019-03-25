@@ -4,13 +4,12 @@
       - git:
           url: https://github.com/jibrelnetwork/jsearch-testing.git
           branches:
-            - "*/BRANCH_NAME"
+            - "*/$BRANCH_NAME"
           browser: stash
           browser-url: "https://github.com/jibrelnetwork/jsearch-testing"
-          credentials-id: "3aed7885-bf8e-46ae-83bf-d6047068d459"
+          credentials-id: a8baf487-179a-4d46-8239-83a21945c810
           timeout: 20
           per-build-tag: false
-          git-tool: linux
           skip-tag: true
           wipe-workspace: false
           clean:
@@ -27,5 +26,6 @@
           mask-password-params: true
       - credentials-binding:
         - text:
-            credential-id: 3aed7885-bf8e-46ae-83bf-d6047068d459
-            variable: GIT_API_KEY
+            credential-id: a8baf487-179a-4d46-8239-83a21945c810
+            name: GIT_USER
+            password: GIT_PASSWORD
