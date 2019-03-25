@@ -1,0 +1,36 @@
+- job-template:
+    name: 'DEPLOYER_{service_name}'
+    parameters:
+      - string:
+          name: BRANCH_NAME
+          default: "master"
+          description: ""
+    disabled: false
+    project-type: freestyle
+    concurrent: falseclear
+    wrappers:
+      - base
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+    scm:
+      - common_automation
+    builders:
+      - shell: |
+          {build}
+
+- project:
+    name: "DEPLOYERS"
+    jobs:
+      - "DEPLOYER_{service_name}"
+    service_name:
+#      - "JENKINS":
+#          build: |
+#            cd deploy/jenkins
+#            docker-compose build
+#            docker-compose up -d
+      - "PYPI":
+          build: |
+            pwd
+            cd deploy/pypi
+            docker-compose up -d --force-recreate

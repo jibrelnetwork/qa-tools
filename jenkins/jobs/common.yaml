@@ -1,0 +1,31 @@
+- scm:
+    name: common_automation
+    scm:
+      - git:
+          url: https://github.com/jibrelnetwork/jsearch-testing.git
+          branches:
+            - "*/BRANCH_NAME"
+          browser: stash
+          browser-url: "https://github.com/jibrelnetwork/jsearch-testing"
+          credentials-id: "3aed7885-bf8e-46ae-83bf-d6047068d459"
+          timeout: 20
+          per-build-tag: false
+          git-tool: linux
+          skip-tag: true
+          wipe-workspace: false
+          clean:
+            after: true
+            before: true
+
+
+- wrapper:
+    name: base
+    wrappers:
+      - timestamps
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - credentials-binding:
+        - text:
+            credential-id: 3aed7885-bf8e-46ae-83bf-d6047068d459
+            variable: GIT_API_KEY
