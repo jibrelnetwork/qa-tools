@@ -1,10 +1,11 @@
-FROM jenkinsci/blueocean:lts
+FROM jenkinsci/blueocean
 
 USER root
 
-RUN apt-get update \
-    && apt-get install curl \
-    && curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+RUN apk update \
+    && apk add py-pip \
+    && pip install docker-compose
+#    && chmod 771 /usr/local/bin/docker-compose \
+#    && chown root:999 /usr/local/bin/docker-compose
 
 USER jenkins
-
