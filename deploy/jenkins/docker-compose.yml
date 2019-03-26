@@ -2,7 +2,9 @@ version: '3.7'
 
 services:
   jenkins:
-    image: jenkinsci/blueocean
+    user: 'jenkins:999'
+    image: jenkinsci-docker_compose
+    build: .
     ports:
       - 8080:8080
       - 50000:50000
@@ -11,4 +13,3 @@ services:
       - /home/aleksandr/jenkins/jenkins_config:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
-    user: '999'
