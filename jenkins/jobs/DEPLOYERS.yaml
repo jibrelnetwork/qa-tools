@@ -28,3 +28,4 @@
           build: |
             cd deploy/pypi
             docker-compose up -d --force-recreate
+            pip3 install -d /var/pypi -r requirements.txt
