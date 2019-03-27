@@ -9,6 +9,6 @@ services:
     ports:
       - "127.0.0.1:55500:80"
     volumes:
-      - /Users/aleksandrvasilev/tmp_folder/test_pypi:${PYPI_ROOT}
+      - /var/pypi:${PYPI_ROOT}
       - ./../..:/app
     restart: always
