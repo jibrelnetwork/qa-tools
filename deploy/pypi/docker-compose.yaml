@@ -1,0 +1,14 @@
+version: '3.7'
+
+
+services:
+  pypi:
+    container_name: custom_pypi_srv
+    image: my_test_pypi
+    build: .
+    ports:
+      - "127.0.0.1:55500:80"
+    volumes:
+      - /Users/aleksandrvasilev/tmp_folder/test_pypi:${PYPI_ROOT}
+      - ./../..:/app
+    restart: always
