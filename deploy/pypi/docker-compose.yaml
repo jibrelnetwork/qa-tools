@@ -4,7 +4,7 @@ version: '3.7'
 services:
   pypi:
     container_name: custom_pypi_srv
-    image: my_test_pypi
+    image: pypi_srv
     build: .
     ports:
       - "127.0.0.1:55500:80"

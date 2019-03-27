@@ -28,4 +28,4 @@
           build: |
             cd deploy/pypi
             docker-compose up -d --force-recreate
-            docker-compose exec pypi sh /update_package.sh
+            docker-compose exec -d pypi sh /update_package.sh
