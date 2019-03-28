@@ -7,7 +7,7 @@ services:
     image: pypi_srv
     build: .
     ports:
-      - "127.0.0.1:55500:80"
+      - "55500:80"
     volumes:
       - /var/pypi:${PYPI_ROOT}
       - ./../..:/app
