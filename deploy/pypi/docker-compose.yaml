@@ -12,5 +12,6 @@ services:
       - /var/pypi:${PYPI_ROOT}
       - ./../..:/app
     restart: always
-    networks:
-      - default
+
+networks:
+  - default
