@@ -12,6 +12,9 @@ services:
       - /var/pypi:${PYPI_ROOT}
       - ./../..:/app
     restart: always
+    networks:
+      - pypi-srv
 
 networks:
-  - default
+  pypi-srv:
+    external: true
