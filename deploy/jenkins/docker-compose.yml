@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   jenkins:
-    user: 'jenkins:999'
+    user: 1005:999
     image: jenkinsci-docker_compose
     build: .
     ports:

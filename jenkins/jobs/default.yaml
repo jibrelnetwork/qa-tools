@@ -5,16 +5,36 @@
           url: https://github.com/jibrelnetwork/jsearch-testing.git
           branches:
             - "*/$BRANCH_NAME"
-          browser: stash
+          browser: githubweb
           browser-url: "https://github.com/jibrelnetwork/jsearch-testing"
           credentials-id: a8baf487-179a-4d46-8239-83a21945c810
           timeout: 20
-          per-build-tag: false
-          skip-tag: true
           wipe-workspace: false
           clean:
             after: true
             before: true
+
+- scm:
+    name: jticker
+    scm:
+      - git:
+          url: https://github.com/jibrelnetwork/jticker.git
+          branches:
+            - "*/${BRANCH_NAME_TEST}"
+          browser: githubweb
+          browser-url: "https://github.com/jibrelnetwork/jticker"
+          credentials-id: a8baf487-179a-4d46-8239-83a21945c810
+          timeout: 20
+          wipe-workspace: false
+          clean:
+            after: true
+            before: true
+          submodule:
+            disable: false
+            recursive: true
+            tracking: true
+            parent-credentials: true
+
 
 
 - wrapper:
@@ -25,7 +45,7 @@
           global: true
           mask-password-params: true
       - credentials-binding:
-        - text:
+        - github_credential:
             credential-id: a8baf487-179a-4d46-8239-83a21945c810
             name: GIT_USER
             password: GIT_PASSWORD
