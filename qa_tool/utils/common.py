@@ -2,6 +2,8 @@ import json
 import requests
 import logging
 
+from qa_tool.libs.reporter import reporter
+
 TIMEOUT_CONNECTION = 10
 TIMEOUT_READ = 60 * 5
 REQUESTS_TIMEOUT = (TIMEOUT_CONNECTION, TIMEOUT_READ)
@@ -28,6 +30,13 @@ def filter_dict_from_none(dict_to_filter):
     return {key: value for key, value in dict_to_filter.items() if value is not None}
 
 
+def get_params_argv(params):
+    return {
+        'argvalues': list(params.values()),
+        'ids': list(params.keys())
+    }
+
+
 class ClientApi(object):
 
     def __init__(self, base_url, service_name=None): #maybe need add arg - additional headers
@@ -37,11 +46,16 @@ class ClientApi(object):
         self._message = []  # TODO: full implement after decide on report tool
         self.api_logger = logging.getLogger(self.service_name)
 
+    def _format_uri_value_fn(self, data):
+        return ','.join(str(i) for i in data) if isinstance(data, (list, set)) else data
+
     def _get_target_uri(self, uri, query_params):
         if query_params:
             query_params = filter_dict_from_none(query_params)
-            query_uri = "&".join(["%s=%s" % (k, v) for k, v in query_params.items()])
-            return self.service_link + uri + "?" + query_uri
+            query_uri = "&".join(["%s=%s" % (k, self._format_uri_value_fn(v)) for k, v in query_params.items()])
+            if query_uri:
+                query_uri = "?" + query_uri
+            return self.service_link + uri + query_uri
         return self.service_link + uri
 
     def _format_body(self, body):
@@ -58,9 +72,12 @@ class ClientApi(object):
 
     def _report_msg(self, *messages):
         message = ' '.join([str(message) for message in messages])
+        print(message)
+        self.__messages.append(message)
         self.api_logger.info(message)
 
     def _request(self, type_request, uri, data, auth=None, verify=False):
+        self.__messages = []
         if type_request not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
             raise Exception("Unknown request type: %s" % type_request)
         headers = filter_dict_from_none(self.headers)
@@ -72,21 +89,23 @@ class ClientApi(object):
         }
         if type_request != Methods.GET:
             request_params.update({'data': data})
-        method_request = getattr(requests, type_request.lower())
-        resp = method_request(uri, **request_params)
-        self._report_msg("Step: %s to the service: %s" % (type_request, uri))
-        self._report_msg("headers of request:", headers)
-        self._report_msg("body of request:", data)
-        self._report_msg("Service code: %s" % resp.status_code)
-        try:
-            json_resp = resp.json()
-            self._report_msg("response:\n", json.dumps(json_resp, indent=4), '\n')
-            res = self._format_res(resp, json_resp)
-        except ValueError:
-            self._report_msg("[CANT SERIALIZE] response:\n", resp.text, '\n')
-            res = self._format_res(resp, resp.text)
-        # TODO: add action for insert message in report, looks like: type_request + ' request ' + self.messages
-        return res
+        with reporter.step(f"Step: {type_request} to the service: {uri}"):
+            method_request = getattr(requests, type_request.lower())
+            resp = method_request(uri, **request_params)
+            self._report_msg("Step: %s to the service: %s" % (type_request, uri))
+            self._report_msg("headers of request:", headers)
+            self._report_msg("body of request:", data)
+            self._report_msg("Service code: %s" % resp.status_code)
+            try:
+                json_resp = resp.json()
+                self._report_msg("response:\n", json.dumps(json_resp, indent=4), '\n')
+                res = self._format_res(resp, json_resp)
+            except ValueError:
+                self._report_msg("[CANT SERIALIZE] response:\n", resp.text, '\n')
+                res = self._format_res(resp, resp.text)
+            reporter.attach('Request info', '\n'.join(self.__messages))
+            del self.__messages[:]
+            return res
 
     def post(self, uri, body=None, query_params=None):
         uri = self._get_target_uri(uri, query_params)
