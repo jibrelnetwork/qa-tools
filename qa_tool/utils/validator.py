@@ -1,4 +1,3 @@
-from qa_tool.utils.utils import getter
 
 
 def check_status(status_data, expected_error):
