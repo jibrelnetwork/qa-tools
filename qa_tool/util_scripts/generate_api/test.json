@@ -1,0 +1,2332 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "jSearch - Ethereum blockexplorer API",
+    "version": "1.0.0",
+    "title": "jSearch API",
+    "contact": {
+      "email": "dev@jibrel.network"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "parameters": {
+    "address": {
+      "name": "address",
+      "in": "path",
+      "required": true,
+      "description": "Account address",
+      "type": "string",
+      "format": "address"
+    },
+    "contract_address": {
+      "name": "contract_address",
+      "in": "path",
+      "required": true,
+      "description": "Contract address",
+      "type": "string",
+      "format": "address"
+    },
+    "tagRequired": {
+      "name": "tag",
+      "in": "path",
+      "required": true,
+      "description": "block hash, block number or \"latest\" keyword",
+      "type": "string"
+    },
+    "tagOptional": {
+      "name": "tag",
+      "in": "path",
+      "description": "block hash, block number or \"latest\" keyword",
+      "type": "string"
+    },
+    "txhash": {
+      "name": "txhash",
+      "in": "path",
+      "required": true,
+      "description": "transaction hash",
+      "type": "string"
+    },
+    "limit": {
+      "name": "limit",
+      "in": "query",
+      "description": "Number of items returned in response",
+      "type": "integer",
+      "default": 20
+    },
+    "offset": {
+      "name": "offset",
+      "in": "query",
+      "description": "Query offset",
+      "type": "integer",
+      "default": 0
+    },
+    "order": {
+      "name": "order",
+      "in": "query",
+      "description": "Items ordering direction",
+      "schema": {
+        "type": "string",
+        "enum": [
+          "asc",
+          "desc"
+        ]
+      },
+      "default": "asc"
+    }
+  },
+  "paths": {
+    "/v1/accounts/balances": {
+      "get": {
+        "summary": "Get balances for multiple addresses in single call.",
+        "operationId": "getBalancesForMultiAddresses",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "addresses",
+            "type": "string",
+            "description": "Comma separated list of addresses"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of balances",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Balance"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "addresses",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/accounts/{address}": {
+      "get": {
+        "summary": "Get account state by address.",
+        "operationId": "getAccount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/address",
+            "description": "Account address"
+          },
+          {
+            "$ref": "#/parameters/tagOptional"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account object",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "$ref": "#/definitions/Account"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "tag",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/accounts/{address}/logs": {
+      "get": {
+        "summary": "Get contract logs.",
+        "operationId": "getLogs",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/address"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "logs",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Log"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "address",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/accounts/{address}/transactions": {
+      "get": {
+        "summary": "Get account transactions.",
+        "operationId": "getAccountTransactions",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/address"
+          },
+          {
+            "$ref": "#/parameters/tagOptional"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transactions for specific address",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Transaction"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "limit",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/accounts/{address}/internal_transactions": {
+      "get": {
+        "summary": "Get account internal transactions",
+        "operationId": "getAccountInternalTransactions",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/address"
+          },
+          {
+            "$ref": "#/parameters/tagOptional"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "internal transactions for specific address",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/InternalTransaction"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "offset",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/accounts/{address}/pending_transactions": {
+      "get": {
+        "summary": "Get account pending transactions",
+        "operationId": "getAccountPendingTransactions",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/address"
+          },
+          {
+            "$ref": "#/parameters/tagOptional"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "pending transactions for specific address",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PendingTransaction"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "address",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/accounts/{address}/mined_blocks": {
+      "get": {
+        "summary": "Get blocks mined by address",
+        "operationId": "getAccountMinedBlocks",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/address"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "blocks mined by specific address",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Block"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "address",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/accounts/{address}/mined_uncles": {
+      "get": {
+        "summary": "Get uncles mined by address",
+        "operationId": "getAccountMinedUncles",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/address"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "uncles mined by specific address",
+            "properties": {
+              "status": {
+                "$ref": "#/definitions/Status"
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Uncle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "address",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/accounts/{address}/token_balance/{contract_address}": {
+      "get": {
+        "summary": "Get token holder balance for specific token",
+        "operationId": "getTokenHolderBalance",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/address"
+          },
+          {
+            "$ref": "#/parameters/contract_address"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "token holders balance",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "$ref": "#/definitions/TokenHolder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "contract_address",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Holder not found"
+          }
+        }
+      }
+    },
+    "/v1/accounts/{address}/token_transfers": {
+      "get": {
+        "summary": "Get tokens transfered to or from this address",
+        "operationId": "getAccountTokenTransfers",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/address"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "tokens transfered to or from specific address",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/TokenTransfer"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "limit",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blocks": {
+      "get": {
+        "summary": "Get blocks list",
+        "operationId": "getBlockList",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "blocks list",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Block"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "limit",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blocks/{tag}": {
+      "get": {
+        "summary": "Get block by hash or number",
+        "operationId": "getBlock",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tagRequired"
+          }
+        ],
+        "required": true,
+        "responses": {
+          "200": {
+            "description": "block",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "$ref": "#/definitions/Block"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "tag",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blocks/{tag}/transactions": {
+      "get": {
+        "summary": "Get all transactions in block",
+        "operationId": "getBlockTransactions",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tagRequired"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transactions from specific block",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Transaction"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "tag",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blocks/{tag}/uncles": {
+      "get": {
+        "summary": "Get all uncle blocks for specific block",
+        "operationId": "getBlockUncles",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tagRequired"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "uncles for specific block",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Uncle"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "tag",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/transactions/{txhash}": {
+      "get": {
+        "summary": "Get Transaction by hash",
+        "operationId": "getTransaction",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/txhash"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transaction",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "$ref": "#/definitions/Transaction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "txhash",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/transactions/internal/{txhash}": {
+      "get": {
+        "summary": "Get Internal transactions by transaction hash",
+        "operationId": "getInternalTransaction",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/txhash"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transaction",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/InternalTransaction"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "txhash",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/receipts/{txhash}": {
+      "get": {
+        "summary": "Get Receipt by transaction hash",
+        "operationId": "getReceipt",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/txhash"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transaction receipt",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "$ref": "#/definitions/Receipt"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "txhash",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/uncles": {
+      "get": {
+        "summary": "Get uncles list",
+        "operationId": "getUnclesList",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "uncles list",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Uncle"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "limit",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/uncles/{tag}": {
+      "get": {
+        "summary": "Get uncle by hash or number",
+        "operationId": "getUncle",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/tagRequired"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "uncle",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "$ref": "#/definitions/Uncle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "tag",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/verified_contracts": {
+      "get": {
+        "summary": "Get list of verified contracts",
+        "operationId": "getVerifiedContractsList",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contract",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Contract"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "limit",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/verified_contracts/{address}": {
+      "get": {
+        "summary": "Get verified contract info.",
+        "operationId": "getVerifiedContract",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/contract_address"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contract",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "$ref": "#/definitions/Contract"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "address",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Contract not found"
+          }
+        }
+      }
+    },
+    "/v1/tokens": {
+      "get": {
+        "summary": "Get ERC20 tokens list",
+        "operationId": "getTokensList",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Token"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "limit",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tokens/{address}": {
+      "get": {
+        "summary": "Get token info",
+        "operationId": "getToken",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/contract_address"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "$ref": "#/definitions/Token"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "address",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Token not found"
+          }
+        }
+      }
+    },
+    "/v1/tokens/{address}/transfers": {
+      "get": {
+        "summary": "Get token transfers for specific token",
+        "operationId": "getTokenTransfers",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/contract_address"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "token transfers",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/TokenTransfer"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "offset",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tokens/{address}/holders": {
+      "get": {
+        "summary": "Get token holders list for specific token",
+        "operationId": "getTokenHolders",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/contract_address"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "token holders list",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/TokenHolder"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "schema": {
+              "example": {
+                "success": false,
+                "errors": [
+                  {
+                    "field": "address",
+                    "code": "VALIDATION_ERROR",
+                    "message": "bad input parameter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/gas_price": {
+      "get": {
+        "summary": "Returns the current price per gas in wei.",
+        "responses": {
+          "200": {
+            "description": "get gas price",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "string",
+                  "format": "dec",
+                  "example": "10000000000000"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/transaction_count": {
+      "post": {
+        "summary": "Returns the number of transactions sent from an address.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "0xf8b483dba2c3b7176a3da549ad41a48bb3121069",
+                "latest"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "nonce",
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "string",
+                  "format": "dec",
+                  "example": "1"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/estimate_gas": {
+      "post": {
+        "summary": "Generates and returns an estimate of how much gas is necessary to allow the transaction to complete.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Call"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "string",
+                  "format": "dec",
+                  "example": "21000"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/call_contract": {
+      "post": {
+        "summary": "Executes a new message call immediately without creating a transaction on the block chain.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Call"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "string",
+                  "format": "hex",
+                  "example": "0x0"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/send_raw_transaction": {
+      "post": {
+        "summary": "Creates new message call transaction or a contract creation for signed transactions.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "hex"
+              },
+              "example": [
+                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/Status"
+                },
+                "data": {
+                  "type": "string",
+                  "format": "hex",
+                  "example": "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Account": {
+      "properties": {
+        "blockNumber": {
+          "type": "integer",
+          "example": 4087355
+        },
+        "blockHash": {
+          "type": "string",
+          "format": "hash",
+          "example": "0x0e851d527ca5b1a8356a29d198c920f20da9af51edc084acaa0de481324d8f5d"
+        },
+        "address": {
+          "type": "string",
+          "format": "address",
+          "example": "0xcd424c53f5dc7d22cdff536309c24ad87a97e6af"
+        },
+        "nonce": {
+          "type": "string",
+          "format": "dec",
+          "example": "976"
+        },
+        "code": {
+          "type": "string",
+          "example": ""
+        },
+        "codeHash": {
+          "type": "string",
+          "format": "hash",
+          "example": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+        },
+        "balance": {
+          "type": "string",
+          "format": "dec",
+          "example": "1029436321514224"
+        }
+      }
+    },
+    "Transaction": {
+      "properties": {
+        "blockHash": {
+          "type": "string",
+          "format": "hash",
+          "example": "0x2f571cb815c2d94c8e48bf697799e545c368029e8b096a730ef5e650874fbbad"
+        },
+        "blockNumber": {
+          "type": "integer",
+          "example": 119416
+        },
+        "from": {
+          "type": "string",
+          "format": "address",
+          "example": "0x3a844524342f0"
+        },
+        "gas": {
+          "type": "string",
+          "format": "dec",
+          "example": "25000"
+        },
+        "gasPrice": {
+          "type": "string",
+          "format": "dec",
+          "example": "50000000000"
+        },
+        "hash": {
+          "type": "string",
+          "format": "hash",
+          "example": "0xf096ab24c5bd8abd9298cd627f5eef1ee948776d8d11127d8c47da2f0897f2c5"
+        },
+        "input": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x"
+        },
+        "nonce": {
+          "type": "string",
+          "format": "dec",
+          "example": "543"
+        },
+        "r": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x23e819fa3f631c042d20b70f28f8f08ef1a2733061b92c59b43ea0997b6cf834"
+        },
+        "s": {
+          "type": "string",
+          "format": "hash",
+          "example": "0x1ad76eadafc639103f6ba7bc0b9f839757086669b973e601ab69efda745948e3"
+        },
+        "to": {
+          "type": "string",
+          "format": "address",
+          "example": "0xcd424c53f5dc7d22cdff536309c24ad87a97e6af"
+        },
+        "transactionIndex": {
+          "type": "integer",
+          "example": 84
+        },
+        "v": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x1c"
+        },
+        "value": {
+          "type": "string",
+          "format": "dec",
+          "example": "2808270086200000000"
+        }
+      }
+    },
+    "InternalTransaction": {
+      "properties": {
+        "blockNumber": {
+          "type": "integer",
+          "example": 119416
+        },
+        "blockHash": {
+          "type": "string",
+          "format": "hash",
+          "example": "0x2f571cb815c2d94c8e48bf697799e545c368029e8b096a730ef5e650874fbbad"
+        },
+        "parentTxHash": {
+          "type": "string",
+          "format": "hash",
+          "example": "0xf096ab24c5bd8abd9298cd627f5eef1ee948776d8d11127d8c47da2f0897f2c5"
+        },
+        "op": {
+          "type": "string",
+          "example": "suicide"
+        },
+        "callDepth": {
+          "type": "integer",
+          "example": 2
+        },
+        "from": {
+          "type": "string",
+          "format": "address",
+          "example": "0xab515c53f5dc7d22cdff536309c24ad87a9fe6af"
+        },
+        "to": {
+          "type": "string",
+          "format": "address",
+          "example": "0xcd424c53f5dc7d22cdff536309c24ad87a97e6af"
+        },
+        "value": {
+          "type": "string",
+          "format": "dec",
+          "example": "41000000000"
+        },
+        "gasLimit": {
+          "type": "string",
+          "format": "dec",
+          "example": "2300"
+        },
+        "input": {
+          "type": "string",
+          "example": "0x"
+        },
+        "status": {
+          "type": "string",
+          "example": "success"
+        },
+        "transactionIndex": {
+          "type": "integer",
+          "example": 84
+        }
+      }
+    },
+    "PendingTransaction": {
+      "properties": {
+        "r": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x25651b1208a9606f9807ea4a140788ed8ea4f51f2aa414ceeab3d82af3dabe96"
+        },
+        "s": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x8f7b9d5fe2d7962771724533f72a125ffc8451a30dff1d22f0479851687d69e"
+        },
+        "v": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x25"
+        },
+        "to": {
+          "type": "string",
+          "format": "address",
+          "example": "0x802356d446f156dd02f82991cd94b8c15586f658"
+        },
+        "from": {
+          "type": "string",
+          "format": "address",
+          "example": "0x612dba2d683e60767b8c32f35e4c08aaddb4bc41"
+        },
+        "gas": {
+          "type": "string",
+          "format": "dec",
+          "example": "41000000000"
+        },
+        "gasPrice": {
+          "type": "string",
+          "format": "dec",
+          "example": "41000000000"
+        },
+        "hash": {
+          "type": "string",
+          "format": "hash",
+          "example": "0x82622cf424795645e3714021867c4197ab2543b34fe61d22aeeff05c5c3cf67f"
+        },
+        "input": {
+          "type": "string",
+          "example": "0xa9059cbb000000000000000000000000b443e84a3a213a0f0471fa6ee378fb4228a661100000000000000000000000000000000000000000000000000000012309ce5400"
+        },
+        "nonce": {
+          "type": "string",
+          "format": "dec",
+          "example": "11"
+        },
+        "value": {
+          "type": "string",
+          "format": "dec",
+          "example": "0"
+        }
+      }
+    },
+    "Block": {
+      "properties": {
+        "difficulty": {
+          "type": "string",
+          "format": "dec",
+          "example": "10694243015446"
+        },
+        "extraData": {
+          "type": "string",
+          "format": "hex",
+          "example": "0xd983010302844765746887676f312e342e328777696e646f7773"
+        },
+        "gasLimit": {
+          "type": "string",
+          "format": "dec",
+          "example": "3141592"
+        },
+        "gasUsed": {
+          "type": "string",
+          "format": "dec",
+          "example": "0"
+        },
+        "hash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x88a6bc42f4f65a0daab3a810444c2202d301db04d05203a86342b35333ac1413"
+        },
+        "logsBloom": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x00000000000000000000000000000000000000000000000000000000001"
+        },
+        "miner": {
+          "type": "string",
+          "format": "hex",
+          "example": "0xf8b483dba2c3b7176a3da549ad41a48bb3121069"
+        },
+        "mixHash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x02a775f306082912b617e858fef268597a277de056dbe924ee6aabfa35a33c44"
+        },
+        "nonce": {
+          "type": "string",
+          "format": "dec",
+          "example": "496358969209982823"
+        },
+        "number": {
+          "type": "integer",
+          "example": 900056
+        },
+        "parentHash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x9e4f201db6e56a43980881cd09855b99b2f2aeefc84ffb2ad0ccf3f42de6fba2"
+        },
+        "receiptsRoot": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
+        },
+        "sha3Uncles": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x2843dd2134eb02067b585e76ce6a7fc89d22d3eae1d38827b1eb15a3b5153347"
+        },
+        "size": {
+          "type": "integer",
+          "example": 1081
+        },
+        "stateRoot": {
+          "type": "string",
+          "format": "hex",
+          "example": "0xc27aca6363fdceaed835753083b4db0bc37fab441e1414b9f051047d37dd025f"
+        },
+        "timestamp": {
+          "type": "integer",
+          "example": 1453686776
+        },
+        "totalDifficulty": {
+          "type": "string",
+          "format": "dec",
+          "example": "6028818335021882784"
+        },
+        "transactions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "0xc9b1ad2422ac745f91f815f14572cae74c8dd31183430c297ec2c7a902eb52db"
+          ]
+        },
+        "transactionsRoot": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
+        },
+        "uncles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "0xe0591f521db8d59f0362ad7bb946ecf98fd2d5eaf0a24b6fce378a00db6389d7"
+          ]
+        },
+        "staticReward": {
+          "type": "string",
+          "format": "dec",
+          "example": "411095732236680000"
+        },
+        "uncleInclusionReward": {
+          "type": "string",
+          "format": "dec",
+          "example": "0"
+        },
+        "txFees": {
+          "type": "string",
+          "format": "dec",
+          "example": "411095732236680000"
+        }
+      }
+    },
+    "Uncle": {
+      "properties": {
+        "difficulty": {
+          "type": "string",
+          "format": "dec",
+          "example": "10694243015446"
+        },
+        "extraData": {
+          "type": "string",
+          "format": "hex",
+          "example": "0xd983010302844765746887676f312e342e328777696e646f7773"
+        },
+        "gasLimit": {
+          "type": "string",
+          "format": "dec",
+          "example": "3141592"
+        },
+        "gasUsed": {
+          "type": "string",
+          "format": "dec",
+          "example": "0"
+        },
+        "hash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x88a6bc42f4f65a0daab3a810444c2202d301db04d05203a86342b35333ac1413"
+        },
+        "logsBloom": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x00000000000000000000000000000000000000000000000000000000001"
+        },
+        "miner": {
+          "type": "string",
+          "format": "hex",
+          "example": "0xf8b483dba2c3b7176a3da549ad41a48bb3121069"
+        },
+        "mixHash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x02a775f306082912b617e858fef268597a277de056dbe924ee6aabfa35a33c44"
+        },
+        "nonce": {
+          "type": "string",
+          "format": "dec",
+          "example": "496358969209982823"
+        },
+        "number": {
+          "type": "integer",
+          "example": 900056
+        },
+        "parentHash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x9e4f201db6e56a43980881cd09855b99b2f2aeefc84ffb2ad0ccf3f42de6fba2"
+        },
+        "receiptsRoot": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
+        },
+        "sha3Uncles": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x2843dd2134eb02067b585e76ce6a7fc89d22d3eae1d38827b1eb15a3b5153347"
+        },
+        "size": {
+          "type": "integer",
+          "example": 1081
+        },
+        "stateRoot": {
+          "type": "string",
+          "format": "hex",
+          "example": "0xc27aca6363fdceaed835753083b4db0bc37fab441e1414b9f051047d37dd025f"
+        },
+        "timestamp": {
+          "type": "integer",
+          "example": 1453686776
+        },
+        "totalDifficulty": {
+          "type": "string",
+          "format": "dec",
+          "example": "6028818335021882784"
+        },
+        "transactionsRoot": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
+        },
+        "blockNumber": {
+          "type": "integer",
+          "example": 19190
+        },
+        "reward": {
+          "type": "string",
+          "format": "hex",
+          "example": 2694156990786306048
+        }
+      }
+    },
+    "Receipt": {
+      "properties": {
+        "blockHash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0xf65ef0910daed64f5bf0effa14c40908395b3df16b64b48a703bb9c7aa61e80f"
+        },
+        "blockNumber": {
+          "type": "integer",
+          "example": 900005
+        },
+        "contractAddress": {
+          "type": "string",
+          "format": "hex",
+          "example": null
+        },
+        "cumulativeGasUsed": {
+          "type": "string",
+          "format": "dec",
+          "example": "21000"
+        },
+        "from": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x2a65aca4d5fc5b5c859090a6c34d164135398226"
+        },
+        "gasUsed": {
+          "type": "string",
+          "format": "dec",
+          "example": "21000"
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Log"
+          }
+        },
+        "logsBloom": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x000000000000000110000000000"
+        },
+        "root": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x5b96718cdfdda40c371eee661a8467d2edcbee0fa03aa5b5cb6a84479db3c177"
+        },
+        "to": {
+          "type": "string",
+          "format": "hex",
+          "example": "0xcd424c53f5dc7d22cdff536309c24ad87a97e6af"
+        },
+        "transactionHash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x6825feb84a806d5eb4321250b050d9aa7848d32ea052bb8c7b21d41d33f94ea9"
+        },
+        "transactionIndex": {
+          "type": "integer",
+          "example": 0
+        },
+        "status": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    },
+    "Log": {
+      "properties": {
+        "address": {
+          "type": "string",
+          "format": "address",
+          "example": "0x47071214d1ef76eeb26e9ac3ec6cc965ab8eb75b"
+        },
+        "blockHash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x4c285ba67d33a3cd670f5c4decfb10a41b929e7c4139766abfd60a24ee1fa148"
+        },
+        "blockNumber": {
+          "type": "integer",
+          "example": 112887
+        },
+        "data": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x00000000000000000000000013f26856cbacaaba9c4488a31c72e605fae029fc"
+        },
+        "logIndex": {
+          "type": "integer",
+          "example": 0
+        },
+        "removed": {
+          "type": "string",
+          "format": "hex",
+          "example": false
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "0x16cdf1707799c6655baac6e210f52b94b7cec08adcaf9ede7dfe8649da926146"
+          ]
+        },
+        "transactionHash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0xcb63b762d9522bbd712b0d8df2208c8a8dbdaeef5d7fdca3cc2dad0f34646790"
+        },
+        "transactionIndex": {
+          "type": "integer",
+          "example": 2
+        }
+      }
+    },
+    "Balance": {
+      "properties": {
+        "balance": {
+          "type": "string",
+          "format": "dec",
+          "example": "256391824440000"
+        },
+        "address": {
+          "type": "string",
+          "format": "address",
+          "example": "0xcd424c53f5dc7d22cdff536309c24ad87a97e6af"
+        }
+      }
+    },
+    "Contract": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string",
+          "format": "address"
+        },
+        "byteCode": {
+          "type": "string"
+        },
+        "sourceCode": {
+          "type": "string"
+        },
+        "abi": {
+          "type": "array",
+          "items": {}
+        },
+        "compilerVersion": {
+          "type": "string"
+        },
+        "optimizationEnabled": {
+          "type": "boolean"
+        },
+        "optimizationRuns": {
+          "type": "integer"
+        },
+        "constructorArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verified_at": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "Token": {
+      "properties": {
+        "contractAddress": {
+          "type": "string",
+          "format": "address"
+        },
+        "name": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "decimals": {
+          "type": "string",
+          "format": "dec"
+        },
+        "totalSupply": {
+          "type": "string",
+          "format": "dec"
+        }
+      }
+    },
+    "TokenTransfer": {
+      "properties": {
+        "timestamp": {
+          "type": "integer",
+          "example": 1548229016
+        },
+        "transactionHash": {
+          "type": "string",
+          "format": "hex",
+          "example": "0x3b749628d5c22d5f372d3c40a760eadd153b27a503e57688e66678d32123fb8c"
+        },
+        "from": {
+          "type": "string",
+          "format": "address",
+          "example": "0xf73c3c65bde10bf26c2e1763104e609a41702efe"
+        },
+        "to": {
+          "type": "string",
+          "format": "address",
+          "example": "0x355941cf7ac065310fd4023e1b913209f076a48a"
+        },
+        "tokenDecimals": {
+          "type": "string",
+          "format": "dec",
+          "example": "18"
+        },
+        "tokenSymbol": {
+          "type": "string",
+          "example": "JNT"
+        },
+        "tokenName": {
+          "type": "string",
+          "example": "Jibrel Network Token"
+        },
+        "tokenAddress": {
+          "type": "string",
+          "format": "address",
+          "example": "0xa5fd1a791c4dfcaacc963d4f73c6ae5824149ea7"
+        },
+        "amount": {
+          "type": "string",
+          "format": "dec",
+          "example": "1664600000000000000000"
+        }
+      }
+    },
+    "TokenHolder": {
+      "properties": {
+        "accountAddress": {
+          "type": "string",
+          "format": "address",
+          "example": "0xfdbacd53b94c4e76742f66a9f235a5d1e5218bb0"
+        },
+        "tokenAddress": {
+          "type": "string",
+          "format": "address",
+          "example": "0xa5fd1a791c4dfcaacc963d4f73c6ae5824149ea7"
+        },
+        "balance": {
+          "type": "string",
+          "format": "dec",
+          "example": "1000000"
+        },
+        "decimals": {
+          "type": "string",
+          "format": "dec",
+          "example": "18"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "example": "NON_FIELD_ERROR"
+        },
+        "code": {
+          "type": "string",
+          "example": "ERR_CODE"
+        },
+        "message": {
+          "type": "string",
+          "example": "some err text"
+        }
+      }
+    },
+    "Errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Error"
+      },
+      "example": []
+    },
+    "Status": {
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "errors": {
+          "$ref": "#/definitions/Errors"
+        }
+      }
+    },
+    "Call": {
+      "properties": {
+        "from": {
+          "type": "string",
+          "required": false,
+          "description": "The address the transaction is sent from.",
+          "example": "0x8aff0a12f3e8d55cc718d36f84e002c335df2f4a"
+        },
+        "to": {
+          "type": "string",
+          "required": false,
+          "description": "The address the transaction is directed to.",
+          "example": "0x5c7687810ce3eae6cda44d0e6c896245cd4f97c6"
+        },
+        "gas": {
+          "type": "string",
+          "format": "dec",
+          "required": false,
+          "description": "Integer of the gas provided for the transaction execution.",
+          "example": "0"
+        },
+        "gasPrice": {
+          "type": "string",
+          "format": "dec",
+          "required": false,
+          "description": "Integer of the gas provided for the transaction execution.",
+          "example": "1"
+        },
+        "value": {
+          "type": "string",
+          "format": "dec",
+          "required": false,
+          "description": "Integer of the value sent with this transaction.",
+          "example": "0"
+        },
+        "data": {
+          "type": "string",
+          "description": "Hash of the method signature and encoded parametelrs.",
+          "example": "0x6740d36c0000000000000000000000000000000000000000000000000000000000000005"
+        }
+      }
+    }
+  },
+  "schemes": [
+    "http"
+  ],
+  "basePath": "/"
+}
