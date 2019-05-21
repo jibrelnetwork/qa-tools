@@ -2,16 +2,16 @@ import os
 import json
 import string
 import requests
-from JibrelTests.actions.common import StatusCodes
-from util_scripts.generate_api.generate_type import generate_types
-from util_scripts.generate_api.generate_interface import generate_interface
+from qa_tool.utils.common import StatusCodes
+from qa_tool.util_scripts.generate_api.generate_type import generate_types
+from qa_tool.util_scripts.generate_api.generate_interface import generate_interface
 
-from JibrelTests.consts.project_paths import apiDir, REPO_NAME
 
 unusable_symbols = string.punctuation + string.whitespace
 
-API_IMPORTS = ["from api.helper import validate_type_wrap"]
-TYPE_IMPORTS = ["from JibrelTests.utils.utils import classproperty"]
+apiDir = "./"
+TYPE_IMPORTS = ["from qa_tool.utils.utils import classproperty"]
+API_IMPORTS = ["from qa_tool.api_helper import validate_type_wrap"]
 
 
 def format_to_python_name(data):
@@ -46,7 +46,7 @@ def save_data_with_imports(path_, data, imports):
 
 def format_to_import(path_, as_statement):
     path_ = path_[:-3].split(os.sep)
-    path_ = path_[path_.index(REPO_NAME)+1:]
+    path_[0] = 'api'
     return 'import ' + '.'.join(path_) + f' as {as_statement}'
 
 
@@ -69,4 +69,4 @@ def generate_api(swagger_url, service_name=None):
 
 
 if __name__ == "__main__":
-    generate_api('http://34.254.184.120:8000/api/doc/swagger.json')
+    generate_api('http://127.0.0.1:9000/api/doc/swagger.json')

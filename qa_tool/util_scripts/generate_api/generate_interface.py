@@ -1,5 +1,5 @@
 import re
-from util_scripts.generate_api.generate_type import generate_type_schema, JsonFields, JsonTypes, get_def_name_from_ref
+from qa_tool.util_scripts.generate_api.generate_type import generate_type_schema, JsonFields, JsonTypes, get_def_name_from_ref
 
 AS_TYPE_IMPORT = 'types'
 REQUIRED_SUFFIX_TYPES = ['Required', 'Optional']
