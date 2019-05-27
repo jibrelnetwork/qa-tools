@@ -2,6 +2,8 @@ version: '3.7'
 
 services:
   jenkins:
+    environment:
+      JENKINS_USER_ID: 1005
     user: 1005:999
     image: jenkinsci-docker_compose
     build: .
