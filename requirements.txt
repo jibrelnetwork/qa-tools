@@ -1,4 +1,4 @@
-psycopg2-binary==2.7.7
+psycopg2-binary==2.8.2
 allure-pytest==2.6.0
 jsonschema==2.6.0
 requests==2.21.0
