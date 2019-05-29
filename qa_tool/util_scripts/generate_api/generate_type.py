@@ -6,6 +6,7 @@ class JsonFields(object):
     TYPE = "type"
     ITEMS = "items"
     REF = "$ref"
+    ONE_OF = "oneOf"
     PROPERTIES = "properties"
 
 
@@ -28,14 +29,20 @@ def get_def_name_from_ref(ref):
 
 
 def get_array_format_info(array_obj):
-    if JsonFields.TYPE not in array_obj[JsonFields.ITEMS]:
+    if JsonFields.TYPE not in array_obj[JsonFields.ITEMS] and JsonFields.ONE_OF not in array_obj[JsonFields.ITEMS]:
         array_obj[JsonFields.ITEMS] = field_formatter(deepcopy(array_obj[JsonFields.ITEMS]))
     return array_obj
+
+
+def get_oneof_format_info(one_of_obj):
+    return [field_formatter(i) for i in one_of_obj]
 
 
 def field_formatter(field_info):
     if JsonFields.REF in field_info:
         return get_def_name_from_ref(field_info[JsonFields.REF]) + '.schema'
+    if JsonFields.ONE_OF in field_info:
+        return get_oneof_format_info(field_info[JsonFields.ONE_OF])
     if not field_info:  # TODO: REMOVE THIS AFTER fill Contract.abi.items field
         field_info[JsonFields.TYPE] = 'string'
     if field_info[JsonFields.TYPE] == JsonTypes.ARRAY:
@@ -61,7 +68,7 @@ def format_schema_class(str_class, type_prefix):
 
 def generate_types(swagger_data):
     generated_definitions = []
-    all_definitions = swagger_data['definitions']
+    all_definitions = swagger_data['components']['schemas']
     for def_name, props in all_definitions.items():
         schema = generate_type_schema(props)
         generated_definitions.append(CLASS_TYPE_TEMPLATE.format(def_name=def_name, type_schema=schema))

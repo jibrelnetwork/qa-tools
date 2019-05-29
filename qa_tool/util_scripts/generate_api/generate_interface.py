@@ -41,6 +41,9 @@ def _get_query_params_and_body(params):
                     body = items[JsonFields.TYPE] + '_array'
                 body = body.lower()
                 continue
+            elif param['schema']['type'] == JsonTypes.STRING:
+                query.append(param['name'])
+                continue
             body['obj_field_name'] = 'obj_field_name'  # TODO: need implement when will add in swagger
     query = [delete_required_type(i) for i in query]
     return query, body
@@ -65,6 +68,8 @@ def get_validate_definition(method_info):
     for service_code, code_info in responses.items():
         if not service_code.startswith('2'):
             continue
+        if 'content' in code_info:
+            code_info = code_info['content']['application/json']
         return generate_type_schema(code_info.get('schema', code_info), 'types')
     else:
         raise Exception("Can't detect 2XX service code")
