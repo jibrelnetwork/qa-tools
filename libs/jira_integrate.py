@@ -18,9 +18,9 @@ CACHE_JIRA_TICKETS = 60 * 5
 MAX_JIRA_ISSUES_IN_SEARCH = 5000
 
 FieldInfo = namedtuple("FieldInfo", ["name", "custom_name", "parse"])
-RepoInfo = namedtuple("RepoInfo", ["repo", "branch", "pr_status"])
+GitInfo = namedtuple("RepoInfo", ["repo", "branch", "pr_status"])
 
-JIRA_BASE_AUTH = ('alex.vasilev@jibrel.network', '')
+JIRA_BASE_AUTH = ('alex.vasilev@jibrel.network', '19FBT7MIWs202dTg7jhE95C4')
 
 
 class IssueTypes(object):
@@ -130,7 +130,7 @@ class JiraIntegrate(object):
         pr_status_by_branch = {pr_branch['source']['url']:pr_branch['status'] for pr_branch in branches_prs}
         result = []
         for branch in branches_info:
-            _tmp = RepoInfo(branch['name'], branch['repository']['name'], pr_status_by_branch.get(branch['url']))
+            _tmp = GitInfo(branch['repository']['name'], branch['name'], pr_status_by_branch.get(branch['url']))
             result.append(_tmp)
         return result
 
@@ -168,16 +168,17 @@ def get_autotest_issues():
 
 
 @lru_cache()
-def get_issues_by_fixversion(fix_version):
-    issues = jira.search_issues("fixVersion = '%s'" % fix_version)
+def get_interesting_issues(label, project):
+    issues = jira.search_issues(f"labels = '{label}' AND project = '{project}'")
     return issues
 
 
 def test_fixversion_assinging():
-    issue = jira.issue('JSEARCH-234')
+    issue = jira.issue('JSEARCH-29')
+    issue1 = jira.issue('JASSETS-5')
     print('test')
     print(issue.branches)
-    ololo = jira.get_repos_by_issue('JSEARCH-330')
+    ololo = jira.get_repos_by_issue('JSEARCH-29')
 
 
 if __name__ == '__main__':

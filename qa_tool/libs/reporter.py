@@ -22,5 +22,10 @@ class Reporter(object):
     def parametrize(self, *args, **kwargs):
         return pytest.mark.parametrize(*args, **kwargs)
 
+    @property
+    def scenario(self):
+        """dependencies for classes tests"""
+        return pytest.mark.incremental
+
 
 reporter = Reporter()
