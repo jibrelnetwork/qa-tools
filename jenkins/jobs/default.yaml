@@ -45,7 +45,15 @@
           global: true
           mask-password-params: true
       - credentials-binding:
-        - github_credential:
-            credential-id: a8baf487-179a-4d46-8239-83a21945c810
+        - username-password-separated:
+            credential-id: 9abe23df-63a8-4d1c-a3b6-93991a2a70a0
             name: GIT_USER
             password: GIT_PASSWORD
+        - username-password-separated:
+            credential-id: userpass-jibrelbot-dockerhub
+            name: DOCKER_USER
+            password: DOCKER_PASSWORD
+        - username-password-separated:
+            credential-id: 88d9eacc-29bc-4d98-a95c-e29664cde3c0
+            name: JIRA_USER
+            password: JIRA_PASSWORD
