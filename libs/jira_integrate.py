@@ -20,7 +20,9 @@ MAX_JIRA_ISSUES_IN_SEARCH = 5000
 FieldInfo = namedtuple("FieldInfo", ["name", "custom_name", "parse"])
 GitInfo = namedtuple("RepoInfo", ["repo", "branch", "pr_status"])
 
-JIRA_BASE_AUTH = ('alex.vasilev@jibrel.network', '19FBT7MIWs202dTg7jhE95C4')
+JIRA_USER = os.getenv('JIRA_USER')
+JIRA_PASSWORD = os.getenv('JIRA_PASSWORD')
+JIRA_BASE_AUTH = (JIRA_USER, JIRA_PASSWORD)
 
 
 class IssueTypes(object):
