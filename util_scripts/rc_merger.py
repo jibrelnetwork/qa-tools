@@ -59,8 +59,8 @@ class TestMerge:
         return data
 
     def setup_class(self):
-        self.env = get_and_check_env_variable('ENV', ENVIRONMENTS)
-        self.service_scope = get_and_check_env_variable('SVC_SCOPE', SERVICE_SCOPE)
+        self.env = get_and_check_env_variable('ENVIRONMENT', ENVIRONMENTS)
+        self.service_scope = get_and_check_env_variable('SERVICE_SCOPE', SERVICE_SCOPE)
         self.branch = os.environ.get('TESTING_BRANCH', None)
         self.errors = []
 
