@@ -57,3 +57,7 @@
             credential-id: 88d9eacc-29bc-4d98-a95c-e29664cde3c0
             name: JIRA_USER
             password: JIRA_PASSWORD
+        - username-password-separated:
+            credential-id: 56512caa-1ea6-4b1b-a7d3-78059e8aa73d
+            name: AWS_ACCESS_KEY_ID
+            password: AWS_SECRET_ACCESS_KEY
