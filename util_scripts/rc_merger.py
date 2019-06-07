@@ -59,10 +59,14 @@ class TestMerge:
         return data
 
     def setup_class(self):
+        os.environ['SERVICE_SCOPE'] = 'jassets'
+        os.environ['ENVIRONMENT'] = 'ENV_01'
         self.env = get_and_check_env_variable('ENVIRONMENT', ENVIRONMENTS)
         self.service_scope = get_and_check_env_variable('SERVICE_SCOPE', SERVICE_SCOPE)
-        self.branch = os.environ.get('TESTING_BRANCH') or None
+        self.branch = os.environ.get('TESTING_BRANCH', 'develop') or None
         self.errors = []
+        self.branches_by_service = {}
+        self.prepared_image_variables = {}
 
     def get_all_not_merged_branches_for_env_by_service(self, issues):
         result = defaultdict(set)
@@ -78,9 +82,10 @@ class TestMerge:
 
     def test_collect_all_finished_tasks_for_each_service(self):
         if self.branch:
-            return {i:{self.branch,} for i in SERVICE_SCOPE[self.service_scope]}
+            self.branches_by_service.update({i:[self.branch] for i in SERVICE_SCOPE[self.service_scope]})
+            return
         issues = get_interesting_issues(self.env, self.service_scope)
-        self.branches_by_service = self.get_all_not_merged_branches_for_env_by_service(issues)
+        self.branches_by_service.update(self.get_all_not_merged_branches_for_env_by_service(issues))
 
     def test_prepare_image_env_data(self):
         self.prepared_image_variables = {}
