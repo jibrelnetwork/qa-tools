@@ -9,7 +9,6 @@ services:
     ports:
       - "55500:80"
     volumes:
-      - /var/pypi:${PYPI_ROOT}
       - ./../..:/app
     restart: always
     networks:
