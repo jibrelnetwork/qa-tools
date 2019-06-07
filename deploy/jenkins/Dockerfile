@@ -2,7 +2,6 @@ FROM jenkinsci/blueocean
 ENV JENKINS_USER_ID=1005
 USER root
 
-
 RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories
 
 RUN apk update -U && \
@@ -12,6 +11,10 @@ RUN apk update -U && \
 RUN python3 -m pip install --upgrade pip
 
 RUN pip3 install docker-compose
+
+RUN mkdir -p /app
+COPY ./requirements.txt /app/
+RUN pip3 install -r /app/requirements.txt
 
 RUN echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
 RUN apk --no-cache add shadow && usermod -u ${JENKINS_USER_ID} jenkins

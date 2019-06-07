@@ -6,7 +6,9 @@ services:
       JENKINS_USER_ID: 1005
     user: 1005:999
     image: jenkinsci-docker_compose
-    build: .
+    build:
+      context: ../../
+      dockerfile: ./deploy/jenkins/Dockerfile
     ports:
       - 8080:8080
       - 50000:50000
