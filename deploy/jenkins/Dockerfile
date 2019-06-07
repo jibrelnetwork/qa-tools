@@ -7,7 +7,7 @@ RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories
 
 RUN apk update -U && \
     apk upgrade && \
-    apk add --no-cache g++ python3=3.7.3-r0 python3-dev=3.7.3-r0 libffi-dev make openssl-dev clang
+    apk add --no-cache g++ python3=3.7.3-r0 python3-dev=3.7.3-r0 libffi-dev make openssl-dev clang musl-dev postgresql-dev
 
 RUN python3 -m pip install --upgrade pip
 
