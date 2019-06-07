@@ -7,7 +7,8 @@ RUN apk update \
 RUN python3 -m pip install --upgrade pip
 RUN pip3 install wheel
 
-COPY ./update_package.sh /
+COPY ./deploy/pypi/update_package.sh /
+COPY . /app/
 RUN chmod 770 /update_package.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

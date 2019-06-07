@@ -5,11 +5,11 @@ services:
   pypi:
     container_name: custom_pypi_srv
     image: pypi_srv
-    build: .
+    build:
+      context: ../../
+      dockerfile: ./deploy/pypi/Dockerfile
     ports:
       - "55500:80"
-    volumes:
-      - ./../..:/app
     restart: always
     networks:
       - pypi-srv

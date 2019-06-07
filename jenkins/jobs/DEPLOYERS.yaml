@@ -27,5 +27,5 @@
       - "PYPI":
           build: |
             cd deploy/pypi
-            docker-compose up -d --force-recreate
-            docker-compose exec -d pypi sh /update_package.sh
+            docker-compose -f ./deploy/pypi/docker-compose.yml up -d --build --force-recreate
+            docker-compose -f ./deploy/pypi/docker-compose.yml exec -d pypi sh /update_package.sh
