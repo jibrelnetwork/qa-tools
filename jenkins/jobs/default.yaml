@@ -7,7 +7,7 @@
             - "*/$BRANCH_NAME"
           browser: githubweb
           browser-url: "https://github.com/jibrelnetwork/jsearch-testing"
-          credentials-id: a8baf487-179a-4d46-8239-83a21945c810
+          credentials-id: 9abe23df-63a8-4d1c-a3b6-93991a2a70a0
           timeout: 20
           wipe-workspace: false
           clean:
@@ -23,7 +23,7 @@
             - "*/${BRANCH_NAME_TEST}"
           browser: githubweb
           browser-url: "https://github.com/jibrelnetwork/jticker"
-          credentials-id: a8baf487-179a-4d46-8239-83a21945c810
+          credentials-id: 9abe23df-63a8-4d1c-a3b6-93991a2a70a0
           timeout: 20
           wipe-workspace: false
           clean:
