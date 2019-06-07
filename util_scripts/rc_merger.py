@@ -51,6 +51,9 @@ def get_and_check_env_variable(name, one_of_item):
 
 @reporter.scenario
 class TestMerge:
+    branches_by_service = dict()
+    prepared_image_variables = dict()
+    errors = []
 
     def get_and_check_env_variable(self, name, one_of_item):
         data = os.environ.get(name)
@@ -59,14 +62,10 @@ class TestMerge:
         return data
 
     def setup_class(self):
-        os.environ['SERVICE_SCOPE'] = 'jassets'
-        os.environ['ENVIRONMENT'] = 'ENV_01'
         self.env = get_and_check_env_variable('ENVIRONMENT', ENVIRONMENTS)
         self.service_scope = get_and_check_env_variable('SERVICE_SCOPE', SERVICE_SCOPE)
         self.branch = os.environ.get('TESTING_BRANCH', 'develop') or None
-        self.errors = []
-        self.branches_by_service = {}
-        self.prepared_image_variables = {}
+
 
     def get_all_not_merged_branches_for_env_by_service(self, issues):
         result = defaultdict(set)
@@ -88,14 +87,13 @@ class TestMerge:
         self.branches_by_service.update(self.get_all_not_merged_branches_for_env_by_service(issues))
 
     def test_prepare_image_env_data(self):
-        self.prepared_image_variables = {}
         image_env_variable_by_service = SERVICE_SCOPE[self.service_scope]
         for service, branches in self.branches_by_service.items():
             branches = branches or ['develop']
             if len(branches) != 1:
                 self.errors.append(f'Service {service} have more than one branch(image) to merge: {branches}')
             variable_name = image_env_variable_by_service[service]
-            self.prepared_image_variables[variable_name] = branches[0]
+            self.prepared_image_variables.update({variable_name:branches[0]})
         if all([i=='develop' for i in self.prepared_image_variables.values()]) and self.branch != 'develop':
             self.errors.append(f"Haven't issues with images for testing on '{self.env}' environment. All branches are 'develop'")
         if any([i in WARNING_BRANCHES for i in self.prepared_image_variables.values()]):
