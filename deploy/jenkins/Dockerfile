@@ -1,12 +1,19 @@
 FROM jenkinsci/blueocean
-
+ENV JENKINS_USER_ID=1005
 USER root
 
-RUN apk update \
-    && apk add py-pip \
-    && pip install docker-compose
+
+RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories
+
+RUN apk update -U && \
+    apk upgrade && \
+    apk add --no-cache g++ python3=3.7.3-r0 python3-dev=3.7.3-r0 libffi-dev make openssl-dev clang
+
+RUN python3 -m pip install --upgrade pip
+
+RUN pip3 install docker-compose
 
 RUN echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
-RUN apk --no-cache add shadow && usermod -u 1005 jenkins
+RUN apk --no-cache add shadow && usermod -u ${JENKINS_USER_ID} jenkins
 
 USER jenkins
