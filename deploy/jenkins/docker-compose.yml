@@ -12,6 +12,6 @@ services:
       - 50000:50000
       - 8443:443
     volumes:
-      - /home/aleksandr/jenkins/jenkins_config:/var/jenkins_home
+      - /var/jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
