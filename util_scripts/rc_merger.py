@@ -39,8 +39,8 @@ STATUSES_SKIPPING = ('To Do', 'Backlog')
 
 
 
-def join_image_info(name, tag, organization=DOCKER_REGISTRY_ORG):
-    return f"{organization}/{name}:{tag}"
+def join_image_info(service_name, tag, organization=DOCKER_REGISTRY_ORG):
+    return f"{organization}/{service_name}:{tag}"
 
 
 def get_and_check_env_variable(name, one_of_item):
@@ -62,6 +62,8 @@ class TestMerge:
         return data
 
     def setup_class(self):
+        os.environ['ENVIRONMENT'] = 'ENV_01'
+        os.environ['SERVICE_SCOPE'] = 'jassets'
         self.env = get_and_check_env_variable('ENVIRONMENT', ENVIRONMENTS)
         self.service_scope = get_and_check_env_variable('SERVICE_SCOPE', SERVICE_SCOPE)
         self.branch = os.environ.get('TESTING_BRANCH', 'develop') or None
@@ -93,7 +95,7 @@ class TestMerge:
             if len(branches) != 1:
                 self.errors.append(f'Service {service} have more than one branch(image) to merge: {branches}')
             variable_name = image_env_variable_by_service[service]
-            self.prepared_image_variables.update({variable_name:branches[0]})
+            self.prepared_image_variables.update({variable_name:join_image_info(service, branches[0])})
         if all([i=='develop' for i in self.prepared_image_variables.values()]) and self.branch != 'develop':
             self.errors.append(f"Haven't issues with images for testing on '{self.env}' environment. All branches are 'develop'")
         if any([i in WARNING_BRANCHES for i in self.prepared_image_variables.values()]):
