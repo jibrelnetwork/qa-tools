@@ -2,27 +2,29 @@ import os
 import json
 import time
 import logging
+from functools import lru_cache
+from dataclasses import dataclass
+from collections import namedtuple
 from cachetools.func import ttl_cache
 
-from dataclasses import dataclass
-
 from jira import JIRA
-from collections import namedtuple
-from functools import lru_cache
+
 
 JIRA_URL = "https://jibrelnetwork.atlassian.net/"
 CURR_DIR = os.path.dirname(__file__)
 AUTOTEST_ISSUES = os.path.join(CURR_DIR, "autotest_issues.json")
-JIRA_FILTER = ""
 CACHE_JIRA_TICKETS = 60 * 5
 MAX_JIRA_ISSUES_IN_SEARCH = 5000
 
-FieldInfo = namedtuple("FieldInfo", ["name", "custom_name", "parse"])
 GitInfo = namedtuple("RepoInfo", ["repo", "branch", "pr_status"])
+FieldInfo = namedtuple("FieldInfo", ["name", "custom_name", "parse"])
 
 JIRA_USER = os.getenv('JIRA_USER')
 JIRA_PASSWORD = os.getenv('JIRA_PASSWORD')
 JIRA_BASE_AUTH = (JIRA_USER, JIRA_PASSWORD)
+
+
+SKIPPING_STATUSES = ['backlog', 'to do', 'in progress']  # 'review'
 
 
 class IssueTypes(object):
@@ -174,6 +176,14 @@ def get_interesting_issues(label, project):
     issues = jira.search_issues(f"labels = '{label}' AND project = '{project}'")
     return issues
 
+@lru_cache()
+def issue_is_open(issue):
+    jira_ticket = issue.split('/')[-1]
+    issue = jira.issue(jira_ticket)
+    # print issue.fields.status.name.lower()
+    is_progress = issue.status.lower() in SKIPPING_STATUSES
+    return is_progress
+
 
 def test_fixversion_assinging():
     issue = jira.issue('JSEARCH-29')
@@ -184,6 +194,7 @@ def test_fixversion_assinging():
 
 
 if __name__ == '__main__':
+    print(issue_is_open('https://jibrelnetwork.atlassian.net/browse/JTICKER-11'))
     logging.basicConfig(level=logging.INFO)
     test_fixversion_assinging()
 
