@@ -119,6 +119,6 @@ class TestMerge:
 
 if __name__ == "__main__":
     from qa_tool import run_test
-    run_test(__file__)
+    run_test(__file__, allure_dir='rc_merger_report')
 
 
