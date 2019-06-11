@@ -62,8 +62,6 @@ class TestMerge:
         return data
 
     def setup_class(self):
-        os.environ['ENVIRONMENT'] = 'ENV_01'
-        os.environ['SERVICE_SCOPE'] = 'jassets'
         self.env = get_and_check_env_variable('ENVIRONMENT', ENVIRONMENTS)
         self.service_scope = get_and_check_env_variable('SERVICE_SCOPE', SERVICE_SCOPE)
         self.branch = os.environ.get('TESTING_BRANCH', 'develop') or None
