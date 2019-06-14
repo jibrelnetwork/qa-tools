@@ -25,7 +25,7 @@ class Status(object):
 
 
 DEFAULT_ERROR = {
-    StatusCodes.BAD_REQUEST: Status
+    StatusCodes.BAD_REQUEST: Status.schema
 }
 
 
