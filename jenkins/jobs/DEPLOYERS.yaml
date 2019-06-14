@@ -9,7 +9,7 @@
     project-type: freestyle
     concurrent: falseclear
     scm:
-      - common_automation
+      - "{git_scm}"
     builders:
       - shell: |
           {build}
@@ -25,6 +25,8 @@
 #            docker-compose build
 #            docker-compose up -d
       - "PYPI":
+          git_scm: common_automation
+          timed: H 00 * * *
           build: |
             docker-compose -f ./deploy/pypi/docker-compose.yml up -d --build --force-recreate
             docker-compose -f ./deploy/pypi/docker-compose.yml exec -d pypi sh /update_package.sh
