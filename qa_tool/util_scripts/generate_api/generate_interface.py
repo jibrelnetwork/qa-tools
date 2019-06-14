@@ -41,7 +41,7 @@ def _get_query_params_and_body(params):
                     body = items[JsonFields.TYPE] + '_array'
                 body = body.lower()
                 continue
-            elif param['schema']['type'] == JsonTypes.STRING:
+            elif param['schema']['type'] in (JsonTypes.STRING, JsonTypes.BOOLEAN):
                 query.append(param['name'])
                 continue
             body['obj_field_name'] = 'obj_field_name'  # TODO: need implement when will add in swagger

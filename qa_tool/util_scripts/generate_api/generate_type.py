@@ -13,6 +13,7 @@ class JsonFields(object):
 class JsonTypes(object):
     ARRAY = "array"
     STRING = "string"
+    BOOLEAN = "boolean"
     OBJECT = "object"
 
 
