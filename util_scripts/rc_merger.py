@@ -1,8 +1,8 @@
+import re
 import os
 from collections import defaultdict
 from qa_tool.libs.reporter import reporter
 from libs.jira_integrate import get_interesting_issues, PRStatuses
-
 
 
 # TODO: now we can get images from docker registry need small research
@@ -18,6 +18,11 @@ from libs.jira_integrate import get_interesting_issues, PRStatuses
 #
 
 DOCKER_REGISTRY_ORG = "jibrelnetwork"
+WARNING_BRANCHES = ['master', ]
+
+READY_TO_MERGE_STATUSES = ()
+STATUSES_SKIPPING = ('To Do', 'Backlog')
+
 
 ENVIRONMENTS = ['ENV_01', 'ENV_02']
 SERVICE_SCOPE = {
@@ -31,22 +36,22 @@ SERVICE_SCOPE = {
     }
 }
 
-WARNING_BRANCHES = ['master', ]
-
-
-READY_TO_MERGE_STATUSES = ()
-STATUSES_SKIPPING = ('To Do', 'Backlog')
-
-
 
 def join_image_info(service_name, tag, organization=DOCKER_REGISTRY_ORG):
-    return f"{organization}/{service_name}:{tag}"
+    return f"{organization}/{service_name}:{cleanupString(tag)}"
 
 
 def get_and_check_env_variable(name, one_of_item):
     data = os.environ.get(name)
     assert data in one_of_item
     return data
+
+
+def cleanupString(string: str):
+    return re.sub(
+        r'[^a-z0-9-.]', '',
+        string.lower().replace('/', '-').replace('_', '-')
+    )
 
 
 @reporter.scenario
@@ -118,5 +123,3 @@ class TestMerge:
 if __name__ == "__main__":
     from qa_tool import run_test
     run_test(__file__, allure_dir='rc_merger_report')
-
-
