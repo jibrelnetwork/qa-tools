@@ -11,7 +11,7 @@ unusable_symbols = string.punctuation + string.whitespace
 
 apiDir = "./"
 TYPE_IMPORTS = ["from qa_tool.utils.utils import classproperty"]
-API_IMPORTS = ["from qa_tool.api_helper import validate_type_wrap"]
+API_IMPORTS = ["from qa_tool.utils.api_helper import validate_type_wrap"]
 
 
 def format_to_python_name(data):
@@ -69,4 +69,4 @@ def generate_api(swagger_url, service_name=None):
 
 
 if __name__ == "__main__":
-    generate_api('http://127.0.0.1:9000/api/doc/swagger.json')
+    generate_api('http://127.0.0.1:8000/api/doc/swagger.json')

@@ -78,5 +78,5 @@ def generate_types(swagger_data):
 
 if __name__ == "__main__":
     # pass
-    from util_scripts.generate_api.generate_common import get_swagger_data
-    print(generate_types(get_swagger_data('test')))
+    from qa_tool.util_scripts.generate_api.generate_common import get_swagger_data
+    print(generate_types(get_swagger_data('http://127.0.0.1:8000/api/doc/swagger.json')))

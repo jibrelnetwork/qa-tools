@@ -60,7 +60,11 @@ def get_name_by_summary(summary_info):  # TODO: remove after Aleksey Selikhov fi
 
 
 def get_method_name(method_info):
-    return method_info.get('operationId', get_name_by_summary(method_info)).replace('.', '')
+    if 'operationId' in method_info:
+        data = method_info['operationId']
+    else:
+        data = get_name_by_summary(method_info)
+    return data.replace('.', '')
 
 
 def get_validate_definition(method_info):
