@@ -33,6 +33,12 @@ SERVICE_SCOPE = {
     },
     'jassets': {
         'jassets': 'JASSETS_IMAGE'
+    },
+    'jsearch': {
+        'jsearch-backend': 'JSEARCH_BACKEND',
+        'jsearch-es-parser': 'JSEARCH_PARSER',
+        'jsearch-compiler': 'JSEARCH_COMPILER',
+        'jsearch-contracts': 'JSEARCH_CONTRACTS',
     }
 }
 
