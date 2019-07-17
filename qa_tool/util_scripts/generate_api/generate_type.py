@@ -8,6 +8,7 @@ class JsonFields(object):
     REF = "$ref"
     ONE_OF = "oneOf"
     PROPERTIES = "properties"
+    REQUIRED = 'required'
 
 
 class JsonTypes(object):
@@ -44,8 +45,8 @@ def field_formatter(field_info):
         return get_def_name_from_ref(field_info[JsonFields.REF]) + '.schema'
     if JsonFields.ONE_OF in field_info:
         return get_oneof_format_info(field_info[JsonFields.ONE_OF])
-    if not field_info:  # TODO: REMOVE THIS AFTER fill Contract.abi.items field
-        field_info[JsonFields.TYPE] = 'string'
+    if not field_info or JsonFields.TYPE not in field_info:  # TODO: REMOVE THIS AFTER fill Contract.abi.items field
+        field_info[JsonFields.TYPE] = JsonTypes.STRING
     if field_info[JsonFields.TYPE] == JsonTypes.ARRAY:
         return get_array_format_info(field_info)
     return field_info
@@ -69,7 +70,10 @@ def format_schema_class(str_class, type_prefix):
 
 def generate_types(swagger_data):
     generated_definitions = []
-    all_definitions = swagger_data['components']['schemas']
+    if 'components' in swagger_data:
+        all_definitions = swagger_data['components']['schemas']
+    else:
+        all_definitions = swagger_data['definitions']
     for def_name, props in all_definitions.items():
         schema = generate_type_schema(props)
         generated_definitions.append(CLASS_TYPE_TEMPLATE.format(def_name=def_name, type_schema=schema))

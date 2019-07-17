@@ -68,5 +68,9 @@ def generate_api(swagger_url, service_name=None):
         save_data_with_imports(path_, data, imports)
 
 
+def swagger_from_yaml(swagger_yaml_url):
+    swagger_data = get_swagger_data(swagger_yaml_url)
+
+
 if __name__ == "__main__":
-    generate_api('http://127.0.0.1:8000/api/doc/swagger.json')
+    generate_api('http://127.0.0.1:9090/api/doc/swagger.json', 'coinmena')

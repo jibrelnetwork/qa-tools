@@ -1,6 +1,7 @@
 import json
 import requests
 import logging
+from qa_tool.utils.custom_structure import Enum
 
 from qa_tool.libs.reporter import reporter
 
@@ -18,7 +19,7 @@ class StatusCodes(object):
     SERVICE_ERROR = 500
 
 
-class Methods(object):
+class Methods(Enum):
     DELETE = "DELETE"
     GET = "GET"
     PATCH = "PATCH"
