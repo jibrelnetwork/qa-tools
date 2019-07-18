@@ -1,6 +1,6 @@
+requests
 pytest==4.3.0
 allure-pytest==2.6.0
-requests==2.20.0
 jsonschema==2.6.0
 psycopg2-binary
 pathlib==1.0.1
