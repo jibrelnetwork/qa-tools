@@ -17,6 +17,7 @@ class Reporter(object):
         return allure.step(step_text)
 
     def attach(self, title, body, type_=TEXT):
+        body = str(body)
         return allure.attach(body, title, type_)
 
     def parametrize(self, *args, **kwargs):
