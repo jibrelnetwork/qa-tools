@@ -45,20 +45,30 @@ def field_formatter(field_info):
         return get_def_name_from_ref(field_info[JsonFields.REF]) + '.schema'
     if JsonFields.ONE_OF in field_info:
         return get_oneof_format_info(field_info[JsonFields.ONE_OF])
-    if not field_info or JsonFields.TYPE not in field_info:  # TODO: REMOVE THIS AFTER fill Contract.abi.items field
+    if not field_info or JsonFields.TYPE not in field_info:
         field_info[JsonFields.TYPE] = JsonTypes.STRING
     if field_info[JsonFields.TYPE] == JsonTypes.ARRAY:
         return get_array_format_info(field_info)
     return field_info
 
 
-def generate_type_schema(props, type_prefix=None):
+def generate_type_schema(props, type_prefix=None, format_to_schema=True):
     result = {JsonFields.TYPE: JsonTypes.OBJECT, JsonFields.PROPERTIES: {}}
     def_info = props.get(JsonFields.PROPERTIES, {})
     for field_name, field_info in def_info.items():
-        result[JsonFields.PROPERTIES][field_name] = field_formatter(field_info)
+        if field_info.get(JsonFields.TYPE) == JsonTypes.OBJECT:
+            data = generate_type_schema(field_info, 'types', False)
+        else:
+            data = field_formatter(field_info)
+        result[JsonFields.PROPERTIES][field_name] = data
     if not def_info:
-        result = field_formatter(props)
+        formatted_field = field_formatter(props)
+        if isinstance(formatted_field, str):
+            result = '.'.join([type_prefix, formatted_field])
+        else:
+            result = formatted_field
+    if not format_to_schema:
+        return result
     return format_schema_class(str(result), type_prefix)
 
 

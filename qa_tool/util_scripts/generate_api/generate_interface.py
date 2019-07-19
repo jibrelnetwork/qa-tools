@@ -1,4 +1,5 @@
 import re
+from qa_tool.utils.utils import getter
 from qa_tool.utils.common import Methods
 from qa_tool.util_scripts.generate_api.generate_type import generate_type_schema, JsonFields, JsonTypes, get_def_name_from_ref
 
@@ -21,22 +22,6 @@ METHOD_TEMPLATE = """
         query_params = {query_params}
         return self.client.{request_method}(uri, body, query_params)
 """
-
-
-# def _get_body_params(definition_name, definitions, depth=None):
-#
-#     definition = get_def_name_from_ref(definition_name)
-#     assert definition in definitions, f"Definition '{definition}' not exist"
-#     definition_info = definitions[definition]
-#     definition_type = definition_info.get(JsonFields.TYPE)
-#     if not definition_type:
-#         raise Exception('Need add this behavior')
-#     if definition_type == JsonTypes.OBJECT:
-#         result = {i: {} for i in definition_info[JsonFields.PROPERTIES]}
-#         for param_name, param_info in definition_info[JsonFields.PROPERTIES].items():
-#             result[param_name]['required'] =
-#     else:
-#         raise Exception('Need add this behavior')
 
 
 def _get_query_params_and_body(params):
@@ -105,44 +90,65 @@ def delete_required_type(param):
     return param
 
 
-def get_stringify_params(params):
+def get_body_params_from_definitions(param, definitions):
+    definition = definitions.get(param)
+    if not definition:
+        return {param: False}
+    properties = definition[JsonFields.PROPERTIES]
+    return {k: field_info.get(JsonFields.REQUIRED, False) for k, field_info in properties.items()}
+
+
+def get_query_params_from_definitions(param, definitions):
+    definition = definitions.get(param)
+    if not definition:
+        return param, False
+    return definition['name'], definition.get(JsonFields.REQUIRED, False)
+
+
+def get_signature_args(params):
+    return [f"{field_name}{'' if is_required else '=None'}" for field_name, is_required in params.items()]
+
+
+def get_stringify_params(params, definitions):
     if params:
         butter = "{%s\n        }"
         template = '\n' + ' ' * 12 + '"%s": %s,'
+        params = dict(get_query_params_from_definitions(i, definitions) for i in params)
         code = [template % (k, k) for k in params]
-        return butter % ("".join(code))
+        return get_signature_args(params), butter % ("".join(code))
     else:
-        return "{}"
+        return [], "{}"
 
 
 def get_stringify_payload(params, definitions=None):
     definitions = definitions or {}
     if isinstance(params, str):
-        definition = definitions[params]
-        properties = definition[JsonFields.PROPERTIES]
-        params = {k: field_info.get(JsonFields.REQUIRED, False) for k, field_info in properties.items()}
+        params = get_body_params_from_definitions(params, definitions)
     if isinstance(params, dict):
-        payload = get_stringify_params(params)
-        signature = [f"{field_name}{'' if is_required else '=None'}" for field_name, is_required in params.items()]
+        _, payload = get_stringify_params(params, definitions)
+        signature = get_signature_args(params)
     return signature, payload
 
 
-def get_result_formatter_code(uri_params, query_params, body_payload, definitions=None):
-    body_signature = [body_payload] if isinstance(body_payload, str) else [i for i in body_payload]
-    signature = uri_params + query_params
-    query_params = get_stringify_params(query_params)
-    body_signature, body_payload = get_stringify_payload(body_payload, definitions)
-    signature += body_signature
+def get_result_formatter_code(uri_params, query_params, body_payload, swagger_data=None):
+    parameters = getter('components.schemas', swagger_data, {})
+    definitions = swagger_data.get('definitions') or getter('components.parameters', swagger_data, {})
+    query_signature, query_params = get_stringify_params(query_params, definitions)
+    body_signature, body_payload = get_stringify_payload(body_payload, parameters)
+    signature = uri_params + query_signature + body_signature
     return ', '.join(signature), query_params, body_payload
 
 
-def get_method_code(uri_path, request_method, method_info, full_swagger=None):
+def get_method_code(uri_path, request_method, method_info, swagger_data=None):
     method_name = get_method_name(method_info)
     validate_type = get_validate_definition(method_info)
     uri_params = _get_uri_params(uri_path)
-    query_params, body_payload = _get_query_params_and_body(method_info.get('parameters', [])[uri_path.count('{'):])
+    request_params = method_info.get('parameters', [])[uri_path.count('{'):]
+    request_body = getter('requestBody.content.application/json', method_info)
+    request_body = [request_body] if request_body else []
+    query_params, body_payload = _get_query_params_and_body(request_params + request_body)
     method_signature, query_params, body_payload = get_result_formatter_code(
-        uri_params, query_params, body_payload, full_swagger['definitions']
+        uri_params, query_params, body_payload, swagger_data
     )
     return METHOD_TEMPLATE.format(**locals())
 
@@ -160,6 +166,17 @@ def generate_interface(swagger_data, interface_name):
 
 if __name__ == "__main__":
     from qa_tool.util_scripts.generate_api.generate_common import get_swagger_data
-    print(generate_interface(get_swagger_data('test'), 'lol'))
-    print(generate_type_schema({'type': 'object', 'properties': {'status': {'$ref': '#/definitions/Status'}, 'data': {'$ref': '#/definitions/Uncle'}}}))
+    from pprint import pprint
+    import json
+    # print(generate_interface(get_swagger_data('test'), 'lol'))
+    datas = generate_type_schema({'type': 'object', 'properties': {'status': {'$ref': '#/definitions/Status'}, 'data': {'properties': {'assets': {'$ref': '#/components/schemas/RequestedAssetsInfo'},
+                                                   'quotes': {'items': {'additionalProperties': {'pattern': '^\\d{1,}\\.?\\d+$',
+                                                                                                 'type': 'string'},
+                                                                        'properties': {'timestamp': {'type': 'string'}},
+                                                                        'type': 'object'},
+                                                              'type': 'array'}},
+                                    'required': ['assets', 'quotes'],
+                                    'type': 'object'}}}, 'types')
+    pprint(datas)
+    pprint(json.loads(str(datas)))
     # print(generate_interface('qwe'))
