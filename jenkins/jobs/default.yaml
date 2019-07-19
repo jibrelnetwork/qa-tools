@@ -2,11 +2,11 @@
     name: common_automation
     scm:
       - git:
-          url: git@github.com:jibrelnetwork/jsearch-testing.git
+          url: git@github.com:jibrelnetwork/qa-tools.git
           branches:
             - "*/$BRANCH_NAME"
           browser: githubweb
-          browser-url: "https://github.com/jibrelnetwork/jsearch-testing"
+          browser-url: "https://github.com/jibrelnetwork/qa-tools"
           credentials-id: 11c7c63f-3747-47e8-9881-042000d87ec0
           timeout: 20
           wipe-workspace: false
