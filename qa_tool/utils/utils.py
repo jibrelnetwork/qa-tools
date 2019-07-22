@@ -64,8 +64,12 @@ def getter(path, data, default=None):
         return default
 
 
-def generate_value(size=10, chars=string.ascii_uppercase + string.digits):  # TODO: add string.punctuation?
-    random_string = ''.join(random.choice(chars) for _ in range(size))
+def generate_value(size=10, chars=string.ascii_uppercase + string.digits, prefix='', suffix=''):  # TODO: add string.punctuation?
+    len_pref, len_suff = len(prefix), len(suffix)
+    if len_pref + len_suff >= size:
+        raise Exception("Can't generate random string. Long suffix or/and  prefix")
+    size = size - len_pref - len_suff
+    random_string = ''.join([prefix] + [random.choice(chars) for _ in range(size)] + [suffix])
     return random_string
 
 
@@ -95,4 +99,13 @@ def generate_date(change_value=0, change_type='days', format='%Y-%m-%dT%H:%M:%SZ
         return date.strftime(format)
     else:
         return date
+
+
+if __name__ == "__main__":
+    print(generate_value(prefix='qwewqeqwe'))
+    print(generate_value(suffix='qwewqeqwe'))
+    print(generate_value(prefix='123', suffix='123'))
+    # generate_value(prefix='123', suffix='qwewqeqwe1')
+    # generate_value(suffix='qwewqeqwe1')
+    generate_value(prefix='qwewqeqweq')
 
