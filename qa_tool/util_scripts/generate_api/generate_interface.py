@@ -133,6 +133,7 @@ def get_stringify_payload(params, definitions=None):
 def get_result_formatter_code(uri_params, query_params, body_payload, swagger_data=None):
     parameters = getter('components.schemas', swagger_data, {})
     definitions = swagger_data.get('definitions') or getter('components.parameters', swagger_data, {})
+    parameters.update(definitions)
     query_signature, query_params = get_stringify_params(query_params, definitions)
     body_signature, body_payload = get_stringify_payload(body_payload, parameters)
     signature = uri_params + query_signature + body_signature
