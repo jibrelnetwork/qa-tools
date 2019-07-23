@@ -152,7 +152,7 @@ class ClientCSRFApi(ClientApi):
             if self._cookies:
                 assert resp.cookies.get('sessionid') == self._cookies['sessionid'], "You change current session. Better create new obj for sesion"
             self._cookies = resp.cookies
-            self.headers.update({self.CSRF_HEADER_FIELD: resp.cookie['csrftoken']})
+            self.headers.update({self.CSRF_HEADER_FIELD: resp.cookies['csrftoken']})
 
     def clean_cookies(self):
         if self.CSRF_HEADER_FIELD in self.headers:
