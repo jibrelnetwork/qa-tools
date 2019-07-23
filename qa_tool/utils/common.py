@@ -51,6 +51,7 @@ class ClientApi(object):
         self.headers = {'Content-Type': 'application/json'}
         self._message = []  # TODO: full implement after decide on report tool
         self.api_logger = logging.getLogger(self.service_name)
+        self._cookies = {}
 
     def _format_uri_value_fn(self, data):
         return ','.join(str(i) for i in data) if isinstance(data, (list, set)) else data
@@ -82,6 +83,9 @@ class ClientApi(object):
         self.__messages.append(message)
         self.api_logger.info(message)
 
+    def _update_header_from_cookies(self, resp):
+        pass
+
     def _request(self, type_request, uri, data, auth=None, verify=False):
         self.__messages = []
         if type_request not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
@@ -91,17 +95,19 @@ class ClientApi(object):
             'headers': headers,
             'verify': verify,
             'auth': auth,
+            'cookies': self._cookies,
             'timeout': REQUESTS_TIMEOUT,
         }
         if type_request != Methods.GET:
             request_params.update({'data': data})
         with reporter.step(f"Step: {type_request} to the service: {uri}"):
             method_request = getattr(requests, type_request.lower())
-            resp = method_request(uri, **request_params)
             self._report_msg("Step: %s to the service: %s" % (type_request, uri))
             self._report_msg("headers of request:", headers)
             self._report_msg("body of request:", data)
+            resp = method_request(uri, **request_params)
             self._report_msg("Service code: %s" % resp.status_code)
+            self._update_header_from_cookies(resp)
             try:
                 json_resp = resp.json()
                 self._report_msg("response:\n", json.dumps(json_resp, indent=4), '\n')
@@ -136,6 +142,23 @@ class ClientApi(object):
         uri = self._get_target_uri(uri, query_params)
         data = self._format_body(body)
         return self._request(Methods.DELETE, uri, data)
+
+
+class ClientCSRFApi(ClientApi):
+    CSRF_HEADER_FIELD = 'X-CSRFToken'
+
+    def _update_header_from_cookies(self, resp):
+        if resp.cookie:
+            if self._cookies:
+                assert resp.cookies.get('sessionid') == self._cookies['sessionid'], "You change current session. Better create new obj for sesion"
+            self._cookies = resp.cookies
+            self.headers.update({self.CSRF_HEADER_FIELD: resp.cookie['csrftoken']})
+
+    def clean_cookies(self):
+        if self.CSRF_HEADER_FIELD in self.headers:
+            self.headers.pop(self.CSRF_HEADER_FIELD)
+        if self._cookies:
+            self._cookies = {}
 
 
 if __name__ == "__main__":
