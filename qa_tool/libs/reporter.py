@@ -23,5 +23,11 @@ class Reporter(object):
     def parametrize(self, *args, **kwargs):
         return pytest.mark.parametrize(*args, **kwargs)
 
+    def skip_test(self, msg):
+        return pytest.mark.skip(msg)
+
+    def skipif_test(self, reason, msg):
+        return pytest.mark.skip(bool(reason), msg)
+
 
 reporter = Reporter()

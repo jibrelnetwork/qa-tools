@@ -147,18 +147,26 @@ class ClientApi(object):
 class ClientCSRFApi(ClientApi):
     CSRF_HEADER_FIELD = 'X-CSRFToken'
 
+    def __init__(self, base_url, service_name=None, check_session_id=True):
+        super().__init__(base_url, service_name)
+        self.check_session_id = check_session_id
+
     def _update_header_from_cookies(self, resp):
         if resp.cookies:
-            if self._cookies:
-                assert resp.cookies.get('sessionid') == self._cookies['sessionid'], "You change current session. Better create new obj for sesion"
+            if self._cookies and self.check_session_id:
+                msg = "You change current sessionId. Better use another client obj for this action"
+                assert resp.cookies.get('sessionid') == self._cookies['sessionid'], msg
             self._cookies = resp.cookies
             self.headers.update({self.CSRF_HEADER_FIELD: resp.cookies['csrftoken']})
 
     def clean_cookies(self):
-        if self.CSRF_HEADER_FIELD in self.headers:
-            self.headers.pop(self.CSRF_HEADER_FIELD)
+        self.clean_headers()
         if self._cookies:
             self._cookies = {}
+
+    def clean_headers(self):
+        if self.CSRF_HEADER_FIELD in self.headers:
+            self.headers.pop(self.CSRF_HEADER_FIELD)
 
 
 if __name__ == "__main__":
