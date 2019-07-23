@@ -148,7 +148,7 @@ class ClientCSRFApi(ClientApi):
     CSRF_HEADER_FIELD = 'X-CSRFToken'
 
     def _update_header_from_cookies(self, resp):
-        if resp.cookie:
+        if resp.cookies:
             if self._cookies:
                 assert resp.cookies.get('sessionid') == self._cookies['sessionid'], "You change current session. Better create new obj for sesion"
             self._cookies = resp.cookies
