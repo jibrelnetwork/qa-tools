@@ -94,15 +94,29 @@ def get_body_params_from_definitions(param, definitions):
     definition = definitions.get(param)
     if not definition:
         return {param: False}
-    properties = definition[JsonFields.PROPERTIES]
-    return {k: field_info.get(JsonFields.REQUIRED, False) for k, field_info in properties.items()}
+    tmp_ = []
+    parent_obj = definition
+    if 'allOf' in definition:
+        for i in definition['allOf']:
+            if JsonFields.REF in i:
+                obj_name = get_def_name_from_ref(i[JsonFields.REF])
+                tmp_.append(get_body_params_from_definitions(obj_name, definitions))
+            elif i.get(JsonFields.TYPE) == JsonTypes.OBJECT:
+                parent_obj = i
+            else:
+                raise Exception
+    properties = parent_obj[JsonFields.PROPERTIES]
+    result = {k: field_info.get(JsonFields.REQUIRED, False) for k, field_info in properties.items()}
+    for i in tmp_:
+        result.update(i)
+    return result
 
 
 def get_query_params_from_definitions(param, definitions):
     definition = definitions.get(param)
     if not definition:
         return param, False
-    return definition['name'], definition.get(JsonFields.REQUIRED, False)
+    return definition.get('name', param), definition.get(JsonFields.REQUIRED, False)
 
 
 def get_signature_args(params):
