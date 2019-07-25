@@ -2,6 +2,7 @@ import re
 from copy import deepcopy
 
 
+
 class JsonFields(object):
     TYPE = "type"
     ITEMS = "items"
@@ -58,13 +59,21 @@ def generate_type_schema(props, type_prefix=None, format_to_schema=True):
     for field_name, field_info in def_info.items():
         if field_info.get(JsonFields.TYPE) == JsonTypes.OBJECT:
             data = generate_type_schema(field_info, 'types', False)
+        elif 'allOf' in field_info:
+            data = []
+            for i in field_info['allOf']:
+                data.append(generate_type_schema(i, format_to_schema=False))
+                print('test')
         else:
             data = field_formatter(field_info)
         result[JsonFields.PROPERTIES][field_name] = data
     if not def_info:
         formatted_field = field_formatter(props)
         if isinstance(formatted_field, str):
-            result = '.'.join([type_prefix, formatted_field])
+            result = [formatted_field]
+            if type_prefix:
+                result = [type_prefix] + result
+            result = '.'.join(result)
         else:
             result = formatted_field
     if not format_to_schema:
@@ -94,3 +103,5 @@ if __name__ == "__main__":
     # pass
     from qa_tool.util_scripts.generate_api.generate_common import get_swagger_data
     print(generate_types(get_swagger_data('http://127.0.0.1:8000/api/doc/swagger.json')))
+
+

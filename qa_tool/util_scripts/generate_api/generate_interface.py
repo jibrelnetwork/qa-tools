@@ -1,7 +1,8 @@
 import re
 from qa_tool.utils.utils import getter
 from qa_tool.utils.common import Methods
-from qa_tool.util_scripts.generate_api.generate_type import generate_type_schema, JsonFields, JsonTypes, get_def_name_from_ref
+from qa_tool.util_scripts.generate_api.generate_type import generate_type_schema, JsonFields, JsonTypes, \
+    get_def_name_from_ref
 
 AS_TYPE_IMPORT = 'types'
 REQUIRED_SUFFIX_TYPES = ['Required', 'Optional']
@@ -90,21 +91,28 @@ def delete_required_type(param):
     return param
 
 
+def generate_allof_object(allof_obj, collectable_fn):
+    # get_body_params_from_definitions
+    tmp_ = []
+    parent_obj = None
+    for i in allof_obj:
+        if JsonFields.REF in i:
+            obj_name = get_def_name_from_ref(i[JsonFields.REF])
+            tmp_.append(collectable_fn(obj_name))
+        elif i.get(JsonFields.TYPE) == JsonTypes.OBJECT:
+            parent_obj = parent_obj or i
+        else:
+            raise Exception
+    return tmp_, parent_obj
+
+
 def get_body_params_from_definitions(param, definitions):
     definition = definitions.get(param)
     if not definition:
         return {param: False}
-    tmp_ = []
-    parent_obj = definition
+    tmp_, parent_obj = [], definition
     if 'allOf' in definition:
-        for i in definition['allOf']:
-            if JsonFields.REF in i:
-                obj_name = get_def_name_from_ref(i[JsonFields.REF])
-                tmp_.append(get_body_params_from_definitions(obj_name, definitions))
-            elif i.get(JsonFields.TYPE) == JsonTypes.OBJECT:
-                parent_obj = i
-            else:
-                raise Exception
+        tmp_, parent_obj = generate_allof_object(definition['allOf'], lambda name: get_body_params_from_definitions(name, definitions))
     properties = parent_obj[JsonFields.PROPERTIES]
     result = {k: field_info.get(JsonFields.REQUIRED, False) for k, field_info in properties.items()}
     for i in tmp_:
@@ -180,7 +188,6 @@ def generate_interface(swagger_data, interface_name):
 
 
 if __name__ == "__main__":
-    from qa_tool.util_scripts.generate_api.generate_common import get_swagger_data
     from pprint import pprint
     import json
     # print(generate_interface(get_swagger_data('test'), 'lol'))
