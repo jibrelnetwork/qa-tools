@@ -2,6 +2,7 @@ import json
 import requests
 import logging
 
+from qa_tool.custom_structure import Enum
 from qa_tool.libs.reporter import reporter
 
 TIMEOUT_CONNECTION = 10
@@ -9,7 +10,7 @@ TIMEOUT_READ = 60 * 5
 REQUESTS_TIMEOUT = (TIMEOUT_CONNECTION, TIMEOUT_READ)
 
 
-class StatusCodes(object):
+class StatusCodes(Enum):
     OK = 200
     CREATED = 201
     NO_CONTENT = 204
