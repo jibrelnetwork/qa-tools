@@ -73,4 +73,4 @@ def swagger_from_yaml(swagger_yaml_url):
 
 
 if __name__ == "__main__":
-    generate_api('http://127.0.0.1:9090/api/doc/swagger.json', 'coinmena')
+    generate_api('http://127.0.0.1:9000/api/doc/swagger.json')
