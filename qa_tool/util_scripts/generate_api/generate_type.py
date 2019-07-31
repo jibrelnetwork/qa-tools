@@ -10,6 +10,7 @@ class JsonFields(object):
     ONE_OF = "oneOf"
     PROPERTIES = "properties"
     REQUIRED = 'required'
+    ADDITIONAL_PROPS = 'additionalProperties'
 
 
 class JsonTypes(object):
@@ -51,6 +52,9 @@ def field_formatter(field_info):
     if field_info[JsonFields.TYPE] == JsonTypes.ARRAY:
         return get_array_format_info(field_info)
     if JsonTypes.OBJECT == field_info[JsonFields.TYPE]:
+        if JsonFields.ADDITIONAL_PROPS in field_info:
+            field_info[JsonFields.ADDITIONAL_PROPS] = field_formatter(field_info[JsonFields.ADDITIONAL_PROPS])
+            return field_info
         for k, v in field_info[JsonFields.PROPERTIES].items():
             field_info[JsonFields.PROPERTIES][k] = field_formatter(v)
     return field_info
