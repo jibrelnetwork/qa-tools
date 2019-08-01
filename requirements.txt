@@ -1,5 +1,5 @@
 requests
-pytest==4.3.0
+pytest==5.0.1
 allure-pytest==2.6.0
 jsonschema==3.0.1
 psycopg2-binary
@@ -7,3 +7,4 @@ pathlib==1.0.1
 setuptools
 jira
 cachetools
+pytest-xdist==1.29.0
