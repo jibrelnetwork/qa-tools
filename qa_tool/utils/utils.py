@@ -1,3 +1,4 @@
+import time
 import string
 import random
 import datetime
@@ -62,6 +63,17 @@ def getter(path, data, default=None):
             return getter(rpath, getattr(data, lpath), default)
     except Exception:
         return default
+
+
+def func_waiter(lambda_fn, timeout=5, wait_time=300, msg="Can't await this function"):
+    time_end = time.time() + wait_time
+    while time.time() < time_end:
+        try:
+            data = lambda_fn()
+            return data
+        except:
+            time.sleep(timeout)
+    raise TimeoutError(msg)
 
 
 def generate_value(size=10, chars=string.ascii_uppercase + string.digits, prefix='', suffix=''):  # TODO: add string.punctuation?
