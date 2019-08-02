@@ -4,13 +4,9 @@ FROM python:3.7-alpine
 RUN apk update \
     && apk add \
     gcc \
-    make \
     musl-dev \
     libffi-dev \
-    postgresql-dev \
-    clang \
-    openssl-dev \
-    git
+    postgresql-dev
 
 COPY /requirements.txt /requirements-qa-tools.txt
 RUN pip install --no-cache-dir -U pip \
@@ -19,4 +15,4 @@ RUN pip install --no-cache-dir -U pip \
 WORKDIR /app
 
 ENTRYPOINT ["pytest", "--execution-timeout", "600", "-vvv", "-s", "--alluredir=./allure-results/"]
-CMD ["-n", "10", "./tests"]
+CMD ["-n", "10", "./tests"]                                                                                                                                                                                                  14,0-1        All
