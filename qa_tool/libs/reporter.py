@@ -18,6 +18,7 @@ class Reporter(object):
         return allure.step(step_text)
 
     def attach(self, title, body, type_=TEXT):
+        body = str(body)
         return allure.attach(body, title, type_)
 
     def parametrize(self, *args, **kwargs):
@@ -37,6 +38,12 @@ class Reporter(object):
 
     def jira_issue_is_open(self, issue):
         return issue_is_open(issue)
+
+    def skip_test(self, msg):
+        return pytest.mark.skip(msg)
+
+    def skipif_test(self, reason, msg):
+        return pytest.mark.skip(bool(reason), msg)
 
 
 reporter = Reporter()

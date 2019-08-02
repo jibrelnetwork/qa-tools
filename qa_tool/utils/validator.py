@@ -9,8 +9,11 @@ def check_status(status_data, expected_error):
 
 
 def get_interest_data(data, expected_error=None):
-    if isinstance(data, dict) and 'status' in data and 'data' in data:
+    if not isinstance(data, dict):
+        return data
+    if 'status' in data:
         check_status(data['status'], expected_error)
+    if 'data' in data:
         data = data['data']
     return data
 

@@ -1,0 +1,14 @@
+
+- job:
+    name: jticker_from_builder
+    parameters:
+      - string:
+          name: BRANCH_NAME_TEST
+          default: "develop"
+          description: ""
+    project-type: pipeline
+    sandbox: true
+    pipeline-scm:
+      scm:
+        - jticker
+      script-path: Jenkinsfile
