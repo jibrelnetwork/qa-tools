@@ -87,11 +87,11 @@ class ClientApi(object):
     def _update_header_from_cookies(self, resp):
         pass
 
-    def _request(self, type_request, uri, data, auth=None, verify=False):
+    def _request(self, type_request, uri, data, headers=None, auth=None, verify=False):
         self.__messages = []
         if type_request not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
             raise Exception("Unknown request type: %s" % type_request)
-        headers = filter_dict_from_none(self.headers)
+        headers = filter_dict_from_none(dict(self.headers, **(headers or {})))
         request_params = {
             'headers': headers,
             'verify': verify,
@@ -120,29 +120,29 @@ class ClientApi(object):
             del self.__messages[:]
             return res
 
-    def post(self, uri, body=None, query_params=None):
+    def post(self, uri, body=None, query_params=None, headers=None):
         uri = self._get_target_uri(uri, query_params)
         data = self._format_body(body)
-        return self._request(Methods.POST, uri, data)
+        return self._request(Methods.POST, uri, data, headers)
 
-    def get(self, uri, body=None, query_params=None):
+    def get(self, uri, body=None, query_params=None, headers=None):
         uri = self._get_target_uri(uri, query_params)
-        return self._request(Methods.GET, uri, "")
+        return self._request(Methods.GET, uri, "", headers)
 
-    def put(self, uri, body=None, query_params=None):
-        uri = self._get_target_uri(uri, query_params)
-        data = self._format_body(body)
-        return self._request(Methods.PUT, uri, data)
-
-    def patch(self, uri, body=None, query_params=None):
+    def put(self, uri, body=None, query_params=None, headers=None):
         uri = self._get_target_uri(uri, query_params)
         data = self._format_body(body)
-        return self._request(Methods.PATCH, uri, data)
+        return self._request(Methods.PUT, uri, data, headers)
 
-    def delete(self, uri, body=None, query_params=None):
+    def patch(self, uri, body=None, query_params=None, headers=None):
         uri = self._get_target_uri(uri, query_params)
         data = self._format_body(body)
-        return self._request(Methods.DELETE, uri, data)
+        return self._request(Methods.PATCH, uri, data, headers)
+
+    def delete(self, uri, body=None, query_params=None, headers=None):
+        uri = self._get_target_uri(uri, query_params)
+        data = self._format_body(body)
+        return self._request(Methods.DELETE, uri, data, headers)
 
 
 class ClientCSRFApi(ClientApi):
