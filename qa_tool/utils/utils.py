@@ -2,6 +2,7 @@ import time
 import string
 import random
 import datetime
+from dateutil.relativedelta import relativedelta
 
 
 class ClassPropertyDescriptor(object):
@@ -106,7 +107,7 @@ def generate_number(min=0, max=10, is_float=False):
 def generate_date(change_value=0, change_type='days', format='%Y-%m-%dT%H:%M:%SZ'):
     date = datetime.datetime.utcnow()
     if change_value:
-        date += datetime.timedelta(**{change_type: change_value})
+        date += relativedelta(**{change_type: change_value})
     if format:
         return date.strftime(format)
     else:
