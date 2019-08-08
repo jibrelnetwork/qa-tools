@@ -3,8 +3,6 @@ import random
 from qa_tool.utils.utils import ClassPropertyDescriptor
 
 
-
-
 class Enum:
 
     @classmethod
