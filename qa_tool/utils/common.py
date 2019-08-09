@@ -87,18 +87,18 @@ class ClientApi(object):
     def _update_header_from_cookies(self, resp):
         pass
 
-    def _request(self, type_request, uri, data, headers=None, auth=None, verify=False):
+    def _request(self, type_request, uri, data, headers=None, auth=None, verify=False, **kwargs):
         self.__messages = []
         if type_request not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
             raise Exception("Unknown request type: %s" % type_request)
         headers = filter_dict_from_none(dict(self.headers, **(headers or {})))
-        request_params = {
+        request_params = dict({
             'headers': headers,
             'verify': verify,
             'auth': auth,
             'cookies': self._cookies,
             'timeout': REQUESTS_TIMEOUT,
-        }
+        }, **kwargs)
         if type_request != Methods.GET:
             request_params.update({'data': data})
         with reporter.step(f"Step: {type_request} to the service: {uri}"):
@@ -120,10 +120,10 @@ class ClientApi(object):
             del self.__messages[:]
             return res
 
-    def post(self, uri, body=None, query_params=None, headers=None):
+    def post(self, uri, body=None, query_params=None, headers=None, **kwargs):
         uri = self._get_target_uri(uri, query_params)
         data = self._format_body(body)
-        return self._request(Methods.POST, uri, data, headers)
+        return self._request(Methods.POST, uri, data, headers, **kwargs)
 
     def get(self, uri, body=None, query_params=None, headers=None):
         uri = self._get_target_uri(uri, query_params)
