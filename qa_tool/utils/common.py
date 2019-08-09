@@ -88,6 +88,7 @@ class ClientApi(object):
         pass
 
     def _request(self, type_request, uri, data, headers=None, auth=None, verify=False, **kwargs):
+        is_load_file = 'files' in kwargs
         self.__messages = []
         if type_request not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
             raise Exception("Unknown request type: %s" % type_request)
@@ -99,6 +100,8 @@ class ClientApi(object):
             'cookies': self._cookies,
             'timeout': REQUESTS_TIMEOUT,
         }, **kwargs)
+        if is_load_file:
+            data = json.loads(data)
         if type_request != Methods.GET:
             request_params.update({'data': data})
         with reporter.step(f"Step: {type_request} to the service: {uri}"):
