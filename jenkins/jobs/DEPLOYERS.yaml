@@ -1,0 +1,32 @@
+- job-template:
+    name: 'DEPLOYER_{service_name}'
+    parameters:
+      - string:
+          name: BRANCH_NAME
+          default: "master"
+          description: ""
+    disabled: false
+    project-type: freestyle
+    concurrent: falseclear
+    scm:
+      - "{git_scm}"
+    builders:
+      - shell: |
+          {build}
+
+- project:
+    name: "DEPLOYERS"
+    jobs:
+      - "DEPLOYER_{service_name}"
+    service_name:
+#      - "JENKINS":
+#          build: |
+#            cd deploy/jenkins
+#            docker-compose build
+#            docker-compose up -d
+      - "PYPI":
+          git_scm: common_automation
+          timed: H 00 * * *
+          build: |
+            docker-compose -f ./deploy/pypi/docker-compose.yml up -d --build --force-recreate
+            docker-compose -f ./deploy/pypi/docker-compose.yml exec -d pypi sh /update_package.sh

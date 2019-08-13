@@ -10,7 +10,7 @@ from qa_tool.consts.env import DISABLE_SCHEMA_VALIDATOR
 class Error(object):
     @classproperty
     def schema(cls):
-        return {'type': 'object', 'properties': {'field': {'type': 'string'}, 'code': {'type': 'string'}, 'message': {'type': 'string'}}}
+        return {'type': 'object', 'properties': {'field': {'type': 'string'}, 'code': {'type': 'string'}, 'message': {'type': 'string'}, 'target': {'type': 'string'}}}
 
 
 class Errors(object):
@@ -26,7 +26,10 @@ class Status(object):
 
 
 DEFAULT_ERROR = {
-    StatusCodes.BAD_REQUEST: Status
+    StatusCodes.BAD_REQUEST: Status.schema,
+    StatusCodes.FORBIDDEN: Status.schema,
+    StatusCodes.CONFLICT: Status.schema,
+    StatusCodes.TOO_MANY_REQUESTS: Status.schema,
 }
 
 

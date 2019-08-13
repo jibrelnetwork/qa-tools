@@ -1,5 +1,12 @@
-pytest==4.3.0
-allure-pytest==2.6.0
-requests==2.21.0
-jsonschema==2.6.0
-psycopg2-binary==2.8.2
+requests
+pytest==5.0.1
+allure-pytest==2.6.5
+jsonschema==3.0.1
+psycopg2-binary
+pathlib==1.0.1
+setuptools
+jira
+cachetools
+pytest-xdist==1.29.0
+pytest-timeouts==1.2
+dateutils

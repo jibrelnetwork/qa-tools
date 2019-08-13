@@ -1,0 +1,19 @@
+version: '3.7'
+
+
+services:
+  pypi:
+    container_name: custom_pypi_srv
+    image: pypi_srv
+    build:
+      context: ../../
+      dockerfile: ./deploy/pypi/Dockerfile
+    ports:
+      - "55500:80"
+    restart: always
+    networks:
+      - pypi-srv
+
+networks:
+  pypi-srv:
+    external: true
