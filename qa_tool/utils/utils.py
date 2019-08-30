@@ -2,6 +2,8 @@ import time
 import string
 import random
 import datetime
+from itertools import islice
+
 from dateutil.relativedelta import relativedelta
 
 
@@ -112,6 +114,19 @@ def generate_date(change_value=0, change_type='days', format='%Y-%m-%dT%H:%M:%SZ
         return date.strftime(format)
     else:
         return date
+
+
+def window(seq, n=2):
+    # https://stackoverflow.com/questions/6822725/rolling-or-sliding-window-iterator
+    # "Returns a sliding window (of width n) over data from the iterable"
+    # "   s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ...                   "
+    it = iter(seq)
+    result = tuple(islice(it, n))
+    if len(result) == n:
+        yield result
+    for elem in it:
+        result = result[1:] + (elem,)
+        yield result
 
 
 if __name__ == "__main__":
