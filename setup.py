@@ -2,11 +2,13 @@ import os
 import pathlib
 from setuptools import find_packages, setup
 
-version = pathlib.Path('./version.txt').read_text().strip()
+
+qa_tools_repo = pathlib.Path(__file__)/'..'
+version = (qa_tools_repo/'version.txt').resolve().read_text().strip()
 
 
 def get_requires():
-    with open('./requirements.txt') as f:
+    with (qa_tools_repo/'requirements.txt').resolve().open() as f:
         required = f.read().splitlines()
     return required
 

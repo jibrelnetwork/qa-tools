@@ -4,6 +4,7 @@ from functools import wraps
 from .common import StatusCodes
 from .utils import classproperty
 from qa_tool.libs.reporter import reporter
+from qa_tool.consts.env import DISABLE_SCHEMA_VALIDATOR
 
 
 class Error(object):
@@ -40,6 +41,8 @@ def validate_type_wrap(combined_type_or_map):
                 service_name = args[0].__class__.__name__
             except:
                 service_name = 'UNDEFINED SERVICE NAME'
+            if DISABLE_SCHEMA_VALIDATOR:
+                return fn(*args, **kwargs)
             with reporter.step("Step: request %s to %s service:" % (fn.__name__, service_name)):
                 code, data = fn(*args, **kwargs)
                 schema = DEFAULT_ERROR.get(code, combined_type_or_map)

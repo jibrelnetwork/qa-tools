@@ -1,6 +1,7 @@
 import json
 import requests
 import logging
+from qa_tool.utils.custom_structure import Enum
 
 from qa_tool.custom_structure import Enum
 from qa_tool.libs.reporter import reporter
@@ -25,7 +26,7 @@ class StatusCodes(Enum):
     SERVICE_UNAVAILABLE = 503
 
 
-class Methods(object):
+class Methods(Enum):
     DELETE = "DELETE"
     GET = "GET"
     PATCH = "PATCH"
