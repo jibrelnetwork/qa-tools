@@ -30,6 +30,7 @@ SERVICE_SCOPE = {
         'jticker-api': 'API_IMAGE',
         'jticker-grabber': 'GRABBER_IMAGE',
         'jticker-aggregator': 'AGGREGATOR_IMAGE',
+        'jassets': 'JASSETS_IMAGE',
     },
     'jassets': {
         'jassets': 'JASSETS_IMAGE'
