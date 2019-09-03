@@ -1,7 +1,6 @@
 import allure
 import pytest
 import logging
-from libs.jira_integrate import issue_is_open
 
 
 class Reporter(object):
@@ -31,12 +30,13 @@ class Reporter(object):
 
     def jira_issue(self, issue):
         allure.dynamic.issue("https://jibrelnetwork.atlassian.net/browse/" + issue)  # TODO: need fix link in tests
-        if issue_is_open(issue):
+        if self.jira_issue_is_open(issue):
             return pytest.mark.skipif("True", reason="issue '%s' is open" % issue)
         else:
             return pytest.mark.skipif("False")
 
     def jira_issue_is_open(self, issue):
+        from libs.jira_integrate import issue_is_open
         return issue_is_open(issue)
 
     def skip_test(self, msg):

@@ -1,7 +1,6 @@
 import json
 import requests
 import logging
-from qa_tool.utils.custom_structure import Enum
 
 from qa_tool.custom_structure import Enum
 from qa_tool.libs.reporter import reporter
