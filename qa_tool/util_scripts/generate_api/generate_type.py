@@ -47,11 +47,12 @@ def field_formatter(field_info):
         return get_def_name_from_ref(field_info[JsonFields.REF]) + '.schema'
     if JsonFields.ONE_OF in field_info:
         return {JsonFields.ONE_OF: get_oneof_format_info(field_info[JsonFields.ONE_OF])}
-    if not field_info or JsonFields.TYPE not in field_info:
-        field_info[JsonFields.TYPE] = JsonTypes.STRING
-    if field_info[JsonFields.TYPE] == JsonTypes.ARRAY:
+    # if not field_info or JsonFields.TYPE not in field_info:
+    #     field_info[JsonFields.TYPE] = JsonTypes.STRING
+    type_ = field_info.get(JsonFields.TYPE)
+    if type_ == JsonTypes.ARRAY:
         return get_array_format_info(field_info)
-    if JsonTypes.OBJECT == field_info[JsonFields.TYPE]:
+    if type_ == JsonTypes.OBJECT:
         if JsonFields.ADDITIONAL_PROPS in field_info:
             field_info[JsonFields.ADDITIONAL_PROPS] = field_formatter(field_info[JsonFields.ADDITIONAL_PROPS])
             return field_info
@@ -70,6 +71,7 @@ def generate_type_schema(props, type_prefix=None, format_to_schema=True):
             data = []
             for i in field_info['allOf']:
                 data.append(generate_type_schema(i, format_to_schema=False))
+            data = {'allOf': data}
         else:
             data = field_formatter(field_info)
         result[JsonFields.PROPERTIES][field_name] = data
