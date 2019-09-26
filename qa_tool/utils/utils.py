@@ -1,9 +1,10 @@
-import time
+import pytz
 import string
 import random
 import datetime
 from itertools import islice
 
+from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
 
@@ -129,7 +130,60 @@ def window(seq, n=2):
         yield result
 
 
+class TimeUtil:
+
+    @classmethod
+    def _format_to_date(cls, date):
+        if isinstance(date, datetime.date):
+            if date.tzinfo:
+                date = date.astimezone(pytz.timezone('UTC'))
+            else:
+                date = pytz.timezone('UTC').localize(date)
+            return date
+        if isinstance(date, (float, int)):
+            return pytz.timezone('UTC').localize(datetime.datetime.utcfromtimestamp(date))
+        return cls._format_to_date(parse(date))
+
+    @classmethod
+    def check_date_in_delta(cls, actual_date, expected_date, delta_seconds=2):
+        expected_date = cls._format_to_date(expected_date)
+        delta = relativedelta(seconds=delta_seconds)
+        return cls.check_date_in_range(actual_date, expected_date - delta, expected_date + delta)
+
+    @classmethod
+    def check_date_in_range(cls, actual_date, time_start, time_end=None):
+        time_start = cls._format_to_date(time_start)
+        actual_date = cls._format_to_date(actual_date)
+        time_end = cls._format_to_date(time_end or datetime.datetime.now())
+        assert time_start < actual_date < time_end, f"{time_start} < {actual_date} < {time_end}"
+
+
 if __name__ == "__main__":
+    import time
+    keks1 = TimeUtil._format_to_date(time.time())
+    keks3 = TimeUtil._format_to_date(datetime.datetime.now())
+    # print(keks1)
+    # print(keks3)
+    # print(TimeUtil._format_to_date(str(datetime.datetime.now())))
+    # print(TimeUtil._format_to_date(datetime.datetime.now(tz=pytz.timezone('America/Los_Angeles'))))
+    # print(pytz.timezone('America/Los_Angeles').localize(datetime.datetime.now()))
+    # print(TimeUtil._format_to_date(pytz.timezone('America/Los_Angeles').localize(datetime.datetime.now())))
+    # print(TimeUtil._format_to_date(str(pytz.timezone('America/Los_Angeles').localize(datetime.datetime.now()))))
+
+    TimeUtil.check_date_in_delta(datetime.datetime.now(), datetime.datetime.now())
+    TimeUtil.check_date_in_delta(str(datetime.datetime.now()), datetime.datetime.now())
+    TimeUtil.check_date_in_delta(time.time(), datetime.datetime.now().astimezone(pytz.timezone('UTC')))
+    try:
+        TimeUtil.check_date_in_delta(str(pytz.timezone('America/Los_Angeles').localize(datetime.datetime.now())), datetime.datetime.now())
+    except:
+        print('all is ok')
+
+    TimeUtil.check_date_in_range(time.time()+2.0, datetime.datetime.now().astimezone(pytz.timezone('UTC')))
+    TimeUtil.check_date_in_range(time.time()+2.0, datetime.datetime.now())  # TODO: need think about it
+
+
+
+
     print(generate_value(prefix='qwewqeqwe'))
     print(generate_value(suffix='qwewqeqwe'))
     print(generate_value(prefix='123', suffix='123'))
