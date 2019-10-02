@@ -1,3 +1,4 @@
+import time
 import pytz
 import string
 import random
@@ -159,7 +160,6 @@ class TimeUtil:
 
 
 if __name__ == "__main__":
-    import time
     keks1 = TimeUtil._format_to_date(time.time())
     keks3 = TimeUtil._format_to_date(datetime.datetime.now())
     # print(keks1)
