@@ -131,7 +131,7 @@ def window(seq, n=2):
         yield result
 
 
-def to_list(self, data):
+def to_list(data):
     return data if isinstance(data, (list, tuple)) else [data]
 
 
