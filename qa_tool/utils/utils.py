@@ -131,6 +131,10 @@ def window(seq, n=2):
         yield result
 
 
+def to_list(self, data):
+    return data if isinstance(data, (list, tuple)) else [data]
+
+
 class TimeUtil:
 
     @classmethod
