@@ -137,6 +137,10 @@ def to_list(data):
 
 class TimeUtil:
 
+    @classproperty
+    def _now(self):
+        return datetime.datetime.now()
+
     @classmethod
     def _format_to_date(cls, date):
         if isinstance(date, datetime.date):
@@ -159,8 +163,20 @@ class TimeUtil:
     def check_date_in_range(cls, actual_date, time_start, time_end=None):
         time_start = cls._format_to_date(time_start)
         actual_date = cls._format_to_date(actual_date)
-        time_end = cls._format_to_date(time_end or datetime.datetime.now())
+        time_end = cls._format_to_date(time_end or cls._now)
         assert time_start < actual_date < time_end, f"{time_start} < {actual_date} < {time_end}"
+
+    @classmethod
+    def generate_date_in_range(cls, start_date, end_date=None, step='minutes'):
+        start_date = cls._format_to_date(start_date)
+        end_date = cls._format_to_date(end_date or cls._now)
+        step_seconds = (cls._now - (cls._now - relativedelta(**{step: 1}))).total_seconds()
+        available_range = (end_date - start_date).total_seconds()
+        start_diff = 1 if step == 'minutes' else 0.1
+        end_diff = available_range/step_seconds
+        assert end_diff > start_diff, "Too small daterange for generate date in this range"
+        diff_range = generate_number(start_diff, end_diff, is_float=True)
+        return start_date + relativedelta(**{step: diff_range})
 
 
 if __name__ == "__main__":
