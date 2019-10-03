@@ -142,7 +142,7 @@ class TimeUtil:
         return datetime.datetime.now()
 
     @classmethod
-    def _format_to_date(cls, date):
+    def to_date(cls, date):
         if isinstance(date, datetime.date):
             if date.tzinfo:
                 date = date.astimezone(pytz.timezone('UTC'))
@@ -151,25 +151,25 @@ class TimeUtil:
             return date
         if isinstance(date, (float, int)):
             return pytz.timezone('UTC').localize(datetime.datetime.utcfromtimestamp(date))
-        return cls._format_to_date(parse(date))
+        return cls.to_date(parse(date))
 
     @classmethod
     def check_date_in_delta(cls, actual_date, expected_date, delta_seconds=2):
-        expected_date = cls._format_to_date(expected_date)
+        expected_date = cls.to_date(expected_date)
         delta = relativedelta(seconds=delta_seconds)
         return cls.check_date_in_range(actual_date, expected_date - delta, expected_date + delta)
 
     @classmethod
     def check_date_in_range(cls, actual_date, time_start, time_end=None):
-        time_start = cls._format_to_date(time_start)
-        actual_date = cls._format_to_date(actual_date)
-        time_end = cls._format_to_date(time_end or cls._now)
+        time_start = cls.to_date(time_start)
+        actual_date = cls.to_date(actual_date)
+        time_end = cls.to_date(time_end or cls._now)
         assert time_start < actual_date < time_end, f"{time_start} < {actual_date} < {time_end}"
 
     @classmethod
     def generate_date_in_range(cls, start_date, end_date=None, step='minutes'):
-        start_date = cls._format_to_date(start_date)
-        end_date = cls._format_to_date(end_date or cls._now)
+        start_date = cls.to_date(start_date)
+        end_date = cls.to_date(end_date or cls._now)
         step_seconds = (cls._now - (cls._now - relativedelta(**{step: 1}))).total_seconds()
         available_range = (end_date - start_date).total_seconds()
         start_diff = 1 if step == 'minutes' else 0.1
@@ -180,8 +180,8 @@ class TimeUtil:
 
 
 if __name__ == "__main__":
-    keks1 = TimeUtil._format_to_date(time.time())
-    keks3 = TimeUtil._format_to_date(datetime.datetime.now())
+    keks1 = TimeUtil.to_date(time.time())
+    keks3 = TimeUtil.to_date(datetime.datetime.now())
     # print(keks1)
     # print(keks3)
     # print(TimeUtil._format_to_date(str(datetime.datetime.now())))
