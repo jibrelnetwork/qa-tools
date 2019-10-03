@@ -13,8 +13,10 @@ class Reporter(object):
     def step(self, step_text, step_prefix=None):
         if step_prefix is None:
             step_prefix = 'Step'
-        logging.info(step_prefix + f": {step_text}")
-        return allure.step(step_text)
+        msg = step_prefix + f": {step_text}"
+        logging.info(msg)
+        print(msg)
+        return allure.step(msg)
 
     def attach(self, title, body, type_=TEXT):
         body = str(body)
