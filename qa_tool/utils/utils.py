@@ -3,6 +3,7 @@ import pytz
 import string
 import random
 import datetime
+from functools import wraps
 from itertools import islice
 
 from dateutil.parser import parse
@@ -135,6 +136,16 @@ def to_list(data):
     return data if isinstance(data, (list, tuple)) else [data]
 
 
+def timing_fn(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time.time()
+        result = f(*args, **kw)
+        print('func:%r args:[%r, %r] took: %2.4f sec' % (f.__name__, args, kw, time.time()-ts))
+        return result
+    return wrap
+
+
 class TimeUtil:
 
     @classproperty
@@ -190,7 +201,7 @@ if __name__ == "__main__":
     # print(TimeUtil._format_to_date(pytz.timezone('America/Los_Angeles').localize(datetime.datetime.now())))
     # print(TimeUtil._format_to_date(str(pytz.timezone('America/Los_Angeles').localize(datetime.datetime.now()))))
 
-    TimeUtil.check_date_in_delta(datetime.datetime.now(), datetime.datetime.now())
+    data = TimeUtil.check_date_in_delta(datetime.datetime.now(), datetime.datetime.now())
     TimeUtil.check_date_in_delta(str(datetime.datetime.now()), datetime.datetime.now())
     TimeUtil.check_date_in_delta(time.time(), datetime.datetime.now().astimezone(pytz.timezone('UTC')))
     try:
