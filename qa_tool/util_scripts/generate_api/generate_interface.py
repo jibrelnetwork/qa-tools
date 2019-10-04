@@ -35,6 +35,9 @@ def _get_query_params_and_body(params):
             query.append(param['name'])
         elif 'schema' in param:
             schema = param['schema']
+            if param.get('in') == 'path':
+                query.append(get_def_name_from_ref(schema[JsonFields.REF].lower()))
+                continue
             if JsonFields.REF in schema:
                 body = get_def_name_from_ref(schema[JsonFields.REF])
             elif schema['type'] == JsonTypes.ARRAY:
@@ -47,6 +50,8 @@ def _get_query_params_and_body(params):
                     body = items[JsonFields.TYPE] + '_array'
                 body = body.lower()
                 continue
+            elif JsonFields.PROPERTIES in schema:
+                body.update({i:i for i in schema[JsonFields.PROPERTIES]})
             elif schema['type'] in (JsonTypes.STRING, JsonTypes.BOOLEAN):
                 query.append(param['name'])
                 continue
