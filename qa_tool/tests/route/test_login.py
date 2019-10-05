@@ -1,3 +1,5 @@
+import allure
+
 from qa_tool.libs.reporter import reporter
 
 
@@ -25,6 +27,12 @@ class TestLogin:
                 print('asdsadsad')
 
     def test_pos_login(self):
+        with reporter.step('Keks login successfull'):
+            print('pos login')
+            assert 1 == 1
+
+    @allure.label("jira", "CMENABACK-100")
+    def test_pos_login123(self):
         with reporter.step('Keks login successfull'):
             print('pos login')
             assert 1 == 1
