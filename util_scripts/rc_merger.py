@@ -2,7 +2,7 @@ import re
 import os
 from collections import defaultdict
 from qa_tool.libs.reporter import reporter
-from libs.jira_integrate import get_interesting_issues, PRStatuses
+from qa_tool.libs.jira_integrate import get_interesting_issues, PRStatuses
 
 
 # TODO: now we can get images from docker registry need small research

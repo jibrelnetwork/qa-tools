@@ -38,7 +38,7 @@ class Reporter(object):
             return pytest.mark.skipif("False")
 
     def jira_issue_is_open(self, issue):
-        from libs.jira_integrate import issue_is_open
+        from qa_tool.libs.jira_integrate import issue_is_open
         return issue_is_open(issue)
 
     def skip_test(self, msg):
