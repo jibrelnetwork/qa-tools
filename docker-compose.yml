@@ -1,0 +1,14 @@
+version: '3.5'
+
+services:
+
+  testing:
+    build: .
+    environment:
+      TESTS_DIR: /qa_tools/qa_tool/tests
+      ALLURE_DIR: /allure-result
+    image: qa-tool-testing
+    volumes:
+      - './allure-result:/allure-result'
+    stdin_open: true
+    tty: true
