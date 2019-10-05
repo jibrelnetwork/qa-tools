@@ -29,6 +29,7 @@ class TestLogin:
             print('pos login')
             assert 1 == 1
 
+    @reporter.label("jira", "CMENABACK-118")
     def test_neg_login(self):
         with reporter.step('Keks login successfull'):
             print('neg login')

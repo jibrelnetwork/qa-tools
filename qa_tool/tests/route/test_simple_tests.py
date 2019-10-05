@@ -6,7 +6,7 @@ def test_pos_simple_test():
         print('qwe')
         assert 1 == 1
 
-
+@reporter.label("jira", "CMENABACK-135")
 def test_neg_simple_test():
     with reporter.step('Keks login successfull'):
         print('ololo')

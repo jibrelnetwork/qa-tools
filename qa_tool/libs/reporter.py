@@ -47,5 +47,9 @@ class Reporter(object):
     def skipif_test(self, reason, msg):
         return pytest.mark.skip(bool(reason), msg)
 
+    def label(self, name, value):
+        # allure.label("jira", "AE-1")
+        return allure.label(name, value)
+
 
 reporter = Reporter()
