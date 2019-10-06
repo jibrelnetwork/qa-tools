@@ -5,7 +5,7 @@ ENV ALLURE_DIR="./allure-results/" \
     TEST_THREAD_COUNT="10" \
     TEST_TIMEOUT="600" \
     PYTEST_STOUT="-vvv -s" \
-    JIRA_PASSWORD=''
+    JIRA_PASSWORD='' \
     JIRA_USER=''
 
 # build dependencies
