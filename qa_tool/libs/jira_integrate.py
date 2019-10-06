@@ -26,6 +26,7 @@ MAX_JIRA_ISSUES_IN_SEARCH = 5000
 GitInfo = namedtuple("RepoInfo", ["repo", "branch", "pr_status"])
 FieldInfo = namedtuple("FieldInfo", ["name", "custom_name", "parse"])
 
+TEST_TOKEN_PREFIX = 'autotests'
 JIRA_USER = os.getenv('JIRA_USER')
 JIRA_PASSWORD = os.getenv('JIRA_PASSWORD')
 JIRA_BASE_AUTH = (JIRA_USER, JIRA_PASSWORD)

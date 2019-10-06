@@ -5,8 +5,8 @@ import pytest
 from cachetools.func import lru_cache
 from allure_pytest.listener import AllureListener
 
-from qa_tool.libs.jira_integrate import TEST_TOKEN_PREFIX, jira
 from qa_tool.libs.reporter import get_known_issues
+from qa_tool.libs.jira_integrate import TEST_TOKEN_PREFIX, jira
 
 
 @lru_cache()
