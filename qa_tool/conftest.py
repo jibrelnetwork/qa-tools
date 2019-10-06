@@ -5,8 +5,9 @@ import pytest
 from cachetools.func import lru_cache
 from allure_pytest.listener import AllureListener
 
+from qa_tool.settings import IS_LOCAL_START
 from qa_tool.libs.reporter import get_known_issues
-from qa_tool.libs.jira_integrate import TEST_TOKEN_PREFIX, jira
+from qa_tool.libs.jira_integrate import TEST_TOKEN_PREFIX, jira, dump_jira_issues, attach_known_issues_and_check_pending
 
 
 @lru_cache()
@@ -27,6 +28,17 @@ def get_allure_plugin(item):
     plugin = [i for i in item.config.pluginmanager.get_plugins() if isinstance(i, AllureListener)]
     if len(plugin) == 1:
         return plugin[0]
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_sessionstart(session):
+    import qa_tool.override_conftest
+    try:
+        if IS_LOCAL_START:
+            dump_jira_issues()
+    finally:
+        print("Can't dump jira issue with autotests token")
+    yield
 
 
 @pytest.hookimpl(hookwrapper=True, tryfirst=True)
@@ -60,7 +72,17 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
 
     if token and known_issues:
-        print('use known issue')
+        is_pending = attach_known_issues_and_check_pending(known_issues)
+        if not is_pending:
+            return
+        report = outcome.get_result()
+
+        def hook():
+            setattr(report, "outcome", "skipped")
+            setattr(report, "wasxfail", "known issue")
+            return report
+
+        outcome.get_result = hook
 
 
 @pytest.hookimpl(hookwrapper=True, tryfirst=True)
@@ -77,7 +99,6 @@ def pytest_runtest_teardown(item):
 
 
 def pytest_runtest_setup(item):
-    import qa_tool.override_conftest
     previousfailed = getattr(item.parent, "_previousfailed", None)
     if previousfailed is not None:
         pytest.xfail("previous test failed (%s)" % previousfailed.name)

@@ -5,17 +5,15 @@ import logging
 import urllib
 
 from pathlib import Path
-from functools import lru_cache
 from dataclasses import dataclass
 from collections import namedtuple
-from cachetools.func import ttl_cache
+from cachetools.func import ttl_cache, lru_cache
 
 from jira import JIRA
 
-from qa_tool.settings import ALLURE_PROJECT_ID, JENKINS_JOB_BUILD_URL
 from qa_tool.static.templates import JIRA_ISSUE_TEMPLATE
+from qa_tool.settings import ALLURE_PROJECT_ID, JENKINS_JOB_BUILD_URL, JIRA_URL
 
-JIRA_URL = "https://jibrelnetwork.atlassian.net/"
 JIRA_NEW_ISSUE_URL = JIRA_URL + "secure/CreateIssueDetails!init.jspa?"
 
 CURR_DIR = Path(__file__).parent
@@ -210,13 +208,26 @@ def get_interesting_issues(label, project):
     return issues
 
 
+def in_progress_issue(issue):
+    return issue.status.lower() in SKIPPING_STATUSES
+
+
 @lru_cache()
 def issue_is_open(issue):
     jira_ticket = issue.split('/')[-1]
     issue = jira.issue(jira_ticket)
     # print issue.fields.status.name.lower()
-    is_progress = issue.status.lower() in SKIPPING_STATUSES
-    return is_progress
+    return in_progress_issue(issue)
+
+
+def attach_known_issues_and_check_pending(known_issues):
+    from qa_tool.libs.reporter import reporter
+    is_pending = False
+    for known_issue in known_issues:
+        reporter.dynamic_issue(known_issue.id)
+        if in_progress_issue(known_issue) and not is_pending:
+            is_pending = True
+    return is_pending
 
 
 def test_fixversion_assinging():

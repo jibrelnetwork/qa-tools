@@ -3,6 +3,7 @@ import pytest
 import logging
 
 from qa_tool.libs.jira_integrate import get_autotest_issues
+from qa_tool.settings import JIRA_URL
 
 
 def get_known_issues(token):
@@ -57,6 +58,9 @@ class Reporter(object):
     def label(self, name, value):
         # allure.label("jira", "AE-1")
         return allure.label(name, value)
+
+    def dynamic_issue(self, issue):
+        allure.dynamic.issue(f"{JIRA_URL}browse/{issue}", issue)
 
 
 reporter = Reporter()
