@@ -2,6 +2,9 @@ import os
 import json
 import time
 import logging
+import urllib
+
+from pathlib import Path
 from functools import lru_cache
 from dataclasses import dataclass
 from collections import namedtuple
@@ -9,10 +12,14 @@ from cachetools.func import ttl_cache
 
 from jira import JIRA
 
+from qa_tool.settings import ALLURE_PROJECT_ID, JENKINS_JOB_BUILD_URL
+from qa_tool.static.templates import JIRA_ISSUE_TEMPLATE
 
 JIRA_URL = "https://jibrelnetwork.atlassian.net/"
-CURR_DIR = os.path.dirname(__file__)
-AUTOTEST_ISSUES = os.path.join(CURR_DIR, "autotest_issues.json")
+JIRA_NEW_ISSUE_URL = JIRA_URL + "secure/CreateIssueDetails!init.jspa?"
+
+CURR_DIR = Path(__file__).parent
+AUTOTEST_ISSUES = CURR_DIR / "autotest_issues.json"
 CACHE_JIRA_TICKETS = 60 * 5
 MAX_JIRA_ISSUES_IN_SEARCH = 5000
 
@@ -39,6 +46,18 @@ class PRStatuses:
     OPEN = "OPEN"
 
 
+JIRA_PROJECT_ID_BY_ALLURE_PROJECT = {
+    1: 10047,  # CMENABACK
+    2: 10044,  # JTICKER
+    3: 10046,  # CMENAWEB
+    4: 10029,  # QA - testing
+    5: 10055,  # NIL JSearch
+}
+
+
+JiraProject = namedtuple('JiraProject', ['id', 'key', 'name'])
+
+
 def issue_obj_to_issue_info(issue):
     converted = {"id": issue.key, "jira_id": issue.id}
     for field in FIELDS:
@@ -54,7 +73,7 @@ FIELDS = [
     FieldInfo("components", None, lambda v: tuple([e.name for e in v]) if v else tuple()),
     FieldInfo("description", None, lambda v: v or ''),
     FieldInfo("labels", None, lambda v: v or tuple()),
-    FieldInfo("project", None, lambda v: v.key if v else ''),
+    FieldInfo("project", None, lambda v: JiraProject(v.id, v.key, v.name) if v else ''),
     FieldInfo("status", None, lambda v: v.name),
     FieldInfo("versions", None, lambda v: tuple([e.name for e in v]) if v else tuple()),
     FieldInfo("fixVersions", None, lambda v: [e.name for e in v] if v else []),
@@ -108,7 +127,7 @@ class JiraIntegrate(object):
 
     def get_autotest_issues(self):
         logging.info("JIRA: Searching issues with autotests tokens")
-        issues = self.search_issues("text ~ 'autotests_*'")
+        issues = self.search_issues(f"text ~ '{TEST_TOKEN_PREFIX}_*'")
         return issues
 
     @property
@@ -151,22 +170,35 @@ class JiraIntegrate(object):
         response = self.jira._session.get(req_url)
         return self.__format_branches(json.loads(response.content), issue_id)
 
+    def get_jira_created_issue_url(self, test_name, error_text):
+        report_link = JENKINS_JOB_BUILD_URL + "allure/#suites"
+        test_file_name = test_name.split("/")[-1].split("::")[0]
+        data = {
+            'pid': JIRA_PROJECT_ID_BY_ALLURE_PROJECT[ALLURE_PROJECT_ID],  # RONE
+            'issuetype': 10004,  # Bug
+            'priority': 3,  # Medium
+            'labels': urllib.parse.quote("autotest"),
+            'summary': urllib.parse.quote(f"Test '{test_file_name}' is failed, {error_text[:60] + '...'}".replace('\n', ' ')),
+            'description': urllib.parse.quote(JIRA_ISSUE_TEMPLATE.format(**locals())),
+        }
+        return JIRA_NEW_ISSUE_URL + "&".join(["%s=%s" % (k, v) for k, v in data.items()])
+
 
 jira = JiraIntegrate()
 
 
 def dump_jira_issues():
-    issues = jira.get_autotest_issues()
-    with open(AUTOTEST_ISSUES, "w") as fp:
+    issues = [i.__dict__ for i in jira.get_autotest_issues()]
+    with AUTOTEST_ISSUES.open("w") as fp:
         json.dump(issues, fp)
 
 
 @lru_cache()
 def get_autotest_issues():
     try:
-        with open(AUTOTEST_ISSUES) as fp:
+        with AUTOTEST_ISSUES.open() as fp:
             issues = json.load(fp)
-            return [IssueInfo(*issue) for issue in issues]
+            return [IssueInfo(**issue) for issue in issues]
     except Exception:
         return []
 
@@ -175,6 +207,7 @@ def get_autotest_issues():
 def get_interesting_issues(label, project):
     issues = jira.search_issues(f"labels = '{label}' AND project = '{project}'")
     return issues
+
 
 @lru_cache()
 def issue_is_open(issue):
@@ -186,15 +219,17 @@ def issue_is_open(issue):
 
 
 def test_fixversion_assinging():
-    issue = jira.issue('JSEARCH-29')
-    issue1 = jira.issue('JASSETS-5')
+    issue = jira.issue('JTICKER-105')
+    # issue1 = jira.issue('JASSETS-5')
     print('test')
     print(issue.branches)
-    ololo = jira.get_repos_by_issue('JSEARCH-29')
+    # ololo = jira.get_repos_by_issue('JSEARCH-29')
 
 
 if __name__ == '__main__':
+    test_fixversion_assinging()
+    dump_jira_issues()
+    keks = get_autotest_issues()[0]
     print(issue_is_open('https://jibrelnetwork.atlassian.net/browse/JTICKER-11'))
     logging.basicConfig(level=logging.INFO)
-    test_fixversion_assinging()
 

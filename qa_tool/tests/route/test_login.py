@@ -43,6 +43,16 @@ class TestLogin:
             print('neg login')
             assert 1 == 2
 
+    def test_neg_login_exception(self):
+        with reporter.step('Keks login successfull exception'):
+            print('pos login')
+            reporter.simple_exception()
+
+    def test_neg_login_assertion(self):
+        with reporter.step('Keks login successfull assertion'):
+            print('pos login')
+            reporter.simple_exception(False)
+
 
 if __name__ == '__main__':
     from qa_tool import run_test

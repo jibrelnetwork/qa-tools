@@ -2,6 +2,13 @@ import allure
 import pytest
 import logging
 
+from qa_tool.libs.jira_integrate import get_autotest_issues
+
+
+def get_known_issues(token):
+    issues = [issue for issue in get_autotest_issues() if token in issue.description]
+    return issues
+
 
 class Reporter(object):
 
