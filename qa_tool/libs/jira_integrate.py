@@ -16,7 +16,8 @@ from qa_tool.settings import ALLURE_PROJECT_ID, JENKINS_JOB_BUILD_URL, JIRA_URL
 
 JIRA_NEW_ISSUE_URL = JIRA_URL + "secure/CreateIssueDetails!init.jspa?"
 
-CURR_DIR = Path(__file__).parent
+# This hack need for create any files in container
+CURR_DIR = Path('/app').resolve() if Path('/app').is_dir() else Path(__file__).parent
 AUTOTEST_ISSUES = CURR_DIR / "autotest_issues.json"
 CACHE_JIRA_TICKETS = 60 * 5
 MAX_JIRA_ISSUES_IN_SEARCH = 5000
