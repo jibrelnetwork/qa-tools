@@ -25,5 +25,7 @@ RUN python /qa_tools/setup.py install
 
 WORKDIR /app
 
+RUN chmod 777 $(find / -name "autotest_issues.json")
+
 ENTRYPOINT ["/qa_tools/run.sh"]
 CMD [""]                                                                                                                                                                                                  14,0-1        All
