@@ -46,7 +46,7 @@ class PRStatuses:
 
 
 JIRA_PROJECT_ID_BY_ALLURE_PROJECT = {
-    1: 10047,  # CMENABACK
+    6: 10047,  # CMENABACK
     2: 10044,  # JTICKER
     3: 10046,  # CMENAWEB
     4: 10029,  # QA - testing
@@ -173,7 +173,7 @@ class JiraIntegrate(object):
         report_link = JENKINS_JOB_BUILD_URL + "allure/#suites"
         test_file_name = test_name.split("/")[-1].split("::")[0]
         data = {
-            'pid': JIRA_PROJECT_ID_BY_ALLURE_PROJECT[ALLURE_PROJECT_ID],  # RONE
+            'pid': JIRA_PROJECT_ID_BY_ALLURE_PROJECT.get(ALLURE_PROJECT_ID),
             'issuetype': 10004,  # Bug
             'priority': 3,  # Medium
             'labels': urllib.parse.quote("autotest"),
