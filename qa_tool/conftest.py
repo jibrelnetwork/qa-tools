@@ -79,10 +79,10 @@ def pytest_runtest_makereport(item, call):
 
     if token and known_issues:
         is_pending = attach_known_issues_and_check_pending(known_issues)
+        get_allure_test(item).status = 'unknown'
         if not is_pending:
             return
         report = outcome.get_result()
-        plugin.add_label('jira_bug_link', (f"{JIRA_URL}browse/{i.id}" for i in known_issues))
         def hook():
             setattr(report, "outcome", "skipped")
             setattr(report, "wasxfail", "known issue")

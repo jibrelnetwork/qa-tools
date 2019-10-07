@@ -1,4 +1,5 @@
 import allure
+import pytest
 
 from qa_tool.libs.reporter import reporter
 
@@ -54,6 +55,12 @@ class TestLogin:
         with reporter.step('Keks login successfull assertion'):
             print('pos login')
             reporter.simple_exception(False)
+
+    @pytest.mark.xfail
+    def test_neg_check_xfail_task(self):
+        with reporter.step('Keks login successfull'):
+            print('neg login')
+            assert 1 == 2
 
 
 if __name__ == '__main__':
