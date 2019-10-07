@@ -79,9 +79,9 @@ def pytest_runtest_makereport(item, call):
 
     if token and known_issues:
         is_pending = attach_known_issues_and_check_pending(known_issues)
-        get_allure_test(item).status = 'unknown'
         if not is_pending:
             return
+        get_allure_test(item).status = 'unknown'
         report = outcome.get_result()
         def hook():
             setattr(report, "outcome", "skipped")
