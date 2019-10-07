@@ -4,7 +4,7 @@ from functools import wraps
 from .common import StatusCodes
 from .utils import classproperty
 from qa_tool.libs.reporter import reporter
-from qa_tool.consts.env import DISABLE_SCHEMA_VALIDATOR
+from qa_tool.settings import DISABLE_SCHEMA_VALIDATOR
 
 
 class Error(object):

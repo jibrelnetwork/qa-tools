@@ -2,6 +2,14 @@ import allure
 import pytest
 import logging
 
+from qa_tool.libs.jira_integrate import get_autotest_issues
+from qa_tool.settings import JIRA_URL
+
+
+def get_known_issues(token):
+    issues = [issue for issue in get_autotest_issues() if token in issue.description]
+    return issues
+
 
 class Reporter(object):
 
@@ -38,7 +46,7 @@ class Reporter(object):
             return pytest.mark.skipif("False")
 
     def jira_issue_is_open(self, issue):
-        from libs.jira_integrate import issue_is_open
+        from qa_tool.libs.jira_integrate import issue_is_open
         return issue_is_open(issue)
 
     def skip_test(self, msg):
@@ -46,6 +54,22 @@ class Reporter(object):
 
     def skipif_test(self, reason, msg):
         return pytest.mark.skip(bool(reason), msg)
+
+    def simple_exception(self, is_exception=True):
+        if is_exception:
+            raise Exception('Some exception generated from action layer')
+        else:
+            assert 1 == 2
+
+    def label(self, name, value):
+        # allure.label("jira", "AE-1")
+        return allure.label(name, value)
+
+    def _get_issue_url(self, issue):
+        return f"{JIRA_URL}browse/{issue}", issue
+
+    def dynamic_issue(self, issue):
+        allure.dynamic.issue(*self._get_issue_url(issue))
 
 
 reporter = Reporter()
