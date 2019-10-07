@@ -55,12 +55,21 @@ class Reporter(object):
     def skipif_test(self, reason, msg):
         return pytest.mark.skip(bool(reason), msg)
 
+    def simple_exception(self, is_exception=True):
+        if is_exception:
+            raise Exception('Some exception generated from action layer')
+        else:
+            assert 1 == 2
+
     def label(self, name, value):
         # allure.label("jira", "AE-1")
         return allure.label(name, value)
 
+    def _get_issue_url(self, issue):
+        return f"{JIRA_URL}browse/{issue}", issue
+
     def dynamic_issue(self, issue):
-        allure.dynamic.issue(f"{JIRA_URL}browse/{issue}", issue)
+        allure.dynamic.issue(*self._get_issue_url(issue))
 
 
 reporter = Reporter()

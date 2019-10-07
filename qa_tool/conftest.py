@@ -5,7 +5,7 @@ import pytest
 from cachetools.func import lru_cache
 from allure_pytest.listener import AllureListener
 
-from qa_tool.settings import IS_LOCAL_START
+from qa_tool.settings import IS_LOCAL_START, JIRA_URL
 from qa_tool.libs.reporter import get_known_issues
 from qa_tool.libs.jira_integrate import TEST_TOKEN_PREFIX, jira, dump_jira_issues, attach_known_issues_and_check_pending
 
@@ -28,6 +28,12 @@ def get_allure_plugin(item):
     plugin = [i for i in item.config.pluginmanager.get_plugins() if isinstance(i, AllureListener)]
     if len(plugin) == 1:
         return plugin[0]
+
+
+def get_allure_test(item):
+    plugin = get_allure_plugin(item)
+    uuid = plugin._cache.get(item.nodeid)
+    return plugin.allure_logger.get_test(uuid)
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -76,7 +82,7 @@ def pytest_runtest_makereport(item, call):
         if not is_pending:
             return
         report = outcome.get_result()
-
+        plugin.add_label('jira_bug_link', (f"{JIRA_URL}browse/{i.id}" for i in known_issues))
         def hook():
             setattr(report, "outcome", "skipped")
             setattr(report, "wasxfail", "known issue")
@@ -88,9 +94,7 @@ def pytest_runtest_makereport(item, call):
 @pytest.hookimpl(hookwrapper=True, tryfirst=True)
 def pytest_runtest_teardown(item):
     yield
-    plugin = get_allure_plugin(item)
-    uuid = plugin._cache.get(item.nodeid)
-    labels = plugin.allure_logger.get_test(uuid).labels
+    labels = get_allure_test(item).labels
     labels_names = [i.name for i in labels]
     if 'subSuite' in labels_names:
         sub_index = labels_names.index('subSuite')
