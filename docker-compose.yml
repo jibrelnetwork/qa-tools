@@ -7,8 +7,9 @@ services:
     environment:
       TESTS_DIR: /qa_tools/qa_tool/tests
       ALLURE_DIR: /allure-results
-      JIRA_USER: "${JIRA_USER}"
-      JIRA_PASSWORD: "${JIRA_PASSWORD}"
+      IS_LOCAL_START: 'true'
+      JIRA_USER: ""
+      JIRA_PASSWORD: ""
     image: qa-tool-testing
     volumes:
       - './allure-results:/allure-results'
