@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir -U pip \
     && pip install --no-cache-dir -r /requirements-qa-tools.txt
 
 COPY . /qa_tools/
-RUN python /qa_tools/setup.py install
+RUN pip install /qa_tools
 
 WORKDIR /app
 RUN chmod 777 /app
