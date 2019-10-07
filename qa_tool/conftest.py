@@ -72,7 +72,7 @@ def pytest_runtest_makereport(item, call):
             description = "\n".join(("[create bug](%s)" % jira_new_issue_link, docsting))
         else:
             description = "[create bug](%s)" % jira_new_issue_link
-        plugin.add_description(description)
+        plugin.add_description_html(f'<p><a class="Button Button_size_small Button_style_danger" href="{description}">create bug</a></p>')
         call.excinfo.exconly = auto_token_getter
 
     outcome = yield
