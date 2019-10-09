@@ -40,7 +40,7 @@ class TestLoginEpic:
             print('pos login')
             assert 1 == 1
 
-    @allure.issue("CMENABACK-102")
+    @allure.issue("CMENABACK-169")
     def test_neg_login_in_epic(self):
         with reporter.step('Keks login successfull'):
             print('neg login')
