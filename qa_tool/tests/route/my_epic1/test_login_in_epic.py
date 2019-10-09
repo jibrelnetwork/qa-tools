@@ -27,6 +27,8 @@ class TestLoginEpic:
             with reporter.step(f'Check teardown_class in one step aggregate'):
                 print('asdsadsad')
 
+    @allure.issue("CMENABACK-169")
+    @allure.label("jira", "CMENABACK-168")
     def test_pos_login_in_epic(self):
         with reporter.step('Keks login successfull'):
             print('pos login')
@@ -37,8 +39,6 @@ class TestLoginEpic:
             print('pos login')
             assert 1 == 1
 
-    @allure.issue("CMENABACK-169")
-    @allure.label("jira", "CMENABACK-168")
     def test_neg_login_in_epic(self):
         with reporter.step('Keks login successfull'):
             print('neg login')

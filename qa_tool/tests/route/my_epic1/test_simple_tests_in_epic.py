@@ -7,7 +7,6 @@ def test_pos_simple_test_in_epic():
         assert 1 == 1
 
 
-@reporter.label("jira", "CMENABACK-135")
 def test_neg_simple_test_in_epic():
     with reporter.step('Keks login successfull'):
         print('ololo')
