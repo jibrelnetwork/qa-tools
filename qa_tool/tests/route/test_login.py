@@ -32,8 +32,6 @@ class TestLogin:
             print('pos login')
             assert 1 == 1
 
-    @allure.label("jira", "CMENABACK-100")
-    @allure.label("jira", "CMENABACK-101")
     @allure.label("jira", "CMENABACK-102")
     def test_pos_login123(self):
         with reporter.step('Keks login successfull'):
