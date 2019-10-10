@@ -42,6 +42,8 @@ def pytest_sessionstart(session):
     try:
         if not IS_LOCAL_START:
             dump_jira_issues()
+        else:
+            print("It's local start. Don't use jira dump issues")
     except Exception as e:
         print(f"Can't dump jira issue with autotests token\n{str(e)}")
     yield
