@@ -40,6 +40,7 @@ def get_allure_test(item):
 def pytest_sessionstart(session):
     import qa_tool.override_conftest
     try:
+        print('Try to dump jira issues')
         if not IS_LOCAL_START:
             dump_jira_issues()
         else:
