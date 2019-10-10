@@ -132,6 +132,12 @@ def window(seq, n=2):
         yield result
 
 
+def random_pop(list_data, population):
+    if population > len(list_data):
+        raise Exception('Not enough data for all operations')
+    return [list_data.pop(generate_number(0, len(list_data) - 1)) for _ in range(population)]
+
+
 def to_list(data):
     return data if isinstance(data, (list, tuple)) else [data]
 
