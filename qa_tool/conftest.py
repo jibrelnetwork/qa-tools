@@ -40,8 +40,11 @@ def get_allure_test(item):
 def pytest_sessionstart(session):
     import qa_tool.override_conftest
     try:
+        print('Try to dump jira issues')
         if not IS_LOCAL_START:
             dump_jira_issues()
+        else:
+            print("It's local start. Don't use jira dump issues")
     except Exception as e:
         print(f"Can't dump jira issue with autotests token\n{str(e)}")
     yield
@@ -55,11 +58,11 @@ def pytest_runtest_makereport(item, call):
             parent._previousfailed = item
     token = None
     if call.excinfo:
-        plugin = get_allure_plugin(item)
+        allure_plugin = get_allure_plugin(item)
         try:
             path = item.nodeid.split('/tests/')[-1]
             token = get_hash(path + call.excinfo.exconly())
-            plugin.add_label('autotest_token', (token,))
+            allure_plugin.add_label('autotest_token', (token,))
         except Exception as e:
             print(e)
             outcome = yield
@@ -72,13 +75,14 @@ def pytest_runtest_makereport(item, call):
             description = "\n".join(("[create bug](%s)" % jira_new_issue_link, docsting))
         else:
             description = "[create bug](%s)" % jira_new_issue_link
-        plugin.add_description(description)
+        allure_plugin.add_description(description)
         call.excinfo.exconly = auto_token_getter
 
     outcome = yield
 
     if token and known_issues:
         is_pending = attach_known_issues_and_check_pending(known_issues)
+        allure_plugin.add_label('jira', (issue.id for issue in known_issues))
         if not is_pending:
             return
         get_allure_test(item).status = 'unknown'

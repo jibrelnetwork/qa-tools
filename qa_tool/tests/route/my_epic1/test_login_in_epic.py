@@ -4,7 +4,7 @@ import pytest
 from qa_tool.libs.reporter import reporter
 
 
-class TestLogin:
+class TestLoginEpic:
 
     @classmethod
     def setup_class(cls):
@@ -27,35 +27,35 @@ class TestLogin:
             with reporter.step(f'Check teardown_class in one step aggregate'):
                 print('asdsadsad')
 
-    def test_pos_login(self):
+    @allure.issue("CMENABACK-169")
+    @allure.label("jira", "CMENABACK-168")
+    def test_pos_login_in_epic(self):
         with reporter.step('Keks login successfull'):
             print('pos login')
             assert 1 == 1
 
-    @allure.label("jira", "CMENABACK-102")
-    def test_pos_login123(self):
+    def test_pos_login123_in_epic(self):
         with reporter.step('Keks login successfull'):
             print('pos login')
             assert 1 == 1
 
-    @reporter.label("jira", "CMENABACK-118")
-    def test_neg_login(self):
+    def test_neg_login_in_epic(self):
         with reporter.step('Keks login successfull'):
             print('neg login')
             assert 1 == 2
 
-    def test_neg_login_exception(self):
+    def test_neg_login_exception_in_epic(self):
         with reporter.step('Keks login successfull exception'):
             print('pos login')
             reporter.simple_exception()
 
-    def test_neg_login_assertion(self):
+    def test_neg_login_assertion_in_epic(self):
         with reporter.step('Keks login successfull assertion'):
             print('pos login')
             reporter.simple_exception(False)
 
     @pytest.mark.xfail
-    def test_neg_check_xfail_task(self):
+    def test_neg_check_xfail_task_in_epic(self):
         with reporter.step('Keks login successfull'):
             print('neg login')
             assert 1 == 2
