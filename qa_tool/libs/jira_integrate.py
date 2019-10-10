@@ -47,7 +47,7 @@ class PRStatuses:
 
 
 JIRA_PROJECT_ID_BY_ALLURE_PROJECT = {
-    6: 10047,  # CMENABACK
+    7: 10047,  # CMENABACK
     2: 10044,  # JTICKER
     3: 10046,  # CMENAWEB
     4: 10029,  # QA - testing
@@ -226,7 +226,7 @@ def attach_known_issues_and_check_pending(known_issues):
     is_pending = False
     for known_issue in known_issues:
         reporter.dynamic_issue(known_issue.id)
-        if in_progress_issue(known_issue) and not is_pending:
+        if not is_pending and in_progress_issue(known_issue):
             is_pending = True
     return is_pending
 
