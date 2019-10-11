@@ -217,7 +217,6 @@ def in_progress_issue(issue):
 def issue_is_open(issue):
     jira_ticket = issue.split('/')[-1]
     issue = jira.issue(jira_ticket)
-    # print issue.fields.status.name.lower()
     return in_progress_issue(issue)
 
 
@@ -225,8 +224,8 @@ def attach_known_issues_and_check_pending(known_issues):
     from qa_tool.libs.reporter import reporter
     is_pending = False
     for known_issue in known_issues:
-        reporter.dynamic_issue(known_issue.id)
-        if not is_pending and in_progress_issue(known_issue):
+        if in_progress_issue(known_issue):
+            reporter.dynamic_issue(known_issue.id)
             is_pending = True
     return is_pending
 

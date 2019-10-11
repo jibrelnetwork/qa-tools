@@ -2,8 +2,8 @@ import allure
 import pytest
 import logging
 
-from qa_tool.libs.jira_integrate import get_autotest_issues
 from qa_tool.settings import JIRA_URL
+from qa_tool.libs.jira_integrate import get_autotest_issues, issue_is_open
 
 
 def get_known_issues(token):
@@ -38,15 +38,7 @@ class Reporter(object):
         """dependencies for classes tests"""
         return pytest.mark.incremental
 
-    def jira_issue(self, issue):
-        allure.dynamic.issue("https://jibrelnetwork.atlassian.net/browse/" + issue)  # TODO: need fix link in tests
-        if self.jira_issue_is_open(issue):
-            return pytest.mark.skipif("True", reason="issue '%s' is open" % issue)
-        else:
-            return pytest.mark.skipif("False")
-
     def jira_issue_is_open(self, issue):
-        from qa_tool.libs.jira_integrate import issue_is_open
         return issue_is_open(issue)
 
     def skip_test(self, msg):
@@ -62,8 +54,10 @@ class Reporter(object):
             assert 1 == 2
 
     def label(self, name, value):
-        # allure.label("jira", "AE-1")
         return allure.label(name, value)
+
+    def jira_label(self, issue_id):
+        return self.label('jira', issue_id)
 
     def _get_issue_url(self, issue):
         return f"{JIRA_URL}browse/{issue}", issue
