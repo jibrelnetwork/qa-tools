@@ -24,7 +24,7 @@ class PostgresConnector(object):
     def get_table_names(self):
         return [table["tablename"] for table in self.get("SELECT * FROM pg_catalog.pg_tables;")]
 
-    def get(self, sql, as_dict=True, isolate_lvl=None):
+    def get(self, sql, as_dict=True, isolate_lvl=AUTOCOMMIT):
         # TODO: Maybe RealDictCursor -> NamedTupleCursor https://stackoverflow.com/questions/6739355/dictcursor-doesnt-seem-to-work-under-psycopg2
         cursor_factory = psycopg2.extras.RealDictCursor if as_dict else psycopg2.extras.DictCursor
         with reporter.step("Postgre SQL to host: {host}:{port}, db_name: {database}".format(**self._connection_dict)):
@@ -32,7 +32,7 @@ class PostgresConnector(object):
             logging.info(msg)
             print(msg)
             with self.driver.connect(**self._connection_dict) as conn:
-                conn.set_isolation_level(isolate_lvl or self.AUTOCOMMIT)
+                conn.set_isolation_level(isolate_lvl)
                 cursor = conn.cursor(cursor_factory=cursor_factory)
                 try:
                     cursor.execute(sql)
@@ -41,7 +41,7 @@ class PostgresConnector(object):
                     logging.error(e)
             reporter.attach('DB Query', msg)
 
-    def insert(self, table_name, dict_to_insert, isolate_lvl=None):
+    def insert(self, table_name, dict_to_insert, isolate_lvl=AUTOCOMMIT):
         """ WARNING! All strings passed unescaped """
         columns = []
         values = []
