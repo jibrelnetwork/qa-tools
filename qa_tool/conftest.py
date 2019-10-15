@@ -3,10 +3,13 @@ import hashlib
 
 import pytest
 from cachetools.func import lru_cache
+from allure_commons.types import LabelType
+from allure_pytest.utils import ALLURE_LABEL_MARK
 from allure_pytest.listener import AllureListener
 
-from qa_tool.settings import IS_LOCAL_START, JIRA_URL
+from qa_tool.settings import IS_LOCAL_START
 from qa_tool.libs.reporter import get_known_issues
+from qa_tool.libs.allure_integrate import allure_api
 from qa_tool.libs.jira_integrate import TEST_TOKEN_PREFIX, jira, dump_jira_issues, attach_known_issues_and_check_pending
 
 
@@ -36,6 +39,16 @@ def get_allure_test(item):
     return plugin.allure_logger.get_test(uuid)
 
 
+def pytest_collection_modifyitems(items, config):
+    cases_map = allure_api.get_dumped_test_cases_map()
+    print('keks')
+    for item in items:
+        if item.name in cases_map:
+            allure_label = getattr(pytest.mark, ALLURE_LABEL_MARK)
+            mark = allure_label(*(cases_map[item.name],), label_type=LabelType.ID).mark
+            item.own_markers.append(mark)
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_sessionstart(session):
     import qa_tool.override_conftest
@@ -43,6 +56,7 @@ def pytest_sessionstart(session):
         print('Try to dump jira issues')
         if not IS_LOCAL_START:
             dump_jira_issues()
+            allure_api.dump_test_cases()
         else:
             print("It's local start. Don't use jira dump issues")
     except Exception as e:

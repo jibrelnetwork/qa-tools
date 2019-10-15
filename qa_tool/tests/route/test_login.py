@@ -33,7 +33,9 @@ class TestLogin:
             assert 1 == 1
 
     @allure.label("jira", "CMENABACK-102")
-    def test_pos_login123(self):
+    @allure.id("23")
+    @reporter.parametrize('keks', [True, False])
+    def test_pos_login123(self, keks):
         with reporter.step('Keks login successfull'):
             print('pos login')
             assert 1 == 1

@@ -189,16 +189,14 @@ jira = JiraIntegrate()
 
 def dump_jira_issues():
     issues = [i.__dict__ for i in jira.get_autotest_issues()]
-    with AUTOTEST_ISSUES.open("w") as fp:
-        json.dump(issues, fp)
+    AUTOTEST_ISSUES.write_text(json.dumps(issues))
 
 
 @lru_cache()
 def get_autotest_issues():
     try:
-        with AUTOTEST_ISSUES.open() as fp:
-            issues = json.load(fp)
-            return [IssueInfo(**issue) for issue in issues]
+        issues = json.loads(AUTOTEST_ISSUES.read_text())
+        return [IssueInfo(**issue) for issue in issues]
     except Exception:
         return []
 
