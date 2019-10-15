@@ -76,7 +76,7 @@ class AllureApi:
         code, data = self.get_test_cases(project_id, 10000)
         assert code == StatusCodes.OK
         cases = data['content']
-        return {self._format_test_name(i['name']): i['id'] for i in cases}
+        return {self._format_test_name(i['name']): str(i['id']) for i in cases}
 
     def dump_test_cases(self):
         issues = self.get_test_cases_by_project(ALLURE_PROJECT_ID)
