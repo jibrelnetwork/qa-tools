@@ -41,11 +41,11 @@ def get_allure_test(item):
 
 def pytest_collection_modifyitems(items, config):
     cases_map = allure_api.get_dumped_test_cases_map()
-    print('keks')
     for item in items:
-        if item.name in cases_map:
+        test_name = allure_api._format_test_name(item.name)
+        if test_name in cases_map:
             allure_label = getattr(pytest.mark, ALLURE_LABEL_MARK)
-            mark = allure_label(*(cases_map[item.name],), label_type=LabelType.ID).mark
+            mark = allure_label(*(cases_map[test_name],), label_type=LabelType.ID).mark
             item.own_markers.append(mark)
 
 
