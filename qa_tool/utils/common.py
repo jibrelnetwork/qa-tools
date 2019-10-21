@@ -50,7 +50,7 @@ class ClientApi(object):
         self.service_link = base_url
         self.service_name = service_name or base_url
         self.headers = {'Content-Type': 'application/json'}
-        self._message = []  # TODO: full implement after decide on report tool
+        # self._message = []  # TODO: full implement after decide on report tool
         self.api_logger = logging.getLogger(self.service_name)
         self._cookies = {}
 
@@ -81,7 +81,7 @@ class ClientApi(object):
     def _report_msg(self, *messages):
         message = ' '.join([str(message) for message in messages])
         print(message)
-        self.__messages.append(message)
+        self._messages.append(message)
         self.api_logger.info(message)
 
     def _update_header_from_cookies(self, resp):
@@ -89,7 +89,7 @@ class ClientApi(object):
 
     def _request(self, type_request, uri, data, headers=None, auth=None, verify=False, **kwargs):
         is_load_file = 'files' in kwargs
-        self.__messages = []
+        self._messages = []
         if type_request not in (Methods.GET, Methods.POST, Methods.PUT, Methods.PATCH, Methods.DELETE):
             raise Exception("Unknown request type: %s" % type_request)
         headers = filter_dict_from_none(dict(self.headers, **(headers or {})))
@@ -119,8 +119,8 @@ class ClientApi(object):
             except ValueError:
                 self._report_msg("[CANT SERIALIZE] response:\n", resp.text, '\n')
                 res = self._format_res(resp, resp.text)
-            reporter.attach('Request info', '\n'.join(self.__messages))
-            del self.__messages[:]
+            reporter.attach('Request info', '\n'.join(self._messages))
+            del self._messages[:]
             return res
 
     def post(self, uri, body=None, query_params=None, headers=None, **kwargs):
