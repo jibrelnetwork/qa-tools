@@ -27,10 +27,10 @@ RUN pip3 install --no-cache-dir -r /requirements-qa-tools.txt
 COPY . /qa_tools/
 RUN pip3 install /qa_tools
 
-USER jenkins
-
 WORKDIR /app
 RUN chmod 777 /app
+
+USER jenkins
 
 #ENTRYPOINT ["/qa_tools/run.sh"]
 #CMD [""]                                                                                                                                                                                                  14,0-1        All
