@@ -28,7 +28,10 @@ class Reporter(object):
 
     def attach(self, title, body, type_=TEXT):
         body = str(body)
-        return allure.attach(body, title, type_)
+        try:
+            return allure.attach(body, title, type_)
+        except Exception as e:
+            print(f"ERROR: can't attach '{title}'")
 
     def parametrize(self, *args, **kwargs):
         return pytest.mark.parametrize(*args, **kwargs)
