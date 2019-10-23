@@ -45,7 +45,7 @@ class Reporter(object):
         return issue_is_open(issue)
 
     def skip_test(self, msg):
-        return pytest.mark.skip(msg)
+        return pytest.skip(msg)
 
     def skipif_test(self, reason, msg):
         return pytest.mark.skip(bool(reason), msg)
