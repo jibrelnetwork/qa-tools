@@ -11,3 +11,4 @@ pytest-xdist==1.29.0
 pytest-timeouts==1.2
 dateutils
 redis
+property-cached
