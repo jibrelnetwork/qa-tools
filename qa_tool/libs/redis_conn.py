@@ -6,7 +6,8 @@ from qa_tool.libs.reporter import reporter
 
 class RedisClient:
 
-    def __init__(self, host, port, db=0):
+    def __init__(self, host, port=None, db=0):
+        port = port or '6379'
         self.conn_str = f"{host}:{port}"
         self.redis = Redis(host=host, port=port, db=db)
 
@@ -14,7 +15,7 @@ class RedisClient:
         with reporter.step(f'Get all redis keys from {self.conn_str}'):
             keys = self.redis.keys()
             try:
-                keys = [str(i) for i in keys]
+                keys = [i.decode("UTF-8") for i in keys]
             finally:
                 reporter.attach(f'Redis keys', keys)
                 return keys
@@ -27,6 +28,10 @@ class RedisClient:
             finally:
                 reporter.attach(f'Redis data by {key}', data)
                 return data
+
+    def get_redis_dict(self):
+        raise NotImplementedError # TODO: implement this with yield data logic from key in dict
+        return
 
 
 if __name__ == '__main__':
