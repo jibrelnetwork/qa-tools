@@ -1,17 +1,31 @@
 import time
-import slack
-from collections import defaultdict
+import asyncio
+from collections import defaultdict, namedtuple
 
+import slack
 from addict import Dict
 
-from libs.slack_bot import slack_bot
-from qa_tool.utils.utils import generate_value
+from qa_tool.utils.utils import to_list
+from qa_tool.utils.common import StatusCodes
+from qa_tool.utils.validator import validate
+from libs import PortainerInterface, slack_bot
 from consts.infrastructure import ServiceScope, Environment
-from services.service_settings import SLACK_TOKEN, SLACK_TO_PORTAINER_HOOK_TIMEOUT
+from services.service_settings import SLACK_TOKEN, SLACK_TO_PORTAINER_HOOK_TIMEOUT, PORTAINER_URL
 
-import asyncio
-import concurrent
 
+EnvInfo = namedtuple('EnvInfo', ['scope', 'env', 'id', 'name'])
+
+EXCLUDE_IMAGES = [
+    'zookeeper',
+    'redis',
+    'balancer',
+    'prometheus',
+    'consul',
+    'postgres',
+    'kafka',
+    'pgbouncer',
+    'rabbitmq',
+]
 
 ENV_COLOR = {
     Environment.DEV: '#FFF000',
@@ -20,92 +34,197 @@ ENV_COLOR = {
 }
 
 
-keks_msg = [
-    {
-        # "text": "UI is not defined",
-        "fields": [
-            {
-                "title": "Project",
-                "value": "Awesome Project",
-                "short": True
-            },
-            {
-                "title": "Environment",
-                "value": "production",
-                "short": True
-            },
-            {
-                "title": "Services",
-                "value": slack_bot.dict_to_str({i: generate_value(20, 'super-commit') for i in ServiceScope.get_all()}),
-                "short": False
-            }
-        ],
-        "color": "#F35A00",
-        "ts": str(time.time())
-    }
-]
-
-
 class Commands:
+    _CHANNELS_FILE = 'slack_subs_channel.json'
+    _ENVIRONMENT_FILE = 'slack_environments_config.json'
 
-    CHANNELS_FILE = 'subs_channel.json'
-    ENVIRONMENT_FILE = 'environments_config.json'
+    def __prepare_subs_file(self, data):
+        data = data or {}
+        result = defaultdict(set)
+        for k, v in data.items():
+            env_obj = EnvInfo(*k.split('__'))
+            result[env_obj].update(v)
+        return result
+
+    def __save_subs(self):
+        slack_bot.save_config(
+            self._CHANNELS_FILE,
+            {'__'.join(str(i) for i in k): list(v) for k, v in self.SUBSCRIBED_CHANNELS.items()}
+        )
+
+    def __prepare_env_cfg_file(self, data):
+        data = data or {}
+        result = defaultdict(lambda: Dict({
+            'services': defaultdict(set),
+            'last_update': time.time(),
+            'last_service_update': time.time(),
+        }))
+        for k, v in data.items():
+            result[k] = Dict(v)
+        return result
 
     def __init__(self):
-        subs_config = slack_bot.init_config(self.CHANNELS_FILE) or defaultdict(list)
-        environment_config = slack_bot.init_config(self.ENVIRONMENT_FILE)
-        self.subscribed_channels = defaultdict(list)  # like (ServiceScope, Environment): [list of channels]
-        self.environments_config = defaultdict(lambda: Dict({
-           'services': dict(),
-           'last_update': time.time(),
-        }))  # like (ServiceScope, Environment): last updated service scope information
+        self.SUBSCRIBED_CHANNELS = slack_bot.init_config(self._CHANNELS_FILE, self.__prepare_subs_file)  # like EnvInfo(): [list of channels]
+        self.ENVIRONMENTS_CONFIG = slack_bot.init_config(self._ENVIRONMENT_FILE, self.__prepare_env_cfg_file)  # like EnvInfo(): last updated service scope information
+        self.updated_envs = []
+        self._portainer = None
 
-    def get_help(self):
-        return slack_bot.dict_to_str(self.get_interested_fn_by_command, 'Some strange helper')
+    @property
+    def portainer(self):
+        if self._portainer is None:
+            self._portainer = PortainerInterface()
+        return self._portainer
 
     def send_exception(self, *msg):
         return slack_bot.text('Some problem in execution', *msg)
 
-    def subs_to_send_env_info(self, service_scope, env):
-        return
+    def get_interested_subs(self, env_obj: EnvInfo):
+        return self.SUBSCRIBED_CHANNELS[env_obj]
 
-    def get_portainer_envs(self):
-        return
+    def _get_envs_info_by(self, scope, env) -> list:
+        scopes = ServiceScope.get_all() if scope.lower() == 'all' else to_list(ServiceScope.find(scope))
+        envs = Environment.get_all() if env.lower() == Environment.ALL.lower() else to_list(Environment.get_env_by_alias(env))
+        result = []
+        for i in self.ENVIRONMENTS_CONFIG.keys():
+            if i.scope in scopes and i.env in envs:
+                result.append(i)
+        return result
 
-    def update_saved_environments(self):
-        return
+    def prepare_env_infos(self):
+        code, portainer_stacks = self.portainer.get_stacks()
+        assert code == StatusCodes.OK
+
+        for stack in portainer_stacks:
+            if stack['Status'] == self.portainer.StackStatus.INACTIVE:
+                continue
+            name = stack['Name']
+            if 'legacy connection' in name.lower():
+                continue
+            env_obj = EnvInfo(ServiceScope.find(name), Environment.find(name), str(stack['Id']), name)
+            if env_obj not in self.ENVIRONMENTS_CONFIG:
+                self.ENVIRONMENTS_CONFIG[env_obj].last_update = time.time()
+            if env_obj not in self.SUBSCRIBED_CHANNELS:
+                self.SUBSCRIBED_CHANNELS[env_obj] = set()
+
+        for env_obj, services in self.ENVIRONMENTS_CONFIG.items():
+            current_data = self._get_envs_containers(env_obj)
+            try:
+                print(services.services)
+                validate(services.services, current_data)
+            except AssertionError:
+                services.services = current_data
+                services.last_service_update = time.time()
+                self.updated_envs.append(env_obj)
+
+    def _get_envs_containers(self, env_obj, exclude_infra_services=True):
+        code, containers = self.portainer.get_containers_by_stack(env_obj.id)
+        assert code == StatusCodes.OK
+        self.ENVIRONMENTS_CONFIG[env_obj].last_update = time.time()
+        containers = [i for i in containers if i.get('State') == self.portainer.ContainerState.RUNNING]
+        current_data = defaultdict(set)
+        for container in containers:
+            image = container.get('Image')
+            if exclude_infra_services and any([i for i in EXCLUDE_IMAGES if i in image]):
+                continue
+            labels = container.get('Labels', {})
+            svc_name = labels.get(self.portainer.CntLabel.SERVICE_NAME)
+            if svc_name is None:
+                continue
+            _lbl = self.portainer.CntLabel
+            version_info = '-'.join([labels.get(i, '') for i in [_lbl.BRANCH, _lbl.VERSION, _lbl.COMMIT]])
+            current_data[svc_name].add(version_info)
+        return current_data
+
+    def get_help(self, channel_id):
+        return channel_id, slack_bot.text(
+            slack_bot.dict_to_str(SlackService.get_interested_fn_by_command, 'Some strange helper')
+        )
+
+    def subscribe_channel_to_environment(self, channel, service_scope=None, env=None):
+        env_objs = self._get_envs_info_by(service_scope, env)
+        if not env_objs:
+            return channel, self.send_exception(f"Not found scope - '{service_scope}', env -'{env}'")
+        for i in env_objs:
+            self.SUBSCRIBED_CHANNELS[i].add(channel)
+        channel, msg = self.get_environment_info(channel, service_scope, env)
+        msg.update(slack_bot.text('Successfull subscribe this channel to services:', *[i.name for i in env_objs]))
+        self.__save_subs()
+        return channel, msg
+
+    def env_info_and_obj_to_msg(self, env_obj, env_info):
+        fields = [
+            slack_bot.get_field("Project", env_obj.scope),
+            slack_bot.get_field("Environment", env_obj.env),
+            slack_bot.get_field("Services", slack_bot.dict_to_str(env_info.services), False),
+        ]
+        return slack_bot.get_attachment(
+            fields,
+            ENV_COLOR[env_obj.env],
+            ts=str(int(env_info.last_service_update)),
+            title=env_obj.name,
+            title_link=f'{PORTAINER_URL}/#/dashboard?stack={env_obj.id}'
+        )
+
+    def get_environment_info(self, channel_id, scope, env):
+        env_objs = self._get_envs_info_by(scope, env)
+        attachments = []
+        err_msg = f"Got some problem when execute 'get_environment_info' for {scope} {env}"
+        for env_obj in env_objs:
+            if env_obj not in self.ENVIRONMENTS_CONFIG:
+                self.send_exception(err_msg, f"Problem with {env_obj}")
+                continue
+            attach = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])
+            attachments.append(attach)
+        return channel_id, {'attachments': attachments}
+
+    def post_updated_env_info(self):
+        while self.updated_envs:
+            env_obj = self.updated_envs.pop()
+            attachments = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])
+            for channel in self.SUBSCRIBED_CHANNELS[env_obj]:
+                try:
+                    slack_bot.service.chat_postMessage(channel=channel, **{'attachments': to_list(attachments)})
+                except Exception as e:
+                    pass #  TODO: Need fix this
+
+
+fake_fn = lambda i: i
 
 
 class SlackService:
     COMMAND_INTERFACE = Commands()
 
     get_interested_fn_by_command = {
-        'subscribe': [COMMAND_INTERFACE.subs_to_send_env_info, ServiceScope.find, Environment.find],
         'help': [COMMAND_INTERFACE.get_help],
-        'hello': [lambda: slack_bot.text('Hello')]
+        'hello': [lambda channel_id: (channel_id, slack_bot.text('Hello'))],
+        'get': [COMMAND_INTERFACE.get_environment_info, fake_fn, fake_fn],
+        'subscribe': [COMMAND_INTERFACE.subscribe_channel_to_environment, fake_fn, fake_fn],
     }
 
-    def message_performer(self, message: str):
+    def prepare_message(self, channel_id, message: str) -> (list, list):
         if not message.startswith('QA'):
-            return
+            return None, None
 
         command_line = message.replace('QA ', '').lower().split(' ')
         command_name = command_line[0]
-        preparation_fns = self.get_interested_fn_by_command.get(command_name)
+        preparation_fns = list(self.get_interested_fn_by_command.get(command_name, []))
 
         if preparation_fns is None or len(preparation_fns) != len(command_line):
-            return
+            return None, None
 
         main_command_name = command_line.pop(0)
         command_fn = preparation_fns.pop(0)
-        args = []
+        args = [channel_id]
         try:
             for i, sub_fn_arg in enumerate(command_line):
-                    data = preparation_fns[i](sub_fn_arg)
-                    args.append(data)
-            return command_fn(*args)
+                data = preparation_fns[i](sub_fn_arg)
+                args.append(data)
+            channels, messages = command_fn(*args)
+            return to_list(channels or channel_id), messages if messages is None else to_list(messages)
         except Exception as e:
-            return Commands.send_exception(f"Can't execute {main_command_name}, with args {command_line}", str(e))
+            return to_list(channel_id), self.COMMAND_INTERFACE.send_exception(
+                f"Can't execute {main_command_name}, with args {command_line}", str(e)
+            )
 
 
 slack_service = SlackService()
@@ -114,42 +233,50 @@ slack_service = SlackService()
 @slack.RTMClient.run_on(event='message')
 def environment_checker(**payload):
     data = payload['data']
-    message_struct = slack_service.message_performer(data.get('text', ''))
-    if message_struct is None:
+    channel_ids, messages_struct = slack_service.prepare_message(data['channel'], data.get('text', ''))
+    if messages_struct is None:
         return
-    channel_id = data['channel']
+    messages_struct = to_list(messages_struct)
     web_client = payload['web_client']
-    web_client.chat_postMessage(
-        channel=channel_id,
-        **message_struct,
-        ts=str(time.time())
-    )
+    for channel in channel_ids:
+        for msg in messages_struct:
+            web_client.chat_postMessage(
+                channel=channel,
+                **msg,
+                ts=str(time.time())
+            )
 
 
-async def environments_worker():
+async def fetch_environments():
     while True:
-        Commands.processing_portainer_envs()
-        time.sleep(SLACK_TO_PORTAINER_HOOK_TIMEOUT)
+        slack_service.COMMAND_INTERFACE.prepare_env_infos()
+        await asyncio.sleep(SLACK_TO_PORTAINER_HOOK_TIMEOUT)
 
 
-# web_client.chat_postMessage(
-#         channel=channel_id,
-#         attachments=keks_msg,
-#         **message_struct
-#     )
+async def check_updated_environment_scheduler():
+    while True:
+        slack_service.COMMAND_INTERFACE.post_updated_env_info()
+        await asyncio.sleep(SLACK_TO_PORTAINER_HOOK_TIMEOUT/2)
 
-print('keks')
-rtm_client = slack.RTMClient(token=SLACK_TOKEN)
-rtm_client.start()
-# async def slack_main():
-#     loop = asyncio.get_event_loop()
-#     rtm_client = slack.RTMClient(token=SLACK_TOKEN, run_async=True, loop=loop)
-#     executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
-#     await asyncio.gather(
-#         # loop.run_in_executor(executor, environment_checker),
-#         rtm_client.start()
-#     )
-#
-#
-# if __name__ == "__main__":
-#     asyncio.run(slack_main())
+
+async def slack_main():
+    loop = asyncio.get_event_loop()
+    rtm_client = slack.RTMClient(token=SLACK_TOKEN, run_async=True, loop=loop)
+    print('Started QA slack service')
+    loop.create_task(fetch_environments())
+    loop.create_task(check_updated_environment_scheduler())
+    await rtm_client.start()
+
+
+if __name__ == "__main__":
+    asyncio.run(slack_main())
+    SlackService.COMMAND_INTERFACE.prepare_env_infos()
+
+    # rtm_client = slack.RTMClient(token=SLACK_TOKEN)
+    # rtm_client.start()
+#     comm = SlackService.COMMAND_INTERFACE
+#     comm.prepare_env_infos()
+    # pprint.pprint(dict(comm.ENVIRONMENTS_CONFIG))
+    # for qwe in comm.ENVIRONMENTS_CONFIG.values():
+    #     for k in qwe.services.keys():
+    #         print(k)

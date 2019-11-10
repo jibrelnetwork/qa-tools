@@ -1,7 +1,11 @@
+
 from cachetools.func import ttl_cache
 
 from qa_tool.utils.common import ClientApi
 from services.service_settings import PORTAINER_TOKEN_LIFETIME, PORTAINER_USER, PORTAINER_PASSWORD, PORTAINER_URL
+
+
+SLACK_CACHE_TTL = 15
 
 
 class PortainerCient(ClientApi):
@@ -18,6 +22,23 @@ class PortainerCient(ClientApi):
 
 
 class PortainerInterface:
+
+    class StackStatus:
+        ACTIVE = 1
+        INACTIVE = 2
+
+    class ContainerState:
+        RUNNING = 'running'
+        EXITED = 'exited'
+        CREATED = 'created'
+
+    class CntLabel:
+        BRANCH = 'cicd.branch'
+        COMMIT = 'cicd.commit'
+        VERSION = 'cicd.version'
+        SERVICE_NAME = 'com.docker.swarm.service.name'
+
+
     _client: PortainerCient = None
 
     def auth(self, user, password):
@@ -36,12 +57,14 @@ class PortainerInterface:
             self.auth(PORTAINER_USER, PORTAINER_PASSWORD)
         return self._client
 
+    @ttl_cache(ttl=SLACK_CACHE_TTL)
     def get_stacks(self):
         uri = '/api/endpoints'
         body = {}
         query_params = {}
         return self.client.get(uri, body, query_params)
 
+    @ttl_cache(ttl=SLACK_CACHE_TTL)
     def get_containers_by_stack(self, stack_id, all=1):
         uri = f"/api/endpoints/{stack_id}/docker/containers/json"
         body = {}

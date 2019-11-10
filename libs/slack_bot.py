@@ -1,8 +1,8 @@
 import json
 
 import slack
+from typing import List
 from pathlib import Path
-from typing import List, Any
 from collections import namedtuple
 from cachetools.func import ttl_cache
 
@@ -41,14 +41,17 @@ class SlackBot:
             if channel_info in i:
                 return i
 
-    def init_config(self, file_name) -> Any(None, dict):
+    def init_config(self, file_name, struct_python_fn=lambda data: data or {}):
         save_file_path = self.config_folder / file_name
         try:
-            if not save_file_path.exists():
+            if not self.config_folder.exists():
                 self.config_folder.mkdir(parents=True)
-                self.save_config(file_name, {})
-                return {}
-            return json.loads(save_file_path.open().read())
+            if not save_file_path.exists():
+                save_file_path.touch()
+                data = struct_python_fn({})
+                self.save_config(file_name, data)
+                return data
+            return struct_python_fn(json.loads(save_file_path.open().read()))
         except Exception as e:
             print(f"Can't init {save_file_path.resolve()}\n{str(e)}")
 
@@ -70,8 +73,20 @@ class SlackBot:
             result = f"{msg}\n{result}"
         return result
 
-    def get_attachments(self, data):
-        return
+    def get_field(self, title, value, short=True):
+        return {
+            'title': title,
+            'value': value,
+            'short': short,
+        }
+
+    def get_attachment(self, fields, color=None, ts=None, **kwargs):
+        kwargs.update({
+            'fields': fields,
+            'color': color,
+            'ts': ts,
+        })
+        return kwargs
 
 
 slack_bot = SlackBot()
