@@ -28,3 +28,7 @@ services:
       - ./slack_config:/qa_tools/slack_cfg
     stdin_open: true
     tty: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10mb"
