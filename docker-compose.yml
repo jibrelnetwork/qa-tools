@@ -23,5 +23,8 @@ services:
       SLACK_TOKEN: ""
       PORTAINER_USER: ""
       PORTAINER_PASSWORD: ""
+      SLACK_FOLDER_CONFIG: "/qa_tools/slack_cfg"
+    volumes:
+      - ./slack_config:/qa_tools/slack_cfg
     stdin_open: true
     tty: true
