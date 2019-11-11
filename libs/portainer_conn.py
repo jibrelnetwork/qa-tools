@@ -19,7 +19,6 @@ def get_portainer_client():
 
 class PortainerInterface:
 
-
     class StackStatus:
         ACTIVE = 1
         INACTIVE = 2
