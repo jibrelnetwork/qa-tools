@@ -8,8 +8,8 @@ services:
     build:
       context: ../../
       dockerfile: ./deploy/pypi/Dockerfile
-    ports:
-      - "55500:80"
+#    ports:
+#      - "55500:80"
     restart: always
     networks:
       - pypi-srv
