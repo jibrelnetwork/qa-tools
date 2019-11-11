@@ -109,7 +109,6 @@ class Commands:
         for env_obj, services in self.ENVIRONMENTS_CONFIG.items():
             current_data = self._get_envs_containers(env_obj)
             try:
-                print(services.services)
                 validate(services.services, current_data)
             except AssertionError:
                 services.services = current_data
@@ -182,10 +181,7 @@ class Commands:
             env_obj = self.updated_envs.pop()
             attachments = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])
             for channel in self.SUBSCRIBED_CHANNELS[env_obj]:
-                try:
-                    slack_bot.service.chat_postMessage(channel=channel, **{'attachments': to_list(attachments)})
-                except Exception as e:
-                    pass #  TODO: Need fix this
+                slack_bot.service.chat_postMessage(channel=channel, **{'attachments': to_list(attachments)})
 
 
 fake_fn = lambda i: i
@@ -231,7 +227,7 @@ slack_service = SlackService()
 
 
 @slack.RTMClient.run_on(event='message')
-def environment_checker(**payload):
+async def environment_checker(**payload):
     data = payload['data']
     channel_ids, messages_struct = slack_service.prepare_message(data['channel'], data.get('text', ''))
     if messages_struct is None:
@@ -240,7 +236,7 @@ def environment_checker(**payload):
     web_client = payload['web_client']
     for channel in channel_ids:
         for msg in messages_struct:
-            web_client.chat_postMessage(
+            await web_client.chat_postMessage(
                 channel=channel,
                 **msg,
                 ts=str(time.time())
@@ -248,14 +244,16 @@ def environment_checker(**payload):
 
 
 async def fetch_environments():
+    loop = asyncio.get_running_loop()
     while True:
-        slack_service.COMMAND_INTERFACE.prepare_env_infos()
+        await loop.run_in_executor(None, slack_service.COMMAND_INTERFACE.prepare_env_infos)
         await asyncio.sleep(SLACK_TO_PORTAINER_HOOK_TIMEOUT)
 
 
 async def check_updated_environment_scheduler():
+    loop = asyncio.get_running_loop()
     while True:
-        slack_service.COMMAND_INTERFACE.post_updated_env_info()
+        await loop.run_in_executor(None, slack_service.COMMAND_INTERFACE.post_updated_env_info)
         await asyncio.sleep(SLACK_TO_PORTAINER_HOOK_TIMEOUT/2)
 
 
@@ -270,7 +268,6 @@ async def slack_main():
 
 if __name__ == "__main__":
     asyncio.run(slack_main())
-    SlackService.COMMAND_INTERFACE.prepare_env_infos()
 
     # rtm_client = slack.RTMClient(token=SLACK_TOKEN)
     # rtm_client.start()

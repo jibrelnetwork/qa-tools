@@ -43,6 +43,7 @@ class Environment(InfrastructureUtil):
 
 
 class ServiceScope(InfrastructureUtil):
+    COINMENA = 'JNA'
     JTICKER = 'JTicker'
     JSEARCH = 'JSearch'
     COINMENA = 'Coinmena'
