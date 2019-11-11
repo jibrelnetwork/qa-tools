@@ -1,9 +1,14 @@
 import json
-import requests
 import logging
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from qa_tool.custom_structure import Enum
 from qa_tool.libs.reporter import reporter
+
+
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 
 TIMEOUT_CONNECTION = 10
 TIMEOUT_READ = 60 * 5
@@ -46,10 +51,10 @@ def get_params_argv(params):
 
 class ClientApi(object):
 
-    def __init__(self, base_url, service_name=None): #maybe need add arg - additional headers
+    def __init__(self, base_url, service_name=None, additional_headers=None): #maybe need add arg - additional headers
         self.service_link = base_url
         self.service_name = service_name or base_url
-        self.headers = {'Content-Type': 'application/json'}
+        self.headers = dict({'Content-Type': 'application/json'}, **(additional_headers or {}))
         # self._message = []  # TODO: full implement after decide on report tool
         self.api_logger = logging.getLogger(self.service_name)
         self._cookies = {}

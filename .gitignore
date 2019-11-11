@@ -75,3 +75,7 @@ target/
 
 # Application artifacts
 .ethash
+
+# docker
+.override.yaml
+.override.yml

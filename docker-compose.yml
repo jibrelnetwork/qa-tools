@@ -15,3 +15,13 @@ services:
       - './allure-results:/allure-results'
     stdin_open: true
     tty: true
+
+  slack_bot:
+    build: .
+    environment:
+      QA_CUSTOM_COMMAND: "python /qa_tools/services/slack_service.py"
+      SLACK_TOKEN: ""
+      PORTAINER_USER: ""
+      PORTAINER_PASSWORD: ""
+    stdin_open: true
+    tty: true
