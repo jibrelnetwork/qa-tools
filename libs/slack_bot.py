@@ -43,17 +43,14 @@ class SlackBot:
 
     def init_config(self, file_name, struct_python_fn=lambda data: data or {}):
         save_file_path = self.config_folder / file_name
-        try:
-            if not self.config_folder.exists():
-                self.config_folder.mkdir(parents=True)
-            if not save_file_path.exists():
-                save_file_path.touch()
-                data = struct_python_fn({})
-                self.save_config(file_name, data)
-                return data
-            return struct_python_fn(json.loads(save_file_path.open().read()))
-        except Exception as e:
-            print(f"Can't init {save_file_path.resolve()}\n{str(e)}")
+        if not self.config_folder.exists():
+            self.config_folder.mkdir(parents=True)
+        if not save_file_path.exists():
+            save_file_path.touch()
+            data = struct_python_fn({})
+            self.save_config(file_name, data)
+            return data
+        return struct_python_fn(json.loads(save_file_path.open().read()))
 
     def save_config(self, file_name, data):
         save_file_path = self.config_folder / file_name
