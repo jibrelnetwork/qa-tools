@@ -8,6 +8,6 @@ services:
 
   slack_bot:
     environment:
-      SLACK_TOKEN: ""
-      PORTAINER_USER: ""
-      PORTAINER_PASSWORD: ""
+      SLACK_TOKEN: " "
+      PORTAINER_USER: " "
+      PORTAINER_PASSWORD: " "
