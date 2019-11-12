@@ -77,3 +77,12 @@ target/
 
 # Application artifacts
 .ethash
+*/allure-results/
+qa_tool/util_scripts/generate_api/allureuaaservice.py
+qa_tool/util_scripts/generate_api/coinmena.py
+qa_tool/util_scripts/generate_api/jsearchapi.py
+qa_tool/util_scripts/generate_api/types/
+slack_environments_config.json
+slack_subs_channel.json
+slack_config/
+

@@ -1,0 +1,13 @@
+version: '3.5'
+
+services:
+
+  testing:
+    environment:
+      TEST_ENV: "qweqw"
+
+  slack_bot:
+    environment:
+      SLACK_TOKEN: "xoxb-186470154240-813908724099-bK3asCsiM6XZ3Dc8TkFmJr3p"
+      PORTAINER_USER: "qabot"
+      PORTAINER_PASSWORD: "hbosf8KpDFDQssGDeU"
