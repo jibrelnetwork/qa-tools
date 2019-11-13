@@ -186,6 +186,12 @@ class Commands:
         env_objs = self._get_envs_info_by(scope, env)
         attachments = []
         err_msg = f"Got some problem when execute 'get_environment_info' for {scope} {env}"
+        if not env_objs:
+            return channel_id, slack_bot.text(
+                f"Can't find {scope}:{env}",
+                f"Available scope {ServiceScope.get_all() + ['all']}"
+                f"Available envs {EnvInfo.get_all() + ['all']}"
+            )
         for env_obj in env_objs:
             if env_obj not in self.ENVIRONMENTS_CONFIG:
                 self.send_exception(err_msg, f"Problem with {env_obj}")
@@ -296,6 +302,7 @@ async def slack_main():
 
 
 if __name__ == "__main__":
+    print(Commands()._get_envs_info_by('scope', 'dev'))
     asyncio.run(slack_main())
 
     # rtm_client = slack.RTMClient(token=SLACK_TOKEN)
