@@ -30,3 +30,4 @@
           build: |
             cat ${{SLACK_BOT_ENV_FILE}} >> .env
             docker-compose up -d --build --force-recreate slack_bot
+            rm .env
