@@ -181,6 +181,7 @@ class Commands:
         )
 
     def get_environment_info(self, channel_id, scope, env):
+        print(f'Get environment info for {channel_id}: ({scope}:{env})')
         env_objs = self._get_envs_info_by(scope, env)
         attachments = []
         err_msg = f"Got some problem when execute 'get_environment_info' for {scope} {env}"
