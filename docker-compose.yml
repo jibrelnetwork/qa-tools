@@ -18,7 +18,7 @@ services:
 
   slack_bot:
     build: .
-    user: 1005
+    user: "1005"
     environment:
       QA_CUSTOM_COMMAND: "python /qa_tools/services/slack_service.py"
       SLACK_TOKEN: ""
