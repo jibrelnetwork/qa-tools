@@ -106,6 +106,7 @@ class Commands:
                 assert len(services.services) == len(current_data)
             except AssertionError:
                 if services.last_service_update == services.last_previous_service_update:
+                    print(f'Got diff for {env_obj}. Wait stabilizing containers')
                     services.last_service_update = time.time()
                 if services.last_service_update + SLACK_TO_PORTAINER_HOOK_TIMEOUT + 10 < time.time():
                     print(f"Update {env_obj} in progress")
@@ -206,7 +207,10 @@ class Commands:
             attachments = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])
             print(f"Start notify {env_obj} subs. Subs: {self.SUBSCRIBED_CHANNELS[env_obj]}")
             for channel in self.SUBSCRIBED_CHANNELS[env_obj]:
-                slack_bot.service.chat_postMessage(channel=channel, **{'attachments': to_list(attachments)})
+                try:
+                    slack_bot.service.chat_postMessage(channel=channel, **{'attachments': to_list(attachments)})
+                except Exception as e:
+                    print(str(e))
 
 
 fake_fn = lambda i: i
