@@ -5,6 +5,7 @@ from collections import defaultdict, namedtuple
 import slack
 from addict import Dict
 
+from consts.slack_models import EnvironmentConfig, SubscribersConfig, EnvInfo
 from qa_tool.utils.utils import to_list
 from qa_tool.utils.common import StatusCodes
 from qa_tool.utils.validator import validate
@@ -12,8 +13,6 @@ from libs import PortainerInterface, slack_bot
 from consts.infrastructure import ServiceScope, Environment
 from services.service_settings import SLACK_TOKEN, SLACK_TO_PORTAINER_HOOK_TIMEOUT, PORTAINER_URL
 
-
-EnvInfo = namedtuple('EnvInfo', ['scope', 'env', 'id', 'name'])
 
 EXCLUDE_IMAGES = [
     'zookeeper',
@@ -38,36 +37,24 @@ class Commands:
     _CHANNELS_FILE = 'slack_subs_channel.json'
     _ENVIRONMENT_FILE = 'slack_environments_config.json'
 
-    def __prepare_subs_file(self, data):
-        data = data or {}
-        result = defaultdict(set)
-        for k, v in data.items():
-            env_obj = EnvInfo(*k.split('__'))
-            result[env_obj].update(v)
-        return result
-
     def __save_subs(self):
-        slack_bot.save_config(
-            self._CHANNELS_FILE,
-            {'__'.join(str(i) for i in k): list(v) for k, v in self.SUBSCRIBED_CHANNELS.items()}
-        )
+        slack_bot.save_config(self._CHANNELS_FILE, self.SUBSCRIBED_CHANNELS, SubscribersConfig)
 
-    def __prepare_env_cfg_file(self, data):
-        data = data or {}
-        result = defaultdict(lambda: Dict({
-            'services': defaultdict(set),
-            'previous_services': defaultdict(set),
-            'last_update': time.time(),
-            'last_service_update': time.time(),
-            'last_previous_service_update': time.time(),
-        }))
-        for k, v in data.items():
-            result[EnvInfo(*k.split('__'))] = Dict(v)
-        return result
+    def _save_env_config(self):
+        slack_bot.save_config(self._ENVIRONMENT_FILE, self.ENVIRONMENTS_CONFIG, EnvironmentConfig)
 
     def __init__(self):
-        self.SUBSCRIBED_CHANNELS = slack_bot.init_config(self._CHANNELS_FILE, self.__prepare_subs_file)  # like EnvInfo(): [list of channels]
-        self.ENVIRONMENTS_CONFIG = slack_bot.init_config(self._ENVIRONMENT_FILE, self.__prepare_env_cfg_file)  # like EnvInfo(): last updated service scope information
+        _channel_file_data = slack_bot.init_config(self._CHANNELS_FILE)
+        _env_conf_file_data = slack_bot.init_config(self._ENVIRONMENT_FILE)
+        self.SUBSCRIBED_CHANNELS = SubscribersConfig().load(_channel_file_data) if _channel_file_data else defaultdict(set) # like EnvInfo(): [list of channels]
+        self.ENVIRONMENTS_CONFIG = EnvironmentConfig().load(_env_conf_file_data) if _env_conf_file_data else defaultdict(
+            lambda: Dict({
+                'services': defaultdict(set),
+                'previous_services': defaultdict(set),
+                'last_update': time.time(),
+                'last_service_update': time.time(),
+                'last_previous_service_update': time.time(),
+        }))  # like EnvInfo(): last updated service scope information
         self.updated_envs = []
         self._portainer = None
 
@@ -202,6 +189,8 @@ class Commands:
         return channel_id, {'attachments': attachments}
 
     def post_updated_env_info(self):
+        # if self.updated_envs:
+        #     self._save_env_config()
         while self.updated_envs:
             env_obj = self.updated_envs.pop()
             attachments = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])

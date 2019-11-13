@@ -44,6 +44,7 @@ class Environment(InfrastructureUtil):
 
 class ServiceScope(InfrastructureUtil):
     JNA = 'JNA'
+    JIBRELCOM = 'Jibrelcom'
     JTICKER = 'JTicker'
     JSEARCH = 'JSearch'
     COINMENA = 'Coinmena'

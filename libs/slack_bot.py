@@ -41,23 +41,19 @@ class SlackBot:
             if channel_info in i:
                 return i
 
-    def init_config(self, file_name, struct_python_fn=lambda data: data or {}):
+    def init_config(self, file_name):
         save_file_path = self.config_folder / file_name
         if not self.config_folder.exists():
             self.config_folder.mkdir(parents=True)
         if not save_file_path.exists():
             save_file_path.touch()
-            data = struct_python_fn({})
-            self.save_config(file_name, data)
-            return data
-        return struct_python_fn(json.loads(save_file_path.open().read()))
+            save_file_path.write_text('{}')
+            return None
+        return json.loads(save_file_path.open().read())
 
-    def save_config(self, file_name, data):
+    def save_config(self, file_name, data, model):
         save_file_path = self.config_folder / file_name
-        try:
-            save_file_path.open('w').write(json.dumps(data))
-        except Exception as e:
-            print(f"Can't save {save_file_path.resolve()}\n{str(e)}")
+        save_file_path.open('w').write(model().dumps(data))
 
     @staticmethod
     def text(*msg):
