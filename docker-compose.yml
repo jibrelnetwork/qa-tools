@@ -21,9 +21,9 @@ services:
     user: "1005"
     environment:
       QA_CUSTOM_COMMAND: "python /qa_tools/services/slack_service.py"
-      SLACK_TOKEN: ""
-      PORTAINER_USER: ""
-      PORTAINER_PASSWORD: ""
+      SLACK_TOKEN: "${SLACK_TOKEN}"
+      PORTAINER_USER: "${PORTAINER_USER}"
+      PORTAINER_PASSWORD: "${PORTAINER_PASSWORD}"
       PORTAINER_TTL_CACHE: 15
       SLACK_FOLDER_CONFIG: "/qa_tools/slack_cfg"
     volumes:
