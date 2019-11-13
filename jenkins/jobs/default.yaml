@@ -51,6 +51,9 @@
             credential-id: 11c7c63f-3747-47e8-9881-042000d87ec0
             key-file-variable: SSH_KEY_TO_GIT
             passphrase-variable: SSH_PASSPHRASE
+        - file:
+            credential-id: SLACK_BOT_ENV_FILE
+            variable: SLACK_BOT_ENV_FILE
 
 - defaults:
     name: service

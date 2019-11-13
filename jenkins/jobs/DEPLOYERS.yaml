@@ -28,6 +28,5 @@
           triggers:
             - timed: 0 3 * * 0
           build: |
-            docker-compose build
-            docker-compose down
-            docker-compose run -d -e SLACK_TOKEN="${{SLACK_BOT_TOKEN}}" -e PORTAINER_USER="${{PORTAINER_USER}}" -e PORTAINER_PASSWORD="${{PORTAINER_PASSWORD}}" -u 1005 slack_bot
+            cat ${{SLACK_BOT_ENV_FILE}} >> .env
+            docker-compose up -d --build --force-recreate slack_bot
