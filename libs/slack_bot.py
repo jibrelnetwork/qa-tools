@@ -65,7 +65,7 @@ class SlackBot:
 
     @staticmethod
     def dict_to_str(some_dict, msg=None):
-        result = '\n'.join([f"{k}={v}" for k, v in some_dict.items()])
+        result = '\n'.join([f"{k}= {v}" for k, v in some_dict.items()])
         if msg:
             result = f"{msg}\n{result}"
         return result
