@@ -104,12 +104,14 @@ class Commands:
                 if services.last_service_update == services.last_previous_service_update:
                     services.last_service_update = time.time()
                 if services.last_service_update + SLACK_TO_PORTAINER_HOOK_TIMEOUT + 10 < time.time():
+                    print(f"Update {env_obj} in progress")
                     _time_now = time.time()
                     services.last_previous_service_update = _time_now
                     services.last_service_update = _time_now
                     services.previous_services = services.services
                     services.services = current_data
                     self.updated_envs.append(env_obj)
+                    print(f"Added task for notify subscribers {env_obj}")
 
     def _get_envs_containers(self, env_obj, exclude_infra_services=True):
         code, containers = self.portainer.get_containers_by_stack(env_obj.id)
@@ -189,11 +191,15 @@ class Commands:
         return channel_id, {'attachments': attachments}
 
     def post_updated_env_info(self):
+        print(f"Check task for notify subscribers")
         if self.updated_envs:
+            print(f"Saved new environment config")
             self._save_env_config()
+            print(f"Saved new environment config")
         while self.updated_envs:
             env_obj = self.updated_envs.pop()
             attachments = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])
+            print(f"Start notify {env_obj} subs. Subs: {self.SUBSCRIBED_CHANNELS[env_obj]}")
             for channel in self.SUBSCRIBED_CHANNELS[env_obj]:
                 slack_bot.service.chat_postMessage(channel=channel, **{'attachments': to_list(attachments)})
 

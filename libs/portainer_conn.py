@@ -2,6 +2,7 @@ import os
 
 from cachetools.func import ttl_cache
 
+from qa_tool.libs.reporter import reporter
 from qa_tool.utils.common import ClientApi, StatusCodes
 from services.service_settings import PORTAINER_TOKEN_LIFETIME, PORTAINER_USER, PORTAINER_PASSWORD, PORTAINER_URL
 
@@ -54,14 +55,16 @@ class PortainerInterface:
         uri = '/api/endpoints'
         body = {}
         query_params = {}
-        return self.client.get(uri, body, query_params)
+        with reporter.supress_stdout():
+            return self.client.get(uri, body, query_params)
 
     @ttl_cache(ttl=PORTAINER_TTL_CACHE)
     def get_containers_by_stack(self, stack_id, all=1):
         uri = f"/api/endpoints/{stack_id}/docker/containers/json"
         body = {}
         query_params = {'all': all}
-        return self.client.get(uri, body, query_params)
+        with reporter.supress_stdout():
+            return self.client.get(uri, body, query_params)
 
 
 if __name__ == '__main__':
