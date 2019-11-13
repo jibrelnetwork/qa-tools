@@ -189,8 +189,8 @@ class Commands:
         return channel_id, {'attachments': attachments}
 
     def post_updated_env_info(self):
-        # if self.updated_envs:
-        #     self._save_env_config()
+        if self.updated_envs:
+            self._save_env_config()
         while self.updated_envs:
             env_obj = self.updated_envs.pop()
             attachments = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])
