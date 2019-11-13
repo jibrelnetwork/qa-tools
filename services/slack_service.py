@@ -44,8 +44,11 @@ class Commands:
         slack_bot.save_config(self._ENVIRONMENT_FILE, self.ENVIRONMENTS_CONFIG, EnvironmentConfig)
 
     def __init__(self):
+        print(f"Start init slack commands")
         _channel_file_data = slack_bot.init_config(self._CHANNELS_FILE)
         _env_conf_file_data = slack_bot.init_config(self._ENVIRONMENT_FILE)
+        print(f"Configuration files was opened")
+        print(f"Start serialize configs")
         self.SUBSCRIBED_CHANNELS = SubscribersConfig().load(_channel_file_data) if _channel_file_data else defaultdict(set) # like EnvInfo(): [list of channels]
         self.ENVIRONMENTS_CONFIG = EnvironmentConfig().load(_env_conf_file_data) if _env_conf_file_data else defaultdict(
             lambda: Dict({
@@ -55,6 +58,7 @@ class Commands:
                 'last_service_update': time.time(),
                 'last_previous_service_update': time.time(),
         }))  # like EnvInfo(): last updated service scope information
+        print(f"Serialize configs completed")
         self.updated_envs = []
         self._portainer = None
 
