@@ -56,11 +56,13 @@ class Commands:
         data = data or {}
         result = defaultdict(lambda: Dict({
             'services': defaultdict(set),
+            'previous_services': defaultdict(set),
             'last_update': time.time(),
             'last_service_update': time.time(),
+            'last_previous_service_update': time.time(),
         }))
         for k, v in data.items():
-            result[k] = Dict(v)
+            result[EnvInfo(*k.split('__'))] = Dict(v)
         return result
 
     def __init__(self):
@@ -110,10 +112,17 @@ class Commands:
             current_data = self._get_envs_containers(env_obj)
             try:
                 validate(services.services, current_data)
+                assert len(services.services) == len(current_data)
             except AssertionError:
-                services.services = current_data
-                services.last_service_update = time.time()
-                self.updated_envs.append(env_obj)
+                if services.last_service_update == services.last_previous_service_update:
+                    services.last_service_update = time.time()
+                if services.last_service_update + SLACK_TO_PORTAINER_HOOK_TIMEOUT + 10 < time.time():
+                    _time_now = time.time()
+                    services.last_previous_service_update = _time_now
+                    services.last_service_update = _time_now
+                    services.previous_services = services.services
+                    services.services = current_data
+                    self.updated_envs.append(env_obj)
 
     def _get_envs_containers(self, env_obj, exclude_infra_services=True):
         code, containers = self.portainer.get_containers_by_stack(env_obj.id)
@@ -150,11 +159,25 @@ class Commands:
         self.__save_subs()
         return channel, msg
 
-    def env_info_and_obj_to_msg(self, env_obj, env_info):
+    def __formatted_service_diff_map(self, old_services, new_services, show_old_version_necessarily):
+        result = {}
+        _fn = lambda data: list(data)[0] if len(data) == 1 else data
+        for svc_name, new_versions in new_services.items():
+            old_versions = old_services.get(svc_name, 'New service')
+            if old_versions == new_versions and not show_old_version_necessarily:
+                result[svc_name] = f"{_fn(new_versions)}"
+            else:
+                result[svc_name] = f"{_fn(old_versions)} -> {_fn(new_versions)}"
+        return result
+
+    def env_info_and_obj_to_msg(self, env_obj, env_info, show_old_version_necessarily=False):
+        service_diff = self.__formatted_service_diff_map(
+            env_info.previous_services, env_info.services, show_old_version_necessarily
+        )
         fields = [
             slack_bot.get_field("Project", env_obj.scope),
             slack_bot.get_field("Environment", env_obj.env),
-            slack_bot.get_field("Services", slack_bot.dict_to_str(env_info.services), False),
+            slack_bot.get_field("Services", slack_bot.dict_to_str(service_diff), False),
         ]
         return slack_bot.get_attachment(
             fields,
@@ -172,7 +195,9 @@ class Commands:
             if env_obj not in self.ENVIRONMENTS_CONFIG:
                 self.send_exception(err_msg, f"Problem with {env_obj}")
                 continue
-            attach = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])
+            attach = self.env_info_and_obj_to_msg(
+                env_obj, self.ENVIRONMENTS_CONFIG[env_obj], show_old_version_necessarily=True
+            )
             attachments.append(attach)
         return channel_id, {'attachments': attachments}
 

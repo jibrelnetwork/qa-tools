@@ -23,6 +23,7 @@ services:
       SLACK_TOKEN: ""
       PORTAINER_USER: ""
       PORTAINER_PASSWORD: ""
+      PORTAINER_TTL_CACHE: 15
       SLACK_FOLDER_CONFIG: "/qa_tools/slack_cfg"
     volumes:
       - ./jenkins:/qa_tools/slack_cfg

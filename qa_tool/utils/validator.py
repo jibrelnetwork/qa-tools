@@ -64,16 +64,16 @@ def validate(data, expected_data, ignore_ordering=True, strict_mode=False, expec
 
 
 if __name__ == "__main__":
-    # data = {
-    #     'test1': 1,
-    #     'test_not_check': 123,
-    #     'array1': [2,1,3]
-    # }
-    #
-    # expected_data = {
-    #     'test1': 1,
-    #     'array1': [1,2,3,4],
-    # }
-    # validate(data, expected_data)
+    data = {
+        'test1': 1,
+        'test_not_check': 123,
+        "test_qwe": 10
+    }
 
-    validate(True, 1)
+    expected_data = {
+        'test1': 1,
+        'test_not_check': 123,
+    }
+    validate(data, expected_data)
+
+    # validate(True, 1)
