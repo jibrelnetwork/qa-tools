@@ -6,7 +6,8 @@ ENV ALLURE_DIR="./allure-results/" \
     TEST_TIMEOUT="600" \
     PYTEST_STOUT="-vvv -s" \
     JIRA_PASSWORD='' \
-    JIRA_USER=''
+    JIRA_USER='' \
+    QA_CUSTOM_COMMAND=''
 
 # build dependencies
 RUN apk update \

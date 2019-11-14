@@ -1,5 +1,10 @@
 #!/bin/sh -e
 
+if [[ "${QA_CUSTOM_COMMAND}" ]]; then
+  echo "${QA_CUSTOM_COMMAND} $*"
+  ${QA_CUSTOM_COMMAND}
+  exit 0
+fi
 
 PYTEST_DEFAULT="pytest --execution-timeout ${TEST_TIMEOUT} ${PYTEST_STOUT} --alluredir=${ALLURE_DIR}"
 

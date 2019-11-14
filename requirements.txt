@@ -11,4 +11,9 @@ pytest-xdist==1.29.0
 pytest-timeouts==1.2
 dateutils
 redis
+addict
 property-cached
+slackclient==2.3.1
+portainer-api==1.22.1.1
+jenkins-job-builder==3.1.0
+marshmallow
