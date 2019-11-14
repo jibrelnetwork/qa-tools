@@ -73,15 +73,15 @@ def getter(path, data, default=None):
 
 def func_waiter(lambda_fn, timeout=5, wait_time=300, msg="Can't await this function"):
     time_end = time.time() + wait_time
-    e = "Don't catch any exception"
+    error = "Don't catch any exception"
     while time.time() < time_end:
         try:
             data = lambda_fn()
             return data
         except Exception as e:
-            e = str(e)
+            error = str(e)
             time.sleep(timeout)
-    raise TimeoutError(msg+f"\n{e}")
+    raise TimeoutError(msg+f"\n{error}")
 
 
 def generate_value(size=10, chars=string.ascii_uppercase + string.digits, prefix='', suffix=''):  # TODO: add string.punctuation?
