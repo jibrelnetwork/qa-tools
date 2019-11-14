@@ -1,3 +1,7 @@
+import io
+import sys
+from contextlib import contextmanager
+
 import allure
 import pytest
 import logging
@@ -27,11 +31,11 @@ class Reporter(object):
         return allure.step(msg)
 
     def attach(self, title, body, type_=TEXT):
-        body = str(body)
         try:
+            body = str(body)
             return allure.attach(body, title, type_)
         except Exception as e:
-            print(f"ERROR: can't attach '{title}'")
+            print(f"ERROR: can't attach '{title}'\n{str(e)}")
 
     def parametrize(self, *args, **kwargs):
         return pytest.mark.parametrize(*args, **kwargs)
@@ -67,6 +71,18 @@ class Reporter(object):
 
     def dynamic_issue(self, issue):
         allure.dynamic.issue(*self._get_issue_url(issue))
+
+    @contextmanager
+    def supress_stdout(self, supressed_title='Suppresed text for this step'):
+        save_stdout = sys.stdout
+        suppresed_test = io.StringIO()
+        sys.stdout = suppresed_test
+        try:
+            yield
+        finally:
+            print(suppresed_test.getvalue())
+            sys.stdout = save_stdout
+            self.attach(supressed_title, suppresed_test.getvalue())
 
 
 reporter = Reporter()

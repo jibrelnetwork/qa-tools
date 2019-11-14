@@ -8,53 +8,12 @@
           browser: githubweb
           browser-url: "https://github.com/jibrelnetwork/qa-tools"
           credentials-id: 11c7c63f-3747-47e8-9881-042000d87ec0
-          timeout: 20
+          timeout: 5
           wipe-workspace: false
-          clean:
-            after: true
-            before: true
+#          clean:
+#            after: true
+#            before: true
 
-- scm:
-    name: jticker
-    scm:
-      - git:
-          url: git@github.com:jibrelnetwork/jticker.git
-          branches:
-            - "*/$BRANCH_NAME"
-          browser: githubweb
-          browser-url: "https://github.com/jibrelnetwork/jticker"
-          credentials-id: 11c7c63f-3747-47e8-9881-042000d87ec0
-          timeout: 20
-          wipe-workspace: false
-          clean:
-            after: true
-            before: true
-          submodule:
-            disable: false
-            recursive: true
-            tracking: true
-            parent-credentials: true
-
-- scm:
-    name: jassets
-    scm:
-      - git:
-          url: git@github.com:jibrelnetwork/jassets-testing.git
-          branches:
-            - "*/$BRANCH_NAME"
-          browser: githubweb
-          browser-url: "https://github.com/jibrelnetwork/jassets-testing"
-          credentials-id: 11c7c63f-3747-47e8-9881-042000d87ec0
-          timeout: 20
-          wipe-workspace: false
-          clean:
-            after: true
-            before: true
-          submodule:
-            disable: false
-            recursive: true
-            tracking: true
-            parent-credentials: true
 
 - wrapper:
     name: base
@@ -66,31 +25,43 @@
       - credentials-binding:
         - username-password-separated:
             credential-id: 9abe23df-63a8-4d1c-a3b6-93991a2a70a0
-            name: GIT_USER
+            username: GIT_USER
             password: GIT_PASSWORD
         - username-password-separated:
             credential-id: userpass-jibrelbot-dockerhub
-            name: DOCKER_USER
+            username: DOCKER_USER
             password: DOCKER_PASSWORD
         - username-password-separated:
             credential-id: 88d9eacc-29bc-4d98-a95c-e29664cde3c0
-            name: JIRA_USER
+            username: JIRA_USER
             password: JIRA_PASSWORD
         - username-password-separated:
             credential-id: 56512caa-1ea6-4b1b-a7d3-78059e8aa73d
-            name: AWS_ACCESS_KEY_ID
+            username: AWS_ACCESS_KEY_ID
             password: AWS_SECRET_ACCESS_KEY
+        - username-password-separated:
+            credential-id: portainer-qa
+            username: PORTAINER_USER
+            password: PORTAINER_PASSWORD
+        - username-password-separated:
+            credential-id: SLACK-QA-BOT-CREDENTIALS
+            username: SLACK_BOT_USER
+            password: SLACK_BOT_TOKEN
         - ssh-user-private-key:
             credential-id: 11c7c63f-3747-47e8-9881-042000d87ec0
             key-file-variable: SSH_KEY_TO_GIT
             passphrase-variable: SSH_PASSPHRASE
+        - file:
+            credential-id: SLACK_BOT_ENV_FILE
+            variable: SLACK_BOT_ENV_FILE
 
 - defaults:
     name: service
     disabled: false
     project-type: freestyle
     concurrent: false
-    node: docker
     wrappers:
       - base
+    scm:
+      - common_automation
 

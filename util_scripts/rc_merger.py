@@ -1,7 +1,9 @@
 import re
 import os
 from collections import defaultdict
+
 from qa_tool.libs.reporter import reporter
+from consts.infrastructure import DOCKER_REGISTRY_ORG, WARNING_BRANCHES
 from qa_tool.libs.jira_integrate import get_interesting_issues, PRStatuses
 
 
@@ -16,9 +18,6 @@ from qa_tool.libs.jira_integrate import get_interesting_issues, PRStatuses
 #
 #
 #
-
-DOCKER_REGISTRY_ORG = "jibrelnetwork"
-WARNING_BRANCHES = ['master', ]
 
 READY_TO_MERGE_STATUSES = ()
 STATUSES_SKIPPING = ('To Do', 'Backlog')

@@ -15,3 +15,22 @@ services:
       - './allure-results:/allure-results'
     stdin_open: true
     tty: true
+
+  slack_bot:
+    build: .
+    user: "1005"
+    environment:
+      QA_CUSTOM_COMMAND: "python /qa_tools/services/slack_service.py"
+      SLACK_TOKEN: "${SLACK_TOKEN}"
+      PORTAINER_USER: "${PORTAINER_USER}"
+      PORTAINER_PASSWORD: "${PORTAINER_PASSWORD}"
+      PORTAINER_TTL_CACHE: 15
+      SLACK_FOLDER_CONFIG: "/qa_tools/slack_cfg"
+    volumes:
+      - ./jenkins:/qa_tools/slack_cfg
+    stdin_open: true
+    tty: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10mb"

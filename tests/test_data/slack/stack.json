@@ -1,0 +1,250 @@
+[
+  {
+    "Id": 2,
+    "Name": "Jticker Develop & Stage (legacy connection)",
+    "Type": 1,
+    "URL": "tcp://cluster-11.jdev.network:2376",
+    "GroupId": 3,
+    "PublicURL": "cluster-11.jdev.network",
+    "TLSConfig": {
+      "TLS": true,
+      "TLSSkipVerify": true,
+      "TLSCert": "/data/tls/2/cert.pem",
+      "TLSKey": "/data/tls/2/key.pem"
+    },
+    "Extensions": [],
+    "AzureCredentials": {
+      "ApplicationID": "",
+      "TenantID": "",
+      "AuthenticationKey": ""
+    },
+    "Tags": [],
+    "Status": 2,
+    "Snapshots": [
+      {
+        "Time": 1572432317,
+        "DockerVersion": "19.03.4",
+        "Swarm": true,
+        "TotalCPU": 24,
+        "TotalMemory": 100237832192,
+        "RunningContainerCount": 0,
+        "StoppedContainerCount": 0,
+        "VolumeCount": 16,
+        "ImageCount": 149,
+        "ServiceCount": 0,
+        "StackCount": 0,
+        "SnapshotRaw": {
+          "Containers": null,
+          "Volumes": null,
+          "Networks": null,
+          "Images": null,
+          "Info": null,
+          "Version": null
+        }
+      }
+    ],
+    "UserAccessPolicies": {},
+    "TeamAccessPolicies": {},
+    "EdgeKey": "",
+    "AuthorizedUsers": null,
+    "AuthorizedTeams": null
+  },
+  {
+    "Id": 5,
+    "Name": "CoinMENA Develop",
+    "Type": 2,
+    "URL": "tcp://cluster-coinmena-develop.coinmena.dev:9001",
+    "GroupId": 2,
+    "PublicURL": "cluster-coinmena-develop.coinmena.dev",
+    "TLSConfig": {
+      "TLS": true,
+      "TLSSkipVerify": true
+    },
+    "Extensions": [],
+    "AzureCredentials": {
+      "ApplicationID": "",
+      "TenantID": "",
+      "AuthenticationKey": ""
+    },
+    "Tags": [
+      "env/develop"
+    ],
+    "Status": 1,
+    "Snapshots": [
+      {
+        "Time": 1573231277,
+        "DockerVersion": "19.03.3",
+        "Swarm": true,
+        "TotalCPU": 6,
+        "TotalMemory": 24196730880,
+        "RunningContainerCount": 38,
+        "StoppedContainerCount": 138,
+        "VolumeCount": 52,
+        "ImageCount": 401,
+        "ServiceCount": 17,
+        "StackCount": 2,
+        "SnapshotRaw": {
+          "Containers": null,
+          "Volumes": null,
+          "Networks": null,
+          "Images": null,
+          "Info": null,
+          "Version": null
+        }
+      }
+    ],
+    "UserAccessPolicies": {},
+    "TeamAccessPolicies": {},
+    "EdgeKey": "",
+    "AuthorizedUsers": null,
+    "AuthorizedTeams": null
+  },
+  {
+    "Id": 7,
+    "Name": "Jticker Develop & Stage",
+    "Type": 2,
+    "URL": "tcp://cluster-11.jdev.network:9001",
+    "GroupId": 3,
+    "PublicURL": "cluster-11.jdev.network",
+    "TLSConfig": {
+      "TLS": true,
+      "TLSSkipVerify": true
+    },
+    "Extensions": [],
+    "AzureCredentials": {
+      "ApplicationID": "",
+      "TenantID": "",
+      "AuthenticationKey": ""
+    },
+    "Tags": [],
+    "Status": 2,
+    "Snapshots": [
+      {
+        "Time": 1572431718,
+        "DockerVersion": "19.03.4",
+        "Swarm": true,
+        "TotalCPU": 24,
+        "TotalMemory": 100237832192,
+        "RunningContainerCount": 35,
+        "StoppedContainerCount": 1,
+        "VolumeCount": 62,
+        "ImageCount": 455,
+        "ServiceCount": 23,
+        "StackCount": 3,
+        "SnapshotRaw": {
+          "Containers": null,
+          "Volumes": null,
+          "Networks": null,
+          "Images": null,
+          "Info": null,
+          "Version": null
+        }
+      }
+    ],
+    "UserAccessPolicies": {},
+    "TeamAccessPolicies": {},
+    "EdgeKey": "",
+    "AuthorizedUsers": null,
+    "AuthorizedTeams": null
+  },
+  {
+    "Id": 10,
+    "Name": "CoinMENA Develop (legacy connection)",
+    "Type": 1,
+    "URL": "tcp://cluster-coinmena-develop.coinmena.dev:2376",
+    "GroupId": 2,
+    "PublicURL": "cluster-coinmena-develop.coinmena.dev",
+    "TLSConfig": {
+      "TLS": true,
+      "TLSSkipVerify": true,
+      "TLSCert": "/data/tls/10/cert.pem",
+      "TLSKey": "/data/tls/10/key.pem"
+    },
+    "Extensions": [],
+    "AzureCredentials": {
+      "ApplicationID": "",
+      "TenantID": "",
+      "AuthenticationKey": ""
+    },
+    "Tags": [
+      "env/develop"
+    ],
+    "Status": 1,
+    "Snapshots": [
+      {
+        "Time": 1573231337,
+        "DockerVersion": "19.03.3",
+        "Swarm": true,
+        "TotalCPU": 6,
+        "TotalMemory": 24196730880,
+        "RunningContainerCount": 14,
+        "StoppedContainerCount": 44,
+        "VolumeCount": 17,
+        "ImageCount": 134,
+        "ServiceCount": 17,
+        "StackCount": 2,
+        "SnapshotRaw": {
+          "Containers": null,
+          "Volumes": null,
+          "Networks": null,
+          "Images": null,
+          "Info": null,
+          "Version": null
+        }
+      }
+    ],
+    "UserAccessPolicies": {},
+    "TeamAccessPolicies": {},
+    "EdgeKey": "",
+    "AuthorizedUsers": null,
+    "AuthorizedTeams": null
+  },
+  {
+    "Id": 14,
+    "Name": "Jticker Develop NEW",
+    "Type": 2,
+    "URL": "tcp://99.81.62.101:9001",
+    "GroupId": 3,
+    "PublicURL": "99.81.62.101",
+    "TLSConfig": {
+      "TLS": true,
+      "TLSSkipVerify": true
+    },
+    "Extensions": [],
+    "AzureCredentials": {
+      "ApplicationID": "",
+      "TenantID": "",
+      "AuthenticationKey": ""
+    },
+    "Tags": [],
+    "Status": 1,
+    "Snapshots": [
+      {
+        "Time": 1573231338,
+        "DockerVersion": "19.03.4",
+        "Swarm": true,
+        "TotalCPU": 12,
+        "TotalMemory": 49034506240,
+        "RunningContainerCount": 35,
+        "StoppedContainerCount": 37,
+        "VolumeCount": 45,
+        "ImageCount": 83,
+        "ServiceCount": 25,
+        "StackCount": 3,
+        "SnapshotRaw": {
+          "Containers": null,
+          "Volumes": null,
+          "Networks": null,
+          "Images": null,
+          "Info": null,
+          "Version": null
+        }
+      }
+    ],
+    "UserAccessPolicies": {},
+    "TeamAccessPolicies": {},
+    "EdgeKey": "",
+    "AuthorizedUsers": null,
+    "AuthorizedTeams": null
+  }
+]

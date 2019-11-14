@@ -8,8 +8,7 @@
     disabled: false
     project-type: freestyle
     concurrent: falseclear
-    scm:
-      - "{git_scm}"
+    defaults: service
     builders:
       - shell: |
           {build}
@@ -19,14 +18,16 @@
     jobs:
       - "DEPLOYER_{service_name}"
     service_name:
-#      - "JENKINS":
-#          build: |
-#            cd deploy/jenkins
-#            docker-compose build
-#            docker-compose up -d
       - "PYPI":
-          git_scm: common_automation
           timed: H 00 * * *
           build: |
             docker-compose -f ./deploy/pypi/docker-compose.yml up -d --build --force-recreate
             docker-compose -f ./deploy/pypi/docker-compose.yml exec -d pypi sh /update_package.sh
+      - "SLACK_BOT":
+          node: allure-jenkins-worker-02
+          triggers:
+            - timed: 0 3 * * 0
+          build: |
+            cat ${{SLACK_BOT_ENV_FILE}} >> .env
+            docker-compose up -d --build --force-recreate slack_bot
+            rm .env
