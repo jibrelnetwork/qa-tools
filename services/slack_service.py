@@ -206,8 +206,13 @@ class Commands:
         print(f"Check task for notify subscribers")
         if self.updated_envs:
             print(f"Saved new environment config")
-            self._save_env_config()
-            print(f"Saved new environment config")
+            try:
+                self._save_env_config()
+                print(f"Saved new environment config")
+            except Exception as e:
+                print(str(e))
+                print("Can't save environment config")
+                print(self.ENVIRONMENTS_CONFIG)
         while self.updated_envs:
             env_obj = self.updated_envs.pop()
             attachments = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])
