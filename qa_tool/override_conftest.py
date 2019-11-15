@@ -1,11 +1,11 @@
 import py
 from _pytest import nose
 from qa_tool.libs.reporter import reporter
-from _pytest.python import Class, _get_non_fixture_func
+from _pytest.python import Class, _get_first_non_fixture_func
 
 
 def setup_class_fixture(self):
-    setup_class = _get_non_fixture_func(self.obj, 'setup_class')
+    setup_class = _get_first_non_fixture_func(self.obj, 'setup_class')
     if setup_class is not None:
         setup_class = getattr(setup_class, 'im_func', setup_class)
         setup_class = getattr(setup_class, '__func__', setup_class)
