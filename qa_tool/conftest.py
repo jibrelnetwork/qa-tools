@@ -120,6 +120,7 @@ def pytest_runtest_teardown(item):
         labels.pop(sub_index)
 
 
+@pytest.hookimpl
 def pytest_runtest_setup(item):
     previousfailed = getattr(item.parent, "_previousfailed", None)
     if previousfailed is not None:
