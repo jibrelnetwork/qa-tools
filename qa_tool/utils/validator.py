@@ -1,5 +1,15 @@
 
 
+def non_strict_check_number(data, expected_data, delta):
+    assert expected_data - delta <= data <= expected_data + delta
+
+
+common_strict_mapping = {
+    int: non_strict_check_number,
+    float: non_strict_check_number
+}
+
+
 def check_status(status_data, expected_error):
     """
     :param status_data: {'success': boolean, 'errors': []}
@@ -29,7 +39,11 @@ def sorted_actual_and_expected_data(data, expected_data):
     return data, expected_data
 
 
-def validate(data, expected_data, ignore_ordering=True, strict_mode=False, expected_error=None):
+def validate(data, expected_data, ignore_ordering=True, strict_mode=True, expected_error=None, strict_delta_by_type=None):
+    """
+    :param strict_mode:
+    :param strict_mapping: like {int: 1, float: 0.002}
+    """
     _fn_validate = lambda _data, _expected_data: validate(_data, _expected_data, ignore_ordering, strict_mode, None)
     data = get_interest_data(data, expected_error)
 
@@ -59,8 +73,13 @@ def validate(data, expected_data, ignore_ordering=True, strict_mode=False, expec
         assert any([expected_data is i for i in  [None, True, False]])
 
     else:
+        type_ = type(data)
         assert type(data) == type(expected_data)
-        assert data == expected_data
+        if strict_mode or type not in common_strict_mapping:
+            assert data == expected_data
+        else:
+            delta = strict_delta_by_type.get(type_, 0.5)
+            common_strict_mapping[type_](data, expected_data, delta)
 
 
 if __name__ == "__main__":
