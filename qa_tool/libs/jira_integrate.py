@@ -31,7 +31,7 @@ JIRA_PASSWORD = os.getenv('JIRA_PASSWORD')
 JIRA_BASE_AUTH = (JIRA_USER, JIRA_PASSWORD)
 
 
-SKIPPING_STATUSES = ['backlog', 'to do', 'in progress']  # 'review'
+SKIPPING_STATUSES = ['backlog', 'to do', 'in progress', 'review']  # 'review'
 
 
 class IssueTypes(object):
@@ -237,6 +237,7 @@ def test_fixversion_assinging():
 
 
 if __name__ == '__main__':
+    print(issue_is_open("CMENABACK-269"))
     test_fixversion_assinging()
     dump_jira_issues()
     keks = get_autotest_issues()[0]
