@@ -1,4 +1,5 @@
 import json
+import pickle
 from redis import Redis
 
 from qa_tool.libs.reporter import reporter
@@ -20,11 +21,21 @@ class RedisClient:
                 reporter.attach(f'Redis keys', keys)
                 return keys
 
-    def get(self, key):
+    def set(self, key, value, is_json=True):
+        if is_json:
+            data = json.dumps(value)
+        else:
+            data = pickle.dumps(value)
+        self.redis.set(key, data)
+
+    def get(self, key, is_json=True):
         with reporter.step(f'Get redis data by key {key} from {self.conn_str}'):
             data = self.redis.get(key)
             try:
-                data = json.loads(data)
+                if is_json:
+                    data = json.loads(data)
+                else:
+                    data = pickle.loads(data)
             finally:
                 reporter.attach(f'Redis data by {key}', data)
                 return data
