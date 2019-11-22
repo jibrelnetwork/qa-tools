@@ -53,7 +53,8 @@ class SlackBot:
 
     def save_config(self, file_name, data, model):
         save_file_path = self.config_folder / file_name
-        save_file_path.open('w').write(model().dumps(data))
+        serl_data = model().dumps(data)
+        save_file_path.open('w').write(serl_data)
 
     @staticmethod
     def text(*msg):

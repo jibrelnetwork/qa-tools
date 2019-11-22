@@ -1,5 +1,16 @@
 
 
+def non_strict_check_number(data, expected_data, delta):
+    msg = f"{expected_data - delta} <= {data}(Actual result) <= {expected_data + delta}"
+    assert expected_data - delta <= data <= expected_data + delta, msg
+
+
+common_strict_mapping = {
+    int: non_strict_check_number,
+    float: non_strict_check_number
+}
+
+
 def check_status(status_data, expected_error):
     """
     :param status_data: {'success': boolean, 'errors': []}
@@ -29,8 +40,12 @@ def sorted_actual_and_expected_data(data, expected_data):
     return data, expected_data
 
 
-def validate(data, expected_data, ignore_ordering=True, strict_mode=False, expected_error=None):
-    _fn_validate = lambda _data, _expected_data: validate(_data, _expected_data, ignore_ordering, strict_mode, None)
+def validate(data, expected_data, ignore_ordering=True, strict_mode=True, expected_error=None, strict_delta_by_type=None):
+    """
+    :param strict_mode:
+    :param strict_mapping: like {int: 1, float: 0.002}
+    """
+    _fn_validate = lambda _data, _expected_data: validate(_data, _expected_data, ignore_ordering, strict_mode, None, strict_delta_by_type)
     data = get_interest_data(data, expected_error)
 
     if isinstance(data, dict):
@@ -59,21 +74,45 @@ def validate(data, expected_data, ignore_ordering=True, strict_mode=False, expec
         assert any([expected_data is i for i in  [None, True, False]])
 
     else:
-        assert type(data) == type(expected_data)
-        assert data == expected_data
+        expected_type = type(expected_data)
+        if strict_mode or expected_type not in common_strict_mapping:
+            assert type(data) == expected_type
+            assert data == expected_data
+        else:
+            strict_delta_by_type = strict_delta_by_type or {}
+            data = expected_type(data)
+            delta = strict_delta_by_type.get(expected_type, 0.5)
+            common_strict_mapping[expected_type](data, expected_data, delta)
+
+
+class TestValidator:
+
+    def test_sample(self):
+        data = {
+            'test1': 1,
+            'test_not_check': 123,
+            "test_qwe": 10
+        }
+
+        expected_data = {
+            'test1': 1,
+            'test_not_check': 123,
+        }
+        validate(data, expected_data)
+
+    def t1est_strict_mode_for_float(self):
+        data = {'var': 1.3}
+        expected_data = {'var': 1.5}
+        validate(data, expected_data, strict_mode=False, strict_delta_by_type={float: 0.2})
+
+    def test_strict_mode_for_float_negative(self):
+        data = {'var': 1.3}
+        expected_data = {'var': 1.5}
+        validate(data, expected_data, strict_mode=False, strict_delta_by_type={float: 0.1})
 
 
 if __name__ == "__main__":
-    data = {
-        'test1': 1,
-        'test_not_check': 123,
-        "test_qwe": 10
-    }
-
-    expected_data = {
-        'test1': 1,
-        'test_not_check': 123,
-    }
-    validate(data, expected_data)
+    from qa_tool import run_test
+    run_test(__file__)
 
     # validate(True, 1)

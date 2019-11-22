@@ -1,13 +1,28 @@
 import re
-import hashlib
-
 import pytest
+import hashlib
+from pathlib import Path
 from cachetools.func import lru_cache
 from allure_commons.types import LabelType
 from allure_pytest.utils import ALLURE_LABEL_MARK
 from allure_pytest.listener import AllureListener
 
 from qa_tool.settings import IS_LOCAL_START
+
+
+def get_python_modules(modules_path, root_dir=None):
+    root_dir = root_dir or modules_path / '../'
+    result = []
+    for i in modules_path.resolve().iterdir():
+        if i.is_file() and i.suffix == '.py' and not "__init" in i.name:
+            import_path = str(i.with_suffix('').resolve()).replace(str(root_dir.resolve()) + '/', '').replace('/', '.')
+            result.append(import_path)
+    return result
+
+
+pytest.register_assert_rewrite(*get_python_modules(Path(__file__) / '../utils'))
+
+
 from qa_tool.libs.reporter import get_known_issues
 from qa_tool.libs.allure_integrate import allure_api
 from qa_tool.libs.jira_integrate import TEST_TOKEN_PREFIX, jira, dump_jira_issues, attach_known_issues_and_check_pending
