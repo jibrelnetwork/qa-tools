@@ -8,6 +8,7 @@ JENKINS_JOB_BUILD_URL = os.getenv("BUILD_URL", '')
 ALLURE_PROJECT_ID = int(os.getenv("ALLURE_PROJECT_ID", 4))
 DISABLE_SCHEMA_VALIDATOR = strtobool(os.getenv("DISABLE_SCHEMA_VALIDATOR", 'False'))
 IS_LOCAL_START = strtobool(os.getenv("IS_LOCAL_START", 'False'))
+MAIN_APP_URL = os.getenv('API_CONN_STR') or os.getenv("BACKEND_API", 'http://127.0.0.1:9090')
 
 if DISABLE_SCHEMA_VALIDATOR:
     for _ in range(5):

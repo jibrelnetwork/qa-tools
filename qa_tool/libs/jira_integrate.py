@@ -1,8 +1,11 @@
 import os
-import json
+import re
 import time
-import logging
+import json
 import urllib
+import logging
+import requests
+from typing import List
 
 from pathlib import Path
 from dataclasses import dataclass
@@ -12,7 +15,7 @@ from cachetools.func import ttl_cache, lru_cache
 from jira import JIRA
 
 from qa_tool.static.templates import JIRA_ISSUE_TEMPLATE
-from qa_tool.settings import ALLURE_PROJECT_ID, JENKINS_JOB_BUILD_URL, JIRA_URL
+from qa_tool.settings import ALLURE_PROJECT_ID, JENKINS_JOB_BUILD_URL, JIRA_URL, MAIN_APP_URL
 
 JIRA_NEW_ISSUE_URL = JIRA_URL + "secure/CreateIssueDetails!init.jspa?"
 
@@ -211,14 +214,43 @@ def in_progress_issue(issue):
     return issue.status.lower() in SKIPPING_STATUSES
 
 
+def get_version_from_text(text):
+    default = tuple([0, 0, 0, 0])
+    try:
+        pattern = "((\d+\.)+(\*|\d+))"
+        version = re.findall(pattern, text)
+        if not version:
+            return default
+        version = version[0]
+        if isinstance(version, (list, tuple)):
+            version = version[0]
+        version = tuple(int(i) for i in version.split('.'))
+        return version
+    except Exception as e:
+        print(str(e))
+        return default
+
+
+@ttl_cache(ttl=10)
+def get_health_check():
+    try:
+        url = urllib.parse.urljoin(MAIN_APP_URL, '/healthcheck')
+        data = requests.get(url)
+        return data.json()
+    except Exception as e:
+        print(str(e))
+        return {}
+
+
 @lru_cache()
 def issue_is_open(issue):
     jira_ticket = issue.split('/')[-1]
     issue = jira.issue(jira_ticket)
-    return in_progress_issue(issue)
+    is_affected_version = get_version_from_text(get_health_check().get('version', '')) >= get_version_from_text(str(issue.fixVersions))
+    return in_progress_issue(issue) or not is_affected_version
 
 
-def attach_known_issues_and_check_pending(known_issues):
+def attach_known_issues_and_check_pending(known_issues: List[IssueInfo]):
     from qa_tool.libs.reporter import reporter
     is_pending = False
     for known_issue in known_issues:
@@ -237,7 +269,8 @@ def test_fixversion_assinging():
 
 
 if __name__ == '__main__':
-    print(issue_is_open("CMENABACK-269"))
+    print(get_health_check())
+    print(issue_is_open("CMENABACK-353"))
     test_fixversion_assinging()
     dump_jira_issues()
     keks = get_autotest_issues()[0]
