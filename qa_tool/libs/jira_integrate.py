@@ -210,10 +210,6 @@ def get_interesting_issues(label, project):
     return issues
 
 
-def in_progress_issue(issue):
-    return issue.status.lower() in SKIPPING_STATUSES
-
-
 def get_version_from_text(text):
     default = tuple([0, 0, 0, 0])
     try:
@@ -242,19 +238,26 @@ def get_health_check():
         return {}
 
 
+def in_progress_issue(issue, check_version=False):
+    is_affected_current_version = True
+    if check_version:
+        current_version = get_version_from_text(get_health_check().get('version', ''))
+        is_affected_current_version = current_version >= get_version_from_text(str(issue.fixVersions))
+    return issue.status.lower() in SKIPPING_STATUSES or not is_affected_current_version
+
+
 @lru_cache()
 def issue_is_open(issue):
     jira_ticket = issue.split('/')[-1]
     issue = jira.issue(jira_ticket)
-    is_affected_version = get_version_from_text(get_health_check().get('version', '')) >= get_version_from_text(str(issue.fixVersions))
-    return in_progress_issue(issue) or not is_affected_version
+    return in_progress_issue(issue)
 
 
 def attach_known_issues_and_check_pending(known_issues: List[IssueInfo]):
     from qa_tool.libs.reporter import reporter
     is_pending = False
     for known_issue in known_issues:
-        if in_progress_issue(known_issue):
+        if in_progress_issue(known_issue, True):
             reporter.dynamic_issue(known_issue.id)
             is_pending = True
     return is_pending
@@ -270,7 +273,7 @@ def test_fixversion_assinging():
 
 if __name__ == '__main__':
     print(get_health_check())
-    print(issue_is_open("CMENABACK-353"))
+    print(attach_known_issues_and_check_pending([jira.issue("CMENABACK-353")]))
     test_fixversion_assinging()
     dump_jira_issues()
     keks = get_autotest_issues()[0]
