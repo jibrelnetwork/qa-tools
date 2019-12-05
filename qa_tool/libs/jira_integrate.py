@@ -247,10 +247,10 @@ def in_progress_issue(issue, check_version=False):
 
 
 @lru_cache()
-def issue_is_open(issue):
+def issue_is_open(issue, check_version=False):
     jira_ticket = issue.split('/')[-1]
     issue = jira.issue(jira_ticket)
-    return in_progress_issue(issue)
+    return in_progress_issue(issue, check_version)
 
 
 def attach_known_issues_and_check_pending(known_issues: List[IssueInfo]):
