@@ -101,8 +101,8 @@ class Commands:
                 self.SUBSCRIBED_CHANNELS[env_obj] = set()
 
         for env_obj, services in self.ENVIRONMENTS_CONFIG.items():
-            current_data = self._get_envs_containers(env_obj)
             try:
+                current_data = self._get_envs_containers(env_obj)
                 validate(services.services, current_data)
                 assert len(services.services) == len(current_data)
             except AssertionError:
@@ -118,6 +118,9 @@ class Commands:
                     services.services = current_data
                     self.updated_envs.append(env_obj)
                     logger.info("Added task for notify subscribers {}", env_obj)
+                    break
+            except Exception:
+                logger.exception(f"Can't get info about containers for env: {env_obj}")
 
     def _get_envs_containers(self, env_obj, exclude_infra_services=True):
         code, containers = self.portainer.get_containers_by_stack(env_obj.id)
