@@ -4,6 +4,7 @@ from collections import defaultdict, namedtuple
 
 import slack
 from addict import Dict
+from loguru import logger
 
 from consts.slack_models import EnvironmentConfig, SubscribersConfig, EnvInfo
 from qa_tool.utils.utils import to_list
@@ -44,11 +45,11 @@ class Commands:
         slack_bot.save_config(self._ENVIRONMENT_FILE, self.ENVIRONMENTS_CONFIG, EnvironmentConfig)
 
     def __init__(self):
-        print(f"Start init slack commands")
+        logger.info("Start init slack commands")
         _channel_file_data = slack_bot.init_config(self._CHANNELS_FILE)
         _env_conf_file_data = slack_bot.init_config(self._ENVIRONMENT_FILE)
-        print(f"Configuration files was opened")
-        print(f"Start serialize configs")
+        logger.info("Configuration files was opened")
+        logger.info("Start serialize configs")
         self.SUBSCRIBED_CHANNELS = SubscribersConfig().load(_channel_file_data) if _channel_file_data else defaultdict(set) # like EnvInfo(): [list of channels]
         self.ENVIRONMENTS_CONFIG = EnvironmentConfig().load(_env_conf_file_data) if _env_conf_file_data else defaultdict(
             lambda: Dict({
@@ -58,7 +59,7 @@ class Commands:
                 'last_service_update': time.time(),
                 'last_previous_service_update': time.time(),
         }))  # like EnvInfo(): last updated service scope information
-        print(f"Serialize configs completed")
+        logger.info("Serialize configs completed")
         self.updated_envs = []
         self._portainer = None
 
@@ -85,8 +86,8 @@ class Commands:
 
     def prepare_env_infos(self):
         code, portainer_stacks = self.portainer.get_stacks()
-        assert code == StatusCodes.OK
-
+        if code != StatusCodes.OK:
+            raise RuntimeError(f"Expect code {StatusCodes.OK}, but receive {code}")
         for stack in portainer_stacks:
             if stack['Status'] == self.portainer.StackStatus.INACTIVE:
                 continue
@@ -106,17 +107,17 @@ class Commands:
                 assert len(services.services) == len(current_data)
             except AssertionError:
                 if services.last_service_update == services.last_previous_service_update:
-                    print(f'Got diff for {env_obj}. Wait stabilizing containers')
+                    logger.info('Got diff for {}. Wait stabilizing containers', env_obj)
                     services.last_service_update = time.time()
                 if services.last_service_update + SLACK_TO_PORTAINER_HOOK_TIMEOUT + 10 < time.time():
-                    print(f"Update {env_obj} in progress")
+                    logger.info("Update {} in progress", env_obj)
                     _time_now = time.time()
                     services.last_previous_service_update = _time_now
                     services.last_service_update = _time_now
                     services.previous_services = services.services
                     services.services = current_data
                     self.updated_envs.append(env_obj)
-                    print(f"Added task for notify subscribers {env_obj}")
+                    logger.info("Added task for notify subscribers {}", env_obj)
 
     def _get_envs_containers(self, env_obj, exclude_infra_services=True):
         code, containers = self.portainer.get_containers_by_stack(env_obj.id)
@@ -182,7 +183,7 @@ class Commands:
         )
 
     def get_environment_info(self, channel_id, scope, env):
-        print(f'Get environment info for {channel_id}: ({scope}:{env})')
+        logger.info('Get environment info for {}: ({}:{})', channel_id, scope, env)
         env_objs = self._get_envs_info_by(scope, env)
         attachments = []
         err_msg = f"Got some problem when execute 'get_environment_info' for {scope} {env}"
@@ -203,25 +204,23 @@ class Commands:
         return channel_id, {'attachments': attachments}
 
     def post_updated_env_info(self):
-        print(f"Check task for notify subscribers")
+        logger.info("Check task for notify subscribers")
         if self.updated_envs:
-            print(f"Saved new environment config")
+            logger.info("Saved new environment config")
             try:
                 self._save_env_config()
-                print(f"Saved new environment config")
-            except Exception as e:
-                print(str(e))
-                print("Can't save environment config")
-                print(self.ENVIRONMENTS_CONFIG)
+                logger.info("Saved new environment config")
+            except Exception:
+                logger.exception("Can't save environment config {}", self.ENVIRONMENTS_CONFIG)
         while self.updated_envs:
             env_obj = self.updated_envs.pop()
             attachments = self.env_info_and_obj_to_msg(env_obj, self.ENVIRONMENTS_CONFIG[env_obj])
-            print(f"Start notify {env_obj} subs. Subs: {self.SUBSCRIBED_CHANNELS[env_obj]}")
+            logger.info("Start notify {} subs. Subs: {}", env_obj, self.SUBSCRIBED_CHANNELS[env_obj])
             for channel in self.SUBSCRIBED_CHANNELS[env_obj]:
                 try:
                     slack_bot.service.chat_postMessage(channel=channel, **{'attachments': to_list(attachments)})
-                except Exception as e:
-                    print(str(e))
+                except Exception:
+                    logger.exception("post chat message failed")
 
 
 fake_fn = lambda i: i
@@ -284,37 +283,57 @@ async def environment_checker(**payload):
 
 
 async def fetch_environments():
+    logger.info("fetch environments task started")
     loop = asyncio.get_running_loop()
     while True:
-        await loop.run_in_executor(None, slack_service.COMMAND_INTERFACE.prepare_env_infos)
+        try:
+            await loop.run_in_executor(None, slack_service.COMMAND_INTERFACE.prepare_env_infos)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("check updated environment failed")
         await asyncio.sleep(SLACK_TO_PORTAINER_HOOK_TIMEOUT)
 
 
 async def check_updated_environment_scheduler():
+    logger.info("check updated environment task started")
     loop = asyncio.get_running_loop()
     while True:
-        await loop.run_in_executor(None, slack_service.COMMAND_INTERFACE.post_updated_env_info)
+        try:
+            await loop.run_in_executor(None, slack_service.COMMAND_INTERFACE.post_updated_env_info)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("check updated environment failed")
         await asyncio.sleep(SLACK_TO_PORTAINER_HOOK_TIMEOUT/2)
 
 
 async def slack_main():
     loop = asyncio.get_event_loop()
     rtm_client = slack.RTMClient(token=SLACK_TOKEN, run_async=True, loop=loop)
-    print('Started QA slack service')
-    loop.create_task(fetch_environments())
-    loop.create_task(check_updated_environment_scheduler())
-    await rtm_client.start()
+    logger.info('Started QA slack service')
+    coros = [
+        fetch_environments(),
+        check_updated_environment_scheduler(),
+    ]
+    tasks = list(map(asyncio.create_task, coros))
+    try:
+        await rtm_client.start()
+    finally:
+        for t in tasks:
+            t.cancel()
+        await asyncio.wait(tasks)
 
 
 if __name__ == "__main__":
-    print(Commands()._get_envs_info_by('scope', 'dev'))
+    logger.info(Commands()._get_envs_info_by('scope', 'dev'))
     asyncio.run(slack_main())
 
     # rtm_client = slack.RTMClient(token=SLACK_TOKEN)
     # rtm_client.start()
 #     comm = SlackService.COMMAND_INTERFACE
 #     comm.prepare_env_infos()
-    # pprint.pprint(dict(comm.ENVIRONMENTS_CONFIG))
+    # plogger.info.plogger.info(dict(comm.ENVIRONMENTS_CONFIG))
     # for qwe in comm.ENVIRONMENTS_CONFIG.values():
     #     for k in qwe.services.keys():
-    #         print(k)
+    #         logger.info(k)
