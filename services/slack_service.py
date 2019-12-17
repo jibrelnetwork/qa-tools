@@ -25,6 +25,7 @@ EXCLUDE_IMAGES = [
     'kafka',
     'pgbouncer',
     'rabbitmq',
+    'influx',
 ]
 
 ENV_COLOR = {
@@ -94,7 +95,11 @@ class Commands:
             name = stack['Name']
             if 'legacy connection' in name.lower():
                 continue
-            env_obj = EnvInfo(ServiceScope.find(name), Environment.find(name), str(stack['Id']), name)
+            scope = ServiceScope.find(name)
+            env = Environment.find(name)
+            if not all([scope, env]):
+                continue
+            env_obj = EnvInfo(scope, env, str(stack['Id']), name)
             if env_obj not in self.ENVIRONMENTS_CONFIG:
                 self.ENVIRONMENTS_CONFIG[env_obj].last_update = time.time()
             if env_obj not in self.SUBSCRIBED_CHANNELS:
