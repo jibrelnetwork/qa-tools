@@ -10,6 +10,9 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
 
+EMAIL_DOMAINE = ['@gmail.com', '@yandex.ru', '@list.ru']
+
+
 class ClassPropertyDescriptor(object):
 
     def __init__(self, fget, fset=None):
@@ -121,6 +124,10 @@ def generate_date(change_value=0, change_type='days', format='%Y-%m-%dT%H:%M:%SZ
         return date
 
 
+def generate_email(prefix='autotest_', size=25):
+    return generate_value(size=size, prefix=prefix, suffix=random.choice(EMAIL_DOMAINE))
+
+
 def window(seq, n=2):
     # https://stackoverflow.com/questions/6822725/rolling-or-sliding-window-iterator
     # "Returns a sliding window (of width n) over data from the iterable"
@@ -199,6 +206,8 @@ class TimeUtil:
 
 
 if __name__ == "__main__":
+    for i in range(20):
+        print(generate_email())
     keks1 = TimeUtil.to_date(time.time())
     keks3 = TimeUtil.to_date(datetime.datetime.now())
     # print(keks1)
