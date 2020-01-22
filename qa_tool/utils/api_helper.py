@@ -16,21 +16,21 @@ class Error(object):
 class AdditionalError(object):
     @classproperty
     def schema(cls):
-        return {'type': 'array', 'properties': {'code': {'type': 'string'}, 'message': {'type': 'string'}}}
+        return {'type': 'array', 'items': {'type': 'object', 'properties': {'code': {'type': 'string'}, 'message': {'type': 'string'}}}}
 
 
 class JtickerError(object):
     @classproperty
     def schema(cls):
-        return {'type': 'object', 'properties': {'success': {'description': 'indicate whole response success', 'type': 'boolean', 'example': True}, 'errors': {'type': 'array', 'description': 'error list', 'items': {'type': 'object', 'description': 'errors by field name (for input errors)', 'properties': {'field': {'type': 'string', 'description': 'error field name'}, 'code': {'type': 'string', 'description': 'machine-readable error code'}, 'message': {'type': 'string', 'description': 'error message'}, 'details': {'type': 'object', 'description': 'details properties of error', 'properties': {'asset': {'type': 'string', 'description': 'asset from error'}, 'exchange': {'type': 'string', 'description': 'exchange from error'}}}}}}}}
+        return {'type': 'array', 'description': 'error list', 'items': {'type': 'object', 'description': 'errors by field name (for input errors)', 'properties': {'field': {'type': 'string', 'description': 'error field name'}, 'code': {'type': 'string', 'description': 'machine-readable error code'}, 'message': {'type': 'string', 'description': 'error message'}, 'details': {'type': 'object', 'description': 'details properties of error', 'properties': {'asset': {'type': 'string', 'description': 'asset from error'}, 'exchange': {'type': 'string', 'description': 'exchange from error'}}}}}}
 
 
 class Errors(object):
     @classproperty
     def schema(cls):
         data = [
-            {'type': 'array', 'items': Error.schema},
             {'type': 'object', 'additionalProperties': AdditionalError.schema},
+            {'type': 'array', 'items': Error.schema},
             JtickerError.schema
         ]
         return {'oneOf': data}
