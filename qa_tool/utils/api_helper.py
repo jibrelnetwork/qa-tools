@@ -33,7 +33,7 @@ class Errors(object):
             {'type': 'array', 'items': Error.schema},
             JtickerError.schema
         ]
-        return {'oneOf': data}
+        return {'anyOf': data}
 
 
 class Status(object):
