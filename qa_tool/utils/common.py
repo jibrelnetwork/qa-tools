@@ -6,9 +6,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from qa_tool.custom_structure import Enum
 from qa_tool.libs.reporter import reporter
 
-
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
 
 TIMEOUT_CONNECTION = 10
 TIMEOUT_READ = 60 * 5
@@ -38,8 +36,19 @@ class Methods(Enum):
     PUT = "PUT"
 
 
+class Value(object):
+    def __init__(self, value):
+        self.value = value
+
+    def __call__(self):
+        return self.value
+
+
 def filter_dict_from_none(dict_to_filter):
-    return {key: value for key, value in dict_to_filter.items() if value is not None}
+    return {
+        key: value if not isinstance(value, Value) else value.value
+        for key, value in dict_to_filter.items() if value is not None
+    }
 
 
 def get_params_argv(params):
@@ -51,7 +60,7 @@ def get_params_argv(params):
 
 class ClientApi(object):
 
-    def __init__(self, base_url, service_name=None, additional_headers=None): #maybe need add arg - additional headers
+    def __init__(self, base_url, service_name=None, additional_headers=None):  # maybe need add arg - additional headers
         self.service_link = base_url
         self.service_name = service_name or base_url
         self.headers = dict({'Content-Type': 'application/json'}, **(additional_headers or {}))
@@ -214,4 +223,3 @@ if __name__ == "__main__":
 
     test = TestService(ClientApi("http://34.254.184.120:8000"))
     test.get_account_balance('0x123weqads123123wqeq')
-
