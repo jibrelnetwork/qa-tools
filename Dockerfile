@@ -28,4 +28,4 @@ WORKDIR /app
 RUN chmod 777 /app
 
 ENTRYPOINT ["/qa_tools/run.sh"]
-CMD [""]                                                                                                                                                                                                  14,0-1        All
+CMD [""]
