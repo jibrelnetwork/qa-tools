@@ -10,6 +10,10 @@ DISABLE_SCHEMA_VALIDATOR = strtobool(os.getenv("DISABLE_SCHEMA_VALIDATOR", 'Fals
 IS_LOCAL_START = strtobool(os.getenv("IS_LOCAL_START", 'False'))
 MAIN_APP_URL = os.getenv('API_CONN_STR') or os.getenv("BACKEND_API", 'http://127.0.0.1:9090')
 
+ENV_NAME = os.getenv('ENV_NAME', 'develop').lower()  # consts/infrastructure.py -> Environment
+ENV_SERVICE_SCOPE_NAME = os.getenv('ENV_SERVICE_SCOPE_NAME', '').lower()  # consts/infrastructure.py -> ServiceScope
+SSH_PKEY_PATH = os.getenv('SSH_PKEY_PATH', '~/.ssh/ssh_key')
+
 if DISABLE_SCHEMA_VALIDATOR:
     for _ in range(5):
         print('Now You disable schema validator!!!!!!!!   DANGER!!!!')
