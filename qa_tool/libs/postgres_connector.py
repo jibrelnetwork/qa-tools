@@ -8,13 +8,12 @@ class PostgresConnector(object):
     SERIALIZE = psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE
     AUTOCOMMIT = psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT
 
-    def __init__(self, host, user, password, database=None):  # Do we need support async there?
-        port = None
-        if ':' in host:
+    def __init__(self, host, user, password, database=None, port=None):  # Do we need support async there?
+        if ':' in host and port is None:
             host, port = host.rsplit(':', 1)
         self._connection_dict = {
             "host": host,
-            "port": int(port) if port else port,
+            "port": int(port if port else port),
             "database": database,
             "user": user,
             "password": password,
