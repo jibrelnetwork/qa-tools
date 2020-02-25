@@ -7,12 +7,14 @@ services:
     environment:
       TESTS_DIR: /qa_tools/qa_tool/tests
       ALLURE_DIR: /allure-results
+      SSH_PKEY_PATH: '/app/.ssh/id_rsa'
 #      IS_LOCAL_START: 'true'
 #      JIRA_USER: ""
 #      JIRA_PASSWORD: ""
     image: qa-tool-testing
     volumes:
       - './allure-results:/allure-results'
+      - '~/.ssh:/app/.ssh'
     stdin_open: true
     tty: true
 
