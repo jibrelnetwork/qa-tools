@@ -1,11 +1,4 @@
-import json
-import socket
-from contextlib import contextmanager
-
-from addict import Dict
-from pathlib import Path
 from sshtunnel import SSHTunnelForwarder
-import psycopg2
 
 from qa_tool.settings import SSH_PKEY_PATH
 

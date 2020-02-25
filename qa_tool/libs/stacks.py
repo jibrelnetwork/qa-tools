@@ -5,10 +5,11 @@ from dataclasses import dataclass
 from contextlib import contextmanager
 
 from addict import Dict
+from cachetools.func import lru_cache
 from pathlib import Path
 from cached_property import cached_property
 
-from qa_tool.settings import ENV_NAME
+from qa_tool.settings import ENV_NAME, ENV_SERVICE_SCOPE_NAME
 from qa_tool.libs.ssh_tunel import create_ssh_tunnel_for_service
 from libs.portainer_conn import get_service_credentials_from_portainer
 from consts.infrastructure import ServiceScope, Environment, InfraServiceType
@@ -109,12 +110,14 @@ class EnvService:
         self.__env_observer = env_observer
 
 
-@dataclass
 class EnvObserver:
-    scope_name: str
-    env: str
-    services: List[EnvService]
-    # bastion_url_suffix: str = 'jdev.network'
+
+    def __init__(self, scope_name: str, env: str, services: List[EnvService]):
+        self.scope_name = scope_name
+        self.env = env
+        self.services = services
+        for i in services:
+            i.env_observer = self
 
     @cached_property
     def bastion_cluster_url(self):
@@ -134,7 +137,6 @@ class EnvObserver:
         ]
         assert len(services) == 1, "Need specify connection, because this scope has two or more same infrastructure service"
         service = services[0]
-        service.env_observer = self
 
         result_data = service.get_connection_params()
         result_data['host'] = 'localhost'
@@ -156,7 +158,15 @@ ENVIRONMENTS_SERVICES = {
     ServiceScope.JTICKER: [pgbouncer_service(), EnvService(InfraServiceType.INFLUX_DB)],
 }
 
-# EnvObserver(ENV_SERVICE_SCOPE_NAME, ENV_NAME, ENVIRONMENTS_SERVICES[ENV_SERVICE_SCOPE_NAME])
+
+@lru_cache()
+def get_env_config(service_scope=ENV_SERVICE_SCOPE_NAME, env_name=ENV_NAME):
+    if not service_scope:
+        raise Exception(
+            f"Set service scope in env variable 'ENV_SERVICE_SCOPE_NAME'\n One of this: {ServiceScope.get_all()}"
+        )
+
+    return EnvObserver(service_scope, env_name, ENVIRONMENTS_SERVICES[service_scope])
 
 
 if __name__ == '__main__':
