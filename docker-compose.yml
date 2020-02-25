@@ -8,6 +8,7 @@ services:
       TESTS_DIR: /qa_tools/qa_tool/tests
       ALLURE_DIR: /allure-results
       SSH_PKEY_PATH: '/app/.ssh/id_rsa'
+      TEST_THREAD_COUNT: 5
 #      IS_LOCAL_START: 'true'
 #      JIRA_USER: ""
 #      JIRA_PASSWORD: ""
