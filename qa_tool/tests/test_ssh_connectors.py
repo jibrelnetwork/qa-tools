@@ -5,7 +5,6 @@ from qa_tool.libs.postgres_connector import PostgresConnector
 from consts.infrastructure import ServiceScope, Environment, InfraServiceType
 
 
-@reporter.scenario
 class TestSSHConnector:
 
     def _check_access_to_scope(self, service_scope, service_type):
