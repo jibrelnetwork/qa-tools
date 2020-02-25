@@ -13,6 +13,7 @@ ENV ALLURE_DIR="./allure-results/" \
 RUN apk update \
     && apk add \
     gcc \
+    make \
     musl-dev \
     libffi-dev \
     postgresql-dev

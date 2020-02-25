@@ -29,17 +29,17 @@ class TestSSHConnector:
         data = connector.get('select * from mapping', arrg_data=False)
         assert data
 
-    def test_connect_to_postgres_jibrelcom(self):
-        conn_params = self._check_access_to_scope(ServiceScope.JIBRELCOM, InfraServiceType.PGBOUNCER)
-        conn = PostgresConnector(**conn_params, database='jibrelcom_db')
+    def test_connect_to_postgres_coinmena(self):
+        conn_params = self._check_access_to_scope(ServiceScope.COINMENA, InfraServiceType.PGBOUNCER)
+        conn = PostgresConnector(**conn_params, database='coinmena_main')
         tables = conn.get_table_names()
         assert tables
         data = conn.get("SELECT * FROM core_assets_assetpair")
         assert data
 
-    def test_connect_to_postgres_coinemna(self):
-        conn_params = self._check_access_to_scope(ServiceScope.COINMENA, InfraServiceType.PGBOUNCER)
-        conn = PostgresConnector(**conn_params, database='coinmena_main')
+    def test_connect_to_postgres_jibrelcom(self):
+        conn_params = self._check_access_to_scope(ServiceScope.JIBRELCOM, InfraServiceType.PGBOUNCER)
+        conn = PostgresConnector(**conn_params, database='jibrelcom_db')
         tables = conn.get_table_names()
         assert tables
         data = conn.get("SELECT * FROM core_assets_assetpair")
