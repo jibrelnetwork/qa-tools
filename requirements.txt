@@ -8,7 +8,7 @@ setuptools
 jira
 cachetools
 pytest-xdist==1.30.0
-pytest-timeouts==1.2
+pytest-timeouts==1.2.1
 dateutils
 redis
 addict
