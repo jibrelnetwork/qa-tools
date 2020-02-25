@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from contextlib import contextmanager
 
 from addict import Dict
-from cachetools.func import lru_cache
 from pathlib import Path
+from cachetools.func import lru_cache
 from cached_property import cached_property
 
 from qa_tool.settings import ENV_NAME, ENV_SERVICE_SCOPE_NAME
