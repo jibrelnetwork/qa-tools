@@ -50,9 +50,13 @@ class Environment(InfrastructureUtil):
 class ServiceScope(InfrastructureUtil):
     JNA = 'jna'
     JIBRELCOM = 'jibrelcom'
-    JTICKER = 'jsicker'
+    JTICKER = 'jticker'
     JSEARCH = 'jsearch'
     COINMENA = 'coinmena'
+
+    @classproperty
+    def ALL(self):
+        return 'all'
 
 
 class InfraServiceType:

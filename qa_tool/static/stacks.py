@@ -1,22 +1,56 @@
-from dataclasses import dataclass
+import json
+import socket
 from typing import List
+from dataclasses import dataclass
+from contextlib import contextmanager
 
+from addict import Dict
+from pathlib import Path
 from cached_property import cached_property
 
+from qa_tool.settings import ENV_NAME
 from qa_tool.libs.ssh_tunel import create_ssh_tunnel_for_service
-from qa_tool.settings import ENV_NAME, ENV_SERVICE_SCOPE_NAME
+from libs.portainer_conn import get_service_credentials_from_portainer
 from consts.infrastructure import ServiceScope, Environment, InfraServiceType
 
 
-def is_local_environment():
-    return Environment.LOCAL == ENV_NAME
-
+CURR_DIR = Path('/app').resolve() if Path('/app').is_dir() else Path(__file__).parent
+BASTION_CONFIG_FILE_PATH = CURR_DIR / 'bastion_connectors_cfg.json'
 
 DEFAULT_PORT_BY_SERVICE = {
     InfraServiceType.PGBOUNCER: 5432,
     InfraServiceType.INFLUX_DB: 8086,
     InfraServiceType.KAFKA: 9092,
 }
+
+
+class BastionCfgVariable:
+    PORT = 'local_port'
+    USER = 'local_port'
+    PASSWORD = 'local_port'
+
+
+def is_local_environment():
+    return Environment.LOCAL == ENV_NAME
+
+
+def is_port_in_use(port):
+    if not port:
+        return False
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
+
+
+@contextmanager
+def bastion_connection_config(bastion_cluster_name):
+    try:
+        config = Dict(json.loads(BASTION_CONFIG_FILE_PATH.read_text()))
+    except Exception as e:
+        config = Dict({bastion_cluster_name: {}})
+
+    yield config[bastion_cluster_name]
+
+    BASTION_CONFIG_FILE_PATH.write_text(json.dumps(config))
 
 
 @dataclass
@@ -31,16 +65,28 @@ class EnvService:
 
     def get_connection_params(self):
         port = DEFAULT_PORT_BY_SERVICE.get(self.container_image_name, 8080)
-        if self.need_create_connection:
-            port = self.create_connection(port)
-        user, password = get_service_credentials_from_portainer(
-            self.container_name, self.login_variable, self.password_variable
-        )
-        return {
-            'user': user,
-            'password': password,
-            'port': port,
-        }
+        with bastion_connection_config(self.env_observer.bastion_cluster_url) as services_config:
+            container_config = services_config.get(self.container_name, {})
+            interested_port = container_config.get('port', None)
+
+            if is_port_in_use(interested_port):
+                port = interested_port
+            else:
+                if self.need_create_connection:
+                    port = self.create_connection(port)
+            user = container_config.get('user')
+            password = container_config.get('password')
+            if not password and self.password_variable:
+                user, password = get_service_credentials_from_portainer(
+                    self.env_observer.scope_name, self.env_observer.env, self.container_name, self.login_variable, self.password_variable
+                )
+            result = {
+                'user': user,
+                'password': password,
+                'port': port,
+            }
+            services_config.update({self.container_name: result})
+            return result
 
     def create_connection(self, default_port):
         if is_local_environment():
@@ -68,11 +114,12 @@ class EnvObserver:
     scope_name: str
     env: str
     services: List[EnvService]
-    bastion_url_suffix: str = 'jdev.network'
+    # bastion_url_suffix: str = 'jdev.network'
 
     @cached_property
     def bastion_cluster_url(self):
-        return '.'.join([self.scope_name, self.env, self.bastion_url_suffix]).lower()
+        bastion_url_suffix = 'coinmena.dev' if self.scope_name == ServiceScope.COINMENA else 'jdev.network'
+        return '.'.join([self.scope_name, self.env, bastion_url_suffix]).lower()
 
     def get_service_connector(self, infra_service_type: InfraServiceType, specify_container_name='', connector_map=None):
         if is_local_environment():
@@ -109,4 +156,10 @@ ENVIRONMENTS_SERVICES = {
     ServiceScope.JTICKER: [pgbouncer_service(), EnvService(InfraServiceType.INFLUX_DB)],
 }
 
-EnvObserver(ENV_SERVICE_SCOPE_NAME, ENV_NAME, ENVIRONMENTS_SERVICES[ENV_SERVICE_SCOPE_NAME])
+# EnvObserver(ENV_SERVICE_SCOPE_NAME, ENV_NAME, ENVIRONMENTS_SERVICES[ENV_SERVICE_SCOPE_NAME])
+
+
+if __name__ == '__main__':
+    keks = EnvObserver(ServiceScope.COINMENA, Environment.DEV, ENVIRONMENTS_SERVICES[ServiceScope.COINMENA])
+    lol = keks.get_service_connector(InfraServiceType.PGBOUNCER)
+    print(lol)
