@@ -7,7 +7,7 @@ from qa_tool.libs.reporter import reporter
 
 class RedisClient:
 
-    def __init__(self, host, port=None, db=0):
+    def __init__(self, host, port=None, db=0, **kwargs):
         port = port or '6379'
         self.conn_str = f"{host}:{port}"
         self.redis = Redis(host=host, port=port, db=db)

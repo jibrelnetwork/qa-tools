@@ -1,5 +1,5 @@
 requests
-pytest==5.2.4
+pytest==5.3.5
 allure-pytest>=2.8.6
 jsonschema==3.0.1
 psycopg2-binary
@@ -7,14 +7,18 @@ pathlib==1.0.1
 setuptools
 jira
 cachetools
-pytest-xdist==1.30.0
-pytest-timeouts==1.2
+pytest-xdist==1.31.0
+pytest-timeouts==1.2.1
 dateutils
 redis
 addict
 property-cached
+cached-property==1.5.1
 slackclient==2.3.1
 portainer-api==1.22.1.1
 jenkins-job-builder==3.1.0
 marshmallow
-loguru == 0.4.0
+loguru==0.4.0
+sshtunnel==0.1.5
+influxdb
+kafka-python==1.4.6

@@ -13,6 +13,9 @@
 - `JIRA_PASSWORD` - jira cloud API key
 - `IS_LOCAL_START` - **(bool)** disable download information from jira when you start any pytest format files
 - `DISABLE_SCHEMA_VALIDATOR` - **(bool)** disable *validate_type_wrap* for api
+- `ENV_NAME` - develop, stage, production or local
+- `ENV_SERVICE_SCOPE_NAME` - jticker, coinmena, jibrelcom, jsearch, etc.
+- `SSH_PKEY_PATH` - path to ssh key with access for connect to bastion service
 
 Other environment variable you can find in qa_tool/settings.py
 

@@ -18,13 +18,18 @@ class InfrastructureUtil(Enum):
 
 
 class Environment(InfrastructureUtil):
-    DEV = 'Develop'
-    STAGE = 'Stage'
-    PROD = 'Production'
+    DEV = 'develop'
+    STAGE = 'stage'
+    PROD = 'production'
+    QA = 'qa'
 
     @classproperty
     def ALL(self):
-        return 'All'
+        return 'all'
+
+    @classproperty
+    def LOCAL(self):
+        return 'local'
 
     __env_alias = None
     @classproperty
@@ -43,8 +48,21 @@ class Environment(InfrastructureUtil):
 
 
 class ServiceScope(InfrastructureUtil):
-    JNA = 'JNA'
-    JIBRELCOM = 'Jibrelcom'
-    JTICKER = 'JTicker'
-    JSEARCH = 'JSearch'
-    COINMENA = 'Coinmena'
+    JNA = 'jna'
+    JIBRELCOM = 'jibrelcom'
+    JTICKER = 'jticker'
+    JSEARCH = 'jsearch'
+    COINMENA = 'coinmena'
+
+    @classproperty
+    def ALL(self):
+        return 'all'
+
+
+class InfraServiceType:
+    PGBOUNCER = 'pgbouncer'
+    INFLUX_DB = 'influxdb'
+    KAFKA = 'kafka'
+    REDIS = 'redis'
+    ADMIN = 'admin'
+    CMS = 'default'

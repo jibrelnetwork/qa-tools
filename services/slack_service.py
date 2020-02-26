@@ -86,24 +86,30 @@ class Commands:
         return result
 
     def prepare_env_infos(self):
-        code, portainer_stacks = self.portainer.get_stacks()
-        if code != StatusCodes.OK:
-            raise RuntimeError(f"Expect code {StatusCodes.OK}, but receive {code}")
-        for stack in portainer_stacks:
-            if stack['Status'] == self.portainer.StackStatus.INACTIVE:
-                continue
-            name = stack['Name']
-            if 'legacy connection' in name.lower():
-                continue
-            scope = ServiceScope.find(name)
-            env = Environment.find(name)
-            if not all([scope, env]):
-                continue
-            env_obj = EnvInfo(scope, env, str(stack['Id']), name)
+        for env_obj in self.portainer.get_active_env_infos():
             if env_obj not in self.ENVIRONMENTS_CONFIG:
                 self.ENVIRONMENTS_CONFIG[env_obj].last_update = time.time()
             if env_obj not in self.SUBSCRIBED_CHANNELS:
                 self.SUBSCRIBED_CHANNELS[env_obj] = set()
+
+        # code, portainer_stacks = self.portainer.get_stacks()
+        # if code != StatusCodes.OK:
+        #     raise RuntimeError(f"Expect code {StatusCodes.OK}, but receive {code}")
+        # for stack in portainer_stacks:
+        #     if stack['Status'] == self.portainer.StackStatus.INACTIVE:
+        #         continue
+        #     name = stack['Name']
+        #     if 'legacy connection' in name.lower():
+        #         continue
+        #     scope = ServiceScope.find(name)
+        #     env = Environment.find(name)
+        #     if not all([scope, env]):
+        #         continue
+        #     env_obj = EnvInfo(scope, env, str(stack['Id']), name)
+        #     if env_obj not in self.ENVIRONMENTS_CONFIG:
+        #         self.ENVIRONMENTS_CONFIG[env_obj].last_update = time.time()
+        #     if env_obj not in self.SUBSCRIBED_CHANNELS:
+        #         self.SUBSCRIBED_CHANNELS[env_obj] = set()
 
         for env_obj, services in self.ENVIRONMENTS_CONFIG.items():
             try:
@@ -130,8 +136,8 @@ class Commands:
     def _get_envs_containers(self, env_obj, exclude_infra_services=True):
         code, containers = self.portainer.get_containers_by_stack(env_obj.id)
         assert code == StatusCodes.OK
-        self.ENVIRONMENTS_CONFIG[env_obj].last_update = time.time()
         containers = [i for i in containers if i.get('State') == self.portainer.ContainerState.RUNNING]
+        self.ENVIRONMENTS_CONFIG[env_obj].last_update = time.time()
         current_data = defaultdict(set)
         for container in containers:
             image = container.get('Image')
