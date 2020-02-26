@@ -1,8 +1,7 @@
-from qa_tool.libs.reporter import reporter
 from qa_tool.libs.stacks import get_env_config, bastion_connection_config
 from qa_tool.libs.influx_connector import InfluxConnector
 from qa_tool.libs.postgres_connector import PostgresConnector
-from consts.infrastructure import ServiceScope, Environment, InfraServiceType
+from qa_tool.static.infrastructure import ServiceScope, Environment, InfraServiceType
 
 
 class TestSSHConnector:

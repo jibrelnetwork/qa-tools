@@ -3,7 +3,7 @@ import os
 from collections import defaultdict
 
 from qa_tool.libs.reporter import reporter
-from consts.infrastructure import DOCKER_REGISTRY_ORG, WARNING_BRANCHES
+from qa_tool.static.infrastructure import DOCKER_REGISTRY_ORG, WARNING_BRANCHES
 from qa_tool.libs.jira_integrate import get_interesting_issues, PRStatuses
 
 

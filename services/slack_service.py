@@ -1,6 +1,6 @@
 import time
 import asyncio
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 
 import slack
 from addict import Dict
@@ -11,7 +11,7 @@ from qa_tool.utils.utils import to_list
 from qa_tool.utils.common import StatusCodes
 from qa_tool.utils.validator import validate
 from libs import PortainerInterface, slack_bot
-from consts.infrastructure import ServiceScope, Environment
+from qa_tool.static.infrastructure import ServiceScope, Environment
 from services.service_settings import SLACK_TOKEN, SLACK_TO_PORTAINER_HOOK_TIMEOUT, PORTAINER_URL
 
 

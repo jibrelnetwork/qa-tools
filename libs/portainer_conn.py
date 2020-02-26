@@ -3,7 +3,7 @@ from typing import List
 
 from cachetools.func import ttl_cache
 
-from consts.infrastructure import ServiceScope, Environment
+from qa_tool.static.infrastructure import ServiceScope, Environment
 from consts.slack_models import EnvInfo
 from qa_tool.libs.reporter import reporter
 from qa_tool.utils.common import ClientApi, StatusCodes

@@ -12,7 +12,7 @@ from cached_property import cached_property
 from qa_tool.settings import ENV_NAME, ENV_SERVICE_SCOPE_NAME
 from qa_tool.libs.ssh_tunel import create_ssh_tunnel_for_service
 from libs.portainer_conn import get_service_credentials_from_portainer
-from consts.infrastructure import ServiceScope, Environment, InfraServiceType
+from qa_tool.static.infrastructure import ServiceScope, Environment, InfraServiceType
 
 
 CURR_DIR = Path('/app').resolve() if Path('/app').is_dir() else Path(__file__).parent
