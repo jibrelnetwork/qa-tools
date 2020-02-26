@@ -1,8 +1,7 @@
 from qa_tool.libs.reporter import reporter
 
 
-@reporter.scenario
-class TestKeks123:
+class TestKeks123123123:
 
     @classmethod
     def setup_class(cls):
