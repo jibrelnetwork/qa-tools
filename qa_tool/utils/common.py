@@ -1,12 +1,16 @@
 import json
 import logging
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+try:
+    from requests.packages.urllib3.exceptions import InsecureRequestWarning
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+except:
+    pass
 
 from qa_tool.custom_structure import Enum
 from qa_tool.libs.reporter import reporter
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 TIMEOUT_CONNECTION = 10
 TIMEOUT_READ = 60 * 5
