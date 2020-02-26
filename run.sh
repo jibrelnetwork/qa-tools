@@ -6,7 +6,7 @@ if [[ "${QA_CUSTOM_COMMAND}" ]]; then
   exit 0
 fi
 
-PYTEST_DEFAULT="pytest --execution-timeout=${TEST_TIMEOUT} --timeout-method=thread ${PYTEST_STOUT} --alluredir=${ALLURE_DIR}"
+PYTEST_DEFAULT="pytest --execution-timeout ${TEST_TIMEOUT} ${PYTEST_STOUT} --alluredir=${ALLURE_DIR}"
 
 
 if [[ "$*" ]]; then
