@@ -35,7 +35,7 @@ class TestBackupRestorePostgres:
             with reporter.step("Backup data"):
                 backup_conn.backup_db()
             with reporter.step("Restore data"):
-                restore_conn.restore_db(restore_file_path=str(self.backup_conn.backup_db_path))
+                restore_conn.restore_db(restore_file_path=str(backup_conn.backup_db_path))
 
 
 if __name__ == "__main__":
