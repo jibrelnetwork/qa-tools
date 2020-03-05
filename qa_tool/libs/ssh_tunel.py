@@ -11,6 +11,7 @@ def create_ssh_tunnel_for_service(bastion_cluster_name, remote_container_name, r
     If some scope doesn't have bastion service, then you must wait 60 or more seconds
     Need wait this PR https://github.com/pahaz/sshtunnel/pull/156/commits
     """
+    print('Opening ssh tunnel')
     server = SSHTunnelForwarder(
         (bastion_cluster_name, BASTION_PORT),
         ssh_username=SSH_USERNAME,
@@ -18,5 +19,7 @@ def create_ssh_tunnel_for_service(bastion_cluster_name, remote_container_name, r
         ssh_private_key_password=SSH_PKEY_PASSWORD,
         remote_bind_address=(remote_container_name, remote_target_port)
     )
+    print('SSH tunnel opened')
+
     server.start()
     return server.local_bind_port

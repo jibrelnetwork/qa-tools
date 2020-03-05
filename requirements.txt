@@ -22,3 +22,4 @@ loguru==0.4.0
 sshtunnel==0.1.5
 influxdb
 kafka-python==1.4.6
+sh==1.12.14

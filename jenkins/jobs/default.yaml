@@ -15,6 +15,22 @@
 #            before: true
 
 
+#- scm:
+#    name: automation_git_service_scope
+#    scm:
+#      - git:
+#          url: "{REPO_TEST_URL}"  #  git@github.com:jibrelnetwork/qa-tools.git
+#          branches:
+#            - "*/$AUTOMATION_BRANCH_NAME"
+##          browser: githubweb
+#          credentials-id: 11c7c63f-3747-47e8-9881-042000d87ec0
+#          timeout: 20
+#          wipe-workspace: false
+#          clean:
+#            after: true
+#            before: true
+
+
 - wrapper:
     name: base
     wrappers:
@@ -65,3 +81,13 @@
     scm:
       - common_automation
 
+
+#- defaults:
+#    name: autotest_service
+#    disabled: false
+#    project-type: freestyle
+#    concurrent: false
+#    wrappers:
+#      - base
+#    scm:
+#      - automation_git_service_scope

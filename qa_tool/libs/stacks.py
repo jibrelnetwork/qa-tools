@@ -94,7 +94,7 @@ class EnvService:
             raise Exception('You use local environment. Check ENV_NAME sys variable')
         return create_ssh_tunnel_for_service(self.env_observer.bastion_cluster_url, self.container_name, default_port)
 
-    @cached_property
+    @property
     def container_name(self):
         name = '_'.join([self.env_observer.scope_name, self.env_observer.env, self.container_image_name]).lower()
         if self.container_suffix:
@@ -160,7 +160,7 @@ ENVIRONMENTS_SERVICES = {
 
 
 @lru_cache()
-def get_env_config(service_scope=ENV_SERVICE_SCOPE_NAME, env_name=ENV_NAME):
+def get_env_config(service_scope=ENV_SERVICE_SCOPE_NAME, env_name=ENV_NAME) -> EnvObserver:
     if not service_scope:
         raise Exception(
             f"Set service scope in env variable 'ENV_SERVICE_SCOPE_NAME'\n One of this: {ServiceScope.get_all()}"
@@ -170,6 +170,6 @@ def get_env_config(service_scope=ENV_SERVICE_SCOPE_NAME, env_name=ENV_NAME):
 
 
 if __name__ == '__main__':
-    keks = EnvObserver(ServiceScope.COINMENA, Environment.DEV, ENVIRONMENTS_SERVICES[ServiceScope.COINMENA])
+    keks = EnvObserver(ServiceScope.JIBRELCOM, Environment.QA, ENVIRONMENTS_SERVICES[ServiceScope.JIBRELCOM])
     lol = keks.get_service_connector(InfraServiceType.PGBOUNCER)
     print(lol)

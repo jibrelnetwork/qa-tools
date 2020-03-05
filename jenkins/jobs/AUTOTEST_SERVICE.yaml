@@ -1,0 +1,73 @@
+- view:
+    name: AUTOTEST_SERVICE
+    view-type: list
+    regex: AUTOTEST_.*
+
+- job-template:
+    name: 'AUTOTEST_{service_scope_name}'
+    parameters:
+      - choice:
+          name: ENV_NAME
+          choices:
+            - qa
+            - develop
+          description: "Environment"
+      - string:
+          name: AUTOMATION_BRANCH_NAME
+          default: "master"
+          description: "where are tests"
+      - string:
+          name: TEST_THREAD_COUNT
+          default: "{TEST_THREAD_COUNT}"
+          description: "Maximum threads count for parallel tests run. If empty - will use default value (for now is 30)"
+    wrappers:
+      - base
+      - build-name:
+          name: ${{ENV,var="AUTOMATION_BRANCH_NAME"}}_${{ENV,var="ENV_NAME"}}_#${{BUILD_NUMBER}}
+    disabled: false
+    project-type: freestyle
+    logrotate:
+      daysToKeep: 14
+      numToKeep: 60
+    scm:  # need research to refactor this and move to defaults scm. Now problem with replace REPO_TEST_URL to another file
+      - git:
+          url: "{REPO_TEST_URL}"  #  git@github.com:jibrelnetwork/qa-tools.git
+          branches:
+            - "*/$AUTOMATION_BRANCH_NAME"
+          credentials-id: 11c7c63f-3747-47e8-9881-042000d87ec0
+          timeout: 20
+          wipe-workspace: false
+          clean:
+            after: true
+            before: true
+    triggers:
+      - timed: "{timed}"
+    builders:
+      - shell: |
+          {build}
+
+- project:
+    timed: ""
+    ENV_NAME: "qa"
+    TEST_THREAD_COUNT: "10"
+    REPO_TEST_URL: git@github.com:jibrelnetwork/jticker-testing.git
+    name: "AUTOTEST_SERVICE"
+    build: |
+      echo 'test'
+    jobs:
+      - "AUTOTEST_{service_scope_name}"
+    service_scope_name:
+      - "JTICKER":
+          REPO_TEST_URL: git@github.com:jibrelnetwork/jticker-testing.git
+#          timed: H 00 * * *
+      - "JASSETS":
+          REPO_TEST_URL: git@github.com:jibrelnetwork/jassets-testing.git
+#          timed: H 00 * * *
+      - "JIBRELCOM":
+          REPO_TEST_URL: git@github.com:jibrelnetwork/coinmena-backend-testing.git
+#          timed: H 00 * * *
+      - "COINMENA":
+          REPO_TEST_URL: git@github.com:jibrelnetwork/coinmena-backend-testing.git
+#          timed: H 00 * * *
+#      - "JSEARCH":
+#          timed: H 00 * * *
