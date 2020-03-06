@@ -16,7 +16,8 @@ RUN apk update \
     make \
     musl-dev \
     libffi-dev \
-    postgresql-dev
+    postgresql-dev \
+    postgresql-client
 
 COPY /requirements.txt /requirements-qa-tools.txt
 RUN pip install --no-cache-dir -U pip \
