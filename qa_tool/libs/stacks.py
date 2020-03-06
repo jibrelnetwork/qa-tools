@@ -64,6 +64,20 @@ class EnvService:
     container_suffix: str = ''  # use if has more than one infra service (like two pgbouncer in jsearch)
     __env_observer = None
 
+    def get_user_password(self):
+        with bastion_connection_config(self.env_observer.bastion_cluster_url) as services_config:
+            container_config = services_config.get(self.container_name, {})
+            user = container_config.get('user')
+            password = container_config.get('password')
+            if not password and self.password_variable:
+                user, password = get_service_credentials_from_portainer(
+                    self.env_observer.scope_name, self.env_observer.env, self.container_name, self.login_variable,
+                    self.password_variable
+                )
+            result = {"user": user, "password": password}
+            services_config.update({self.container_name: result})
+            return result
+
     def get_connection_params(self):
         port = DEFAULT_PORT_BY_SERVICE.get(self.container_image_name, 8080)
         with bastion_connection_config(self.env_observer.bastion_cluster_url) as services_config:
@@ -75,17 +89,8 @@ class EnvService:
             else:
                 if self.need_create_connection:
                     port = self.create_connection(port)
-            user = container_config.get('user')
-            password = container_config.get('password')
-            if not password and self.password_variable:
-                user, password = get_service_credentials_from_portainer(
-                    self.env_observer.scope_name, self.env_observer.env, self.container_name, self.login_variable, self.password_variable
-                )
-            result = {
-                'user': user,
-                'password': password,
-                'port': port,
-            }
+            user_password = self.get_user_password()
+            result = dict(user_password, port=port)
             services_config.update({self.container_name: result})
             return result
 
@@ -124,20 +129,37 @@ class EnvObserver:
         bastion_url_suffix = 'coinmena.dev' if self.scope_name == ServiceScope.COINMENA else 'jdev.network'
         return '.'.join([self.scope_name, self.env, bastion_url_suffix]).lower()
 
+    def get_host_url(self, domain_prefix=None, protocol='https://', host_for_local_env=None):
+        if is_local_environment():
+            return host_for_local_env
+        host = self.bastion_cluster_url
+        if domain_prefix:
+            host = f'{domain_prefix}.{host}'
+        return protocol + host
+
+    def get_interested_service(self, infra_service_type: InfraServiceType, specify_container_name=''):
+        services = [
+            i for i in self.services
+            if i.container_image_name == infra_service_type
+               and not (specify_container_name)
+               and i.container_suffix == specify_container_name
+        ]
+        assert len(services) == 1, "Need specify connection, because this scope has two or more same infrastructure service"
+        return services[0]
+
+    def get_service_creds(self, infra_service_type: InfraServiceType, specify_container_name='', connector_map=None):
+        if is_local_environment():
+            assert connector_map
+            return connector_map
+        service = self.get_interested_service(infra_service_type, specify_container_name)
+        return service.get_user_password()
+
     def get_service_connector(self, infra_service_type: InfraServiceType, specify_container_name='', connector_map=None):
         if is_local_environment():
             assert connector_map
             return connector_map
 
-        services = [
-            i for i in self.services
-            if i.container_image_name == infra_service_type
-               and not(specify_container_name)
-               and i.container_suffix == specify_container_name
-        ]
-        assert len(services) == 1, "Need specify connection, because this scope has two or more same infrastructure service"
-        service = services[0]
-
+        service = self.get_interested_service(infra_service_type, specify_container_name)
         result_data = service.get_connection_params()
         result_data['host'] = 'localhost'
         return result_data
@@ -170,6 +192,9 @@ def get_env_config(service_scope=ENV_SERVICE_SCOPE_NAME, env_name=ENV_NAME) -> E
 
 
 if __name__ == '__main__':
-    keks = EnvObserver(ServiceScope.JIBRELCOM, Environment.QA, ENVIRONMENTS_SERVICES[ServiceScope.JIBRELCOM])
-    lol = keks.get_service_connector(InfraServiceType.PGBOUNCER)
-    print(lol)
+    print(get_env_config('jibrelcom').get_host_url())
+    print(get_env_config('jibrelcom').get_host_url('api'))
+    print(get_env_config('jibrelcom').get_host_url('qa'))
+    # keks = EnvObserver(ServiceScope.JIBRELCOM, Environment.QA, ENVIRONMENTS_SERVICES[ServiceScope.JIBRELCOM])
+    # lol = keks.get_service_connector(InfraServiceType.PGBOUNCER)
+    # print(lol)
