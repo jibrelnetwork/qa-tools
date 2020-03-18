@@ -36,10 +36,16 @@ def _get_query_params_and_body(params):
         elif 'schema' in param:
             schema = param['schema']
             if param.get('in') == 'path':
-                query.append(get_def_name_from_ref(schema[JsonFields.REF].lower()))
+                if JsonFields.NAME in param:
+                    query.append(param[JsonFields.NAME])
+                else:
+                    query.append(get_def_name_from_ref(schema[JsonFields.REF].lower()))
                 continue
             if JsonFields.REF in schema:
                 body = get_def_name_from_ref(schema[JsonFields.REF])
+            elif JsonFields.ONE_OF in schema:
+                first_one_of_element = schema[JsonFields.ONE_OF][0]
+                body = get_def_name_from_ref(first_one_of_element[JsonFields.REF])
             elif schema['type'] == JsonTypes.ARRAY:
                 if not isinstance(body, dict):
                     raise Exception("Can't detect body payload for method")

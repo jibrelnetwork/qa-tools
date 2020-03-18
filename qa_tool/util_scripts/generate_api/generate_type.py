@@ -8,6 +8,7 @@ class JsonFields(object):
     ITEMS = "items"
     REF = "$ref"
     ONE_OF = "oneOf"
+    NAME = "name"
     PROPERTIES = "properties"
     REQUIRED = 'required'
     ADDITIONAL_PROPS = 'additionalProperties'
