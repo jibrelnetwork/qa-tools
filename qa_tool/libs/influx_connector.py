@@ -56,8 +56,9 @@ class InfluxConnector:
             expected_response_code=204
         )
 
-    def measurements_format(self, measurements):
+    def measurements_format(self, measurements, rp='minute'):
         measurements = measurements if isinstance(measurements, (list, tuple)) else [measurements]
+        measurements = [f'"{i}"' if rp is None else f'{rp}."{i}"' for i in measurements]
         return ', '.join(measurements)
 
 
