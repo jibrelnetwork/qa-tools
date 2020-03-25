@@ -186,11 +186,14 @@ class TimeUtil:
         return cls.check_date_in_range(actual_date, expected_date - delta, expected_date + delta)
 
     @classmethod
-    def check_date_in_range(cls, actual_date, time_start, time_end=None):
+    def check_date_in_range(cls, actual_date, time_start, time_end=None, return_bool=False):
         time_start = cls.to_date(time_start)
         actual_date = cls.to_date(actual_date)
         time_end = cls.to_date(time_end or cls._now)
-        assert time_start < actual_date < time_end, f"{time_start} < {actual_date} < {time_end}"
+        if return_bool:
+            return time_start < actual_date < time_end
+        else:
+            assert time_start < actual_date < time_end, f"{time_start} < {actual_date} < {time_end}"
 
     @classmethod
     def generate_date_in_range(cls, start_date, end_date=None, step='minutes'):
