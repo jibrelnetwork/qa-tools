@@ -23,7 +23,7 @@ def get_python_modules(modules_path, root_dir=None):
 pytest.register_assert_rewrite(*get_python_modules(Path(__file__) / '../utils'))
 
 
-from qa_tool.libs.reporter import get_known_issues
+# from qa_tool.libs.reporter import get_known_issues
 from qa_tool.libs.allure_integrate import allure_api
 from qa_tool.libs.jira_integrate import TEST_TOKEN_PREFIX, jira, dump_jira_issues, attach_known_issues_and_check_pending
 
@@ -67,15 +67,17 @@ def pytest_collection_modifyitems(items, config):
 @pytest.hookimpl(hookwrapper=True)
 def pytest_sessionstart(session):
     import qa_tool.override_conftest
-    try:
-        print('Try to dump jira issues')
-        if not IS_LOCAL_START:
-            dump_jira_issues()
-            allure_api.dump_test_cases()
-        else:
-            print("It's local start. Don't use jira dump issues")
-    except Exception as e:
-        print(f"Can't dump jira issue with autotests token\n{str(e)}")
+
+    print('Do nothing! (because jira integration is not supported now)')
+    # try:
+    #     print('Try to dump jira issues')
+    #     if not IS_LOCAL_START:
+    #         dump_jira_issues()
+    #         allure_api.dump_test_cases()
+    #     else:
+    #         print("It's local start. Don't use jira dump issues")
+    # except Exception as e:
+    #     print(f"Can't dump jira issue with autotests token\n{str(e)}")
     yield
 
 
@@ -96,7 +98,8 @@ def pytest_runtest_makereport(item, call):
             print(e)
             outcome = yield
             return
-        known_issues = get_known_issues(token)
+        # known_issues = get_known_issues(token)
+        known_issues = None
         auto_token_getter = tokenize_text(token, call.excinfo.exconly())
         jira_new_issue_link = jira.get_jira_created_issue_url(item.nodeid, auto_token_getter())
         docsting = item._obj.__doc__
