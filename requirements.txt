@@ -10,7 +10,7 @@ cachetools==4.0.0
 pytest-xdist==1.31.0
 pytest-timeouts==1.2.1
 dateutils==0.6.8
-redis==3.5.2
+redis==4.5.3
 addict==2.2.1
 property-cached==1.6.4
 cached-property==1.5.1
